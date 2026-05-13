@@ -1,0 +1,101 @@
+# ============================================================================
+# intent-rollout-gate — combined .gitignore
+# Language not yet locked (see 000-docs/001-DR-DESIGN-rollout-gate-architecture-…
+# § "Language choice"). Cover Node + Go + Python until M5 picks one.
+# ============================================================================
+
+# --- OS / editor ------------------------------------------------------------
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+*.code-workspace
+
+# --- Secrets / local env ---------------------------------------------------
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+!cosign.pub
+secrets/
+.secrets/
+
+# --- Node / TypeScript -----------------------------------------------------
+node_modules/
+dist/
+build/
+out/
+*.tsbuildinfo
+.npm/
+.pnpm-store/
+.yarn/
+yarn-error.log
+npm-debug.log*
+pnpm-debug.log*
+.eslintcache
+coverage/
+.nyc_output/
+
+# --- Go --------------------------------------------------------------------
+bin/
+pkg/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+go.work
+go.work.sum
+
+# --- Python ----------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+env/
+ENV/
+.pip-cache/
+.tox/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+htmlcov/
+.coverage
+.coverage.*
+*.egg-info/
+*.egg
+dist/
+build/
+pip-wheel-metadata/
+
+# --- Beads -----------------------------------------------------------------
+# Beads sqlite is local; the .beads/ dir is shared via bd sync, not git.
+.beads/*.db
+.beads/*.db-journal
+.beads/*.db-shm
+.beads/*.db-wal
+
+# --- Evidence Bundles (test fixtures) -------------------------------------
+# Real bundles produced during integration tests don't belong in git;
+# fixture bundles under tests/fixtures/ are the exception.
+evidence/
+!tests/fixtures/evidence/
+
+# --- Cosign / signing artifacts -------------------------------------------
+*.sig
+*.crt
+*.pub.bak
+
+# Beads / Dolt files (added by bd init)
+.dolt/
+*.db
+.beads-credential-key
