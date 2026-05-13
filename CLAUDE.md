@@ -74,7 +74,7 @@ Per the global Intent Solutions Testing SOP, this repo will install [`@intentsol
 
 ## Beads workflow
 
-This repo will own its own `.beads/` directory once M5 starts (prefix per project convention — likely `IRG`). Until then, M4-related beads live in the convergence epic's home `~/.beads/` (prefix `OPS`).
+This repo owns its own `.beads/` directory (initialized at M4 with prefix `IRG`). Convergence-level meta-beads continue to live in the home `~/.beads/` (prefix `OPS`).
 
 Workflow once initialized:
 

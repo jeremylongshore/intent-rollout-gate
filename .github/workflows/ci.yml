@@ -1,0 +1,66 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  lint-action-yaml:
+    name: Lint action.yml
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+
+      - name: Validate action.yml structure (YAML well-formed + required keys)
+        run: |
+          python3 - <<'PY'
+          import sys, yaml
+          with open('action.yml') as f:
+              doc = yaml.safe_load(f)
+          required = ['name', 'description', 'runs']
+          missing = [k for k in required if k not in doc]
+          if missing:
+              print(f"action.yml missing required keys: {missing}")
+              sys.exit(1)
+          if 'using' not in doc.get('runs', {}):
+              print("action.yml missing runs.using")
+              sys.exit(1)
+          print(f"action.yml OK — runs.using = {doc['runs']['using']}")
+          print(f"inputs: {list((doc.get('inputs') or {}).keys())}")
+          print(f"outputs: {list((doc.get('outputs') or {}).keys())}")
+          PY
+
+  smoke-action-stub:
+    name: Smoke — action stub exits 0
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Create a synthetic empty bundle dir for smoke
+        run: mkdir -p smoke-evidence
+
+      - name: Run the bootstrap action against the synthetic bundle
+        id: gate
+        uses: ./
+        with:
+          bundle-path: smoke-evidence
+          policy-file: tests/TESTING.md
+          dry-run: "true"
+
+      - name: Confirm decision == not-implemented (the v0.0.0 contract)
+        run: |
+          if [ "${{ steps.gate.outputs.decision }}" != "not-implemented" ]; then
+            echo "Expected decision=not-implemented, got: ${{ steps.gate.outputs.decision }}"
+            exit 1
+          fi
+          echo "Bootstrap action emitted decision=not-implemented as expected."

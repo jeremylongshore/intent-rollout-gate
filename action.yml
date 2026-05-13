@@ -1,0 +1,86 @@
+name: 'Intent Rollout Gate'
+author: 'Jeremy Longshore (Intent Solutions)'
+description: >-
+  Consume an Evidence Bundle (in-toto Statement v1 rows under predicateType
+  https://evals.intentsolutions.io/gate-result/v1) and decide ship / no-ship
+  per the consuming repo's tests/TESTING.md policy. Part of the Intent Eval
+  Platform.
+
+branding:
+  icon: 'check-square'
+  color: 'blue'
+
+inputs:
+  bundle-path:
+    description: >-
+      Filesystem path to the Evidence Bundle. Accepts a directory of signed
+      Statement files, a JSON Lines file, or a JSON file with a top-level
+      bundle.rows array (per Evidence Bundle SPEC § 4.R1).
+    required: true
+  policy-file:
+    description: >-
+      Path to the policy file the gate evaluates against. Defaults to
+      tests/TESTING.md — the same file audit-harness reads for thresholds
+      (enforcement travels with the code).
+    required: false
+    default: 'tests/TESTING.md'
+  predicate-uri:
+    description: >-
+      Predicate URI to filter on when reading rows. The default value is the
+      stable v1 URI; consumers MUST NOT change this unless they want to consume
+      a different (e.g. v2) predicate type.
+    required: false
+    default: 'https://evals.intentsolutions.io/gate-result/v1'
+  rekor-url:
+    description: >-
+      Rekor instance for transparency-log anchoring of the rollout-decision
+      row this action emits. Empty string disables anchoring (engagement-private
+      mode — verifiability reduces to whoever holds the signing key).
+    required: false
+    default: 'https://rekor.sigstore.dev'
+  cosign-key:
+    description: >-
+      Path to a cosign keypair used to sign the rollout-decision row. If unset,
+      falls back to keyless OIDC (Sigstore Fulcio short-lived certificates).
+    required: false
+    default: ''
+  dry-run:
+    description: >-
+      If 'true', evaluate and report but exit 0 regardless of the verdict.
+      Useful for observability rollouts ahead of enforcement.
+    required: false
+    default: 'false'
+
+outputs:
+  decision:
+    description: >-
+      One of: ship, no-ship, advisory, not-implemented. At v0.0.0 (this
+      bootstrap) always emits 'not-implemented'.
+    value: ${{ steps.decide.outputs.decision }}
+  summary:
+    description: >-
+      Markdown summary of the decision (gate pass rates, coverage table,
+      failing rows, advisories). Empty at v0.0.0.
+    value: ${{ steps.decide.outputs.summary }}
+  signed-decision-row-path:
+    description: >-
+      Filesystem path to the signed in-toto row attesting the rollout decision
+      itself (predicateType https://evals.intentsolutions.io/rollout-decision/v1).
+      Empty at v0.0.0.
+    value: ${{ steps.decide.outputs.signed-decision-row-path }}
+
+runs:
+  using: 'composite'
+  steps:
+    - id: decide
+      shell: bash
+      run: |
+        echo "::notice title=intent-rollout-gate::Rollout Gate v0.0.0 — implementation lands in M5; this is the bootstrap action declaration. Inputs validated; no enforcement performed."
+        echo "decision=not-implemented" >> "$GITHUB_OUTPUT"
+        echo "summary=" >> "$GITHUB_OUTPUT"
+        echo "signed-decision-row-path=" >> "$GITHUB_OUTPUT"
+        # Emit a structured marker on stdout so downstream consumers piping
+        # action logs can detect the no-op state without parsing notices.
+        echo "{\"version\":\"0.0.0\",\"status\":\"not-implemented\",\"bundle_path\":\"${{ inputs.bundle-path }}\",\"policy_file\":\"${{ inputs.policy-file }}\",\"dry_run\":\"${{ inputs.dry-run }}\"}"
+        # Exit 0 by design: do NOT block adopters wiring early.
+        exit 0
