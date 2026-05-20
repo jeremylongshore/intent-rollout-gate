@@ -9,9 +9,9 @@ The Rollout Gate is the **fourth repo** in the Intent Eval Platform convergence,
 | Sister repo | Role | License |
 |---|---|---|
 | [`intent-eval-lab`](https://github.com/jeremylongshore/intent-eval-lab) | Methodology, Evidence Bundle spec, Intentional Mapping taxonomy, OTel RFC | Apache 2.0 |
-| [`audit-harness`](https://github.com/jeremylongshore/audit-harness) | Deterministic static gates — emits Evidence Bundle `gate-result/v1` rows | MIT |
-| [`j-rig-binary-eval`](https://github.com/jeremylongshore/j-rig-binary-eval) | 7-layer behavioral judgment harness — emits and consumes Evidence Bundle rows | MIT |
-| **`intent-rollout-gate`** *(this repo)* | **Consumer of the bundle — decides ship/no-ship at end of CI** | **MIT** |
+| [`audit-harness`](https://github.com/jeremylongshore/audit-harness) | Deterministic static gates — emits Evidence Bundle `gate-result/v1` rows | Apache 2.0 |
+| [`j-rig-binary-eval`](https://github.com/jeremylongshore/j-rig-binary-eval) | 7-layer behavioral judgment harness — emits and consumes Evidence Bundle rows | Apache 2.0 |
+| **`intent-rollout-gate`** *(this repo)* | **Consumer of the bundle — decides ship/no-ship at end of CI** | **Apache 2.0** |
 
 ## What it does (target behavior, lands M5)
 
@@ -93,7 +93,9 @@ Adopters wiring this **today** (against v0.0.0) will get a `decision: not-implem
 
 ## License
 
-[MIT](./LICENSE) — see `LICENSE` at repo root.
+[Apache 2.0](./LICENSE) — see `LICENSE` and [NOTICE](./NOTICE) at repo root.
+
+Aligns with the rest of the Intent Eval Platform ecosystem (`intent-eval-lab`, `intent-eval-core`, `audit-harness`, `j-rig-binary-eval`) — every repo ships under a single OSI-approved license with explicit patent-grant language.
 
 ## Contributing
 
