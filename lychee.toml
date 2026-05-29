@@ -1,0 +1,17 @@
+verbose = "info"
+no_progress = true
+include_verbatim = true
+
+exclude = [
+  "^https://localhost",
+  "^http://localhost",
+  "^https://127\\.0\\.0\\.1",
+]
+
+exclude_path = [
+  "node_modules",
+]
+
+[cache]
+enabled = true
+max_cache_age = "7d"
