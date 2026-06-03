@@ -30,7 +30,7 @@ IEP
 ISEDC
 JRig
 JSONL
-keyless
+(?i)keyless
 Kubernetes
 Lamport
 markdownlint
@@ -54,7 +54,7 @@ pnpm
 Porkbun
 predicateType
 Prometheus
-pseudocode
+(?i)pseudocode
 pytest
 Pytest
 Rekor
@@ -62,10 +62,10 @@ relicense
 relicensed
 relicenses
 Renovate
-repo
-repos
+(?i)repo
+(?i)repos
 RTM
-rollout
+(?i)rollout
 runtimes
 Sigstore
 SKILL.md
