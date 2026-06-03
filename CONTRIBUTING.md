@@ -9,7 +9,7 @@ This repo is currently at **v0.0.0 substantive bootstrap (M4)**. The action decl
 **Substantive implementation lands in M5**, not M4. If you want to contribute implementation work, start by reading:
 
 | Source | Where |
-|---|---|
+| --- | --- |
 | Architecture design doc | [`000-docs/001-DR-DESIGN-rollout-gate-architecture-2026-05-12.md`](./000-docs/001-DR-DESIGN-rollout-gate-architecture-2026-05-12.md) |
 | Evidence Bundle SPEC (what we consume) | [`intent-eval-lab/specs/evidence-bundle/v0.1.0-draft/SPEC.md`](https://github.com/jeremylongshore/intent-eval-lab/blob/main/specs/evidence-bundle/v0.1.0-draft/SPEC.md) |
 | Build journey plan (M4 / M5 context) | Local-only at `~/.claude/plans/se-the-council-bubbly-frog.md` (maintainer-side). Public mirror in the convergence umbrella issue [`intent-eval-lab#4`](https://github.com/jeremylongshore/intent-eval-lab/issues/4). |
