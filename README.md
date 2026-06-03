@@ -1,5 +1,7 @@
 # intent-rollout-gate
 
+Part of the **[Intent Eval Platform](https://github.com/intent-solutions-io/intent-eval-platform)** — the umbrella mapping the six repos that converge via a shared Evidence Bundle schema.
+
 > **Status: v0.0.0 bootstrap.** This repo is the M4 substantive bootstrap of the Intent Eval Platform convergence. **Implementation lands in M5.** The action declared here is intentionally a no-op stub that exits cleanly so adopters can wire it into CI early without blocking deployments.
 
 A GitHub Action that consumes [Evidence Bundles](https://github.com/jeremylongshore/intent-eval-lab/tree/main/specs/evidence-bundle) (collections of signed [in-toto Statement v1](https://github.com/in-toto/attestation/blob/main/spec/v1/statement.md) rows) and decides **ship** or **no-ship** for a CI pipeline based on a policy declared in the consuming repository's `tests/TESTING.md` file.
