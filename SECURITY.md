@@ -3,7 +3,7 @@
 ## Supported Versions
 
 | Version | Supported |
-|---|---|
+| --- | --- |
 | v0.0.x (M4 bootstrap stub) | Yes — but the action is a no-op; security surface is limited to `action.yml` parsing |
 | v0.1.x (M5 implementation, pending) | Will be supported on release |
 | < v0.0.0 | n/a |
@@ -12,7 +12,7 @@
 
 **Please do NOT open public issues for security concerns.**
 
-Email **security@intentsolutions.io** with:
+Email **<security@intentsolutions.io>** with:
 
 - Type of issue (e.g., signature-verification bypass, predicate-URI confusion, decision-row forgery, credential leakage in PR-comment surface, Rekor-push of a row that shouldn't have been pushed, code execution via crafted bundle)
 - Full paths of related source files
@@ -25,7 +25,7 @@ Email **security@intentsolutions.io** with:
 ### Response Timeline
 
 | Stage | Timeframe |
-|---|---|
+| --- | --- |
 | Acknowledgment | 24 hours |
 | Initial assessment | 48 hours |
 | Status update | 5 business days |
@@ -34,7 +34,7 @@ Email **security@intentsolutions.io** with:
 ### Severity Levels
 
 | Severity | CVSS | Examples | Target Resolution |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | Critical | 9.0–10.0 | Decision-row signature forgery; arbitrary code execution via crafted bundle; Rekor-push bypass of the DNSSEC pre-condition | 24 hours |
 | High | 7.0–8.9 | Predicate-URI confusion attack (action accepts rows with wrong URI as valid); credential exposure in PR-comment markdown | 7 days |
 | Medium | 4.0–6.9 | Denial of service via crafted bundle; partial-verification bypass | 30 days |
@@ -59,7 +59,7 @@ The Rollout Gate inherits security constraints from the Intent Eval Platform:
 
 ## Disclosure Process
 
-1. **Report** — You email the details to security@intentsolutions.io
+1. **Report** — You email the details to <security@intentsolutions.io>
 2. **Triage** — We assess severity and impact
 3. **Fix** — We develop and test a patch
 4. **Notify** — We inform affected users via GitHub Security Advisory + a CHANGELOG entry tagged `SECURITY`
@@ -88,6 +88,6 @@ We appreciate responsible disclosure. Reporters who follow this policy will rece
 
 ## Contact
 
-- **Security reports:** security@intentsolutions.io
-- **General inquiries:** jeremy@intentsolutions.io
+- **Security reports:** <security@intentsolutions.io>
+- **General inquiries:** <jeremy@intentsolutions.io>
 - **Response time:** 24 hours for initial acknowledgment

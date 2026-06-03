@@ -1,5 +1,7 @@
 # intent-rollout-gate
 
+Part of the **[Intent Eval Platform](https://github.com/intent-solutions-io/intent-eval-platform)**—the umbrella mapping the six repos that converge via a shared Evidence Bundle schema.
+
 > **Status: v0.0.0 bootstrap.** This repo is the M4 substantive bootstrap of the Intent Eval Platform convergence. **Implementation lands in M5.** The action declared here is intentionally a no-op stub that exits cleanly so adopters can wire it into CI early without blocking deployments.
 
 A GitHub Action that consumes [Evidence Bundles](https://github.com/jeremylongshore/intent-eval-lab/tree/main/specs/evidence-bundle) (collections of signed [in-toto Statement v1](https://github.com/in-toto/attestation/blob/main/spec/v1/statement.md) rows) and decides **ship** or **no-ship** for a CI pipeline based on a policy declared in the consuming repository's `tests/TESTING.md` file.
@@ -7,21 +9,21 @@ A GitHub Action that consumes [Evidence Bundles](https://github.com/jeremylongsh
 The Rollout Gate is the **fourth repo** in the Intent Eval Platform convergence, alongside:
 
 | Sister repo | Role | License |
-|---|---|---|
+| --- | --- | --- |
 | [`intent-eval-lab`](https://github.com/jeremylongshore/intent-eval-lab) | Methodology, Evidence Bundle spec, Intentional Mapping taxonomy, OTel RFC | Apache 2.0 |
-| [`audit-harness`](https://github.com/jeremylongshore/audit-harness) | Deterministic static gates — emits Evidence Bundle `gate-result/v1` rows | Apache 2.0 |
-| [`j-rig-binary-eval`](https://github.com/jeremylongshore/j-rig-binary-eval) | 7-layer behavioral judgment harness — emits and consumes Evidence Bundle rows | Apache 2.0 |
-| **`intent-rollout-gate`** *(this repo)* | **Consumer of the bundle — decides ship/no-ship at end of CI** | **Apache 2.0** |
+| [`audit-harness`](https://github.com/jeremylongshore/audit-harness) | Deterministic static gates—emits Evidence Bundle `gate-result/v1` rows | Apache 2.0 |
+| [`j-rig-binary-eval`](https://github.com/jeremylongshore/j-rig-binary-eval) | 7-layer behavioral judgment harness—emits and consumes Evidence Bundle rows | Apache 2.0 |
+| **`intent-rollout-gate`** *(this repo)* | **Consumer of the bundle—decides ship/no-ship at end of CI** | **Apache 2.0** |
 
 ## What it does (target behavior, lands M5)
 
-1. **Reads the Evidence Bundle** produced by `audit-harness` and `j-rig-binary-eval` during the CI pipeline (any container form per Evidence Bundle SPEC § 4 — directory of files, JSONL, or JSON array).
+1. **Reads the Evidence Bundle** produced by `audit-harness` and `j-rig-binary-eval` during the CI pipeline (any container form per Evidence Bundle SPEC § 4—directory of files, JSONL, or JSON array).
 2. **Verifies each row** against the `https://evals.intentsolutions.io/gate-result/v1` predicate URI: DSSE signature check, JSON Schema validation of the predicate body, subject-digest match, optional Rekor anchor confirmation.
-3. **Reads the policy** declared in the consuming repo's `tests/TESTING.md` (the same file `audit-harness` uses for thresholds — *enforcement travels with the code*).
+3. **Reads the policy** declared in the consuming repo's `tests/TESTING.md` (the same file `audit-harness` uses for thresholds—*enforcement travels with the code*).
 4. **Evaluates** the verified rows against the policy: required-gate pass + applicable-only coverage check + advisory-elevation rules.
 5. **Emits a decision**: PR comment, GitHub status check, and a *new* signed in-toto row at predicate URI `https://evals.intentsolutions.io/rollout-decision/v1` (the decision is itself an attestation that can be archived to Rekor).
 
-The Rollout Gate does NOT require complete coverage. The composable partial attestation principle (Evidence Bundle SPEC R2) applies: a bundle that covers three of six MM categories and two of five surfaces can still pass — if the declared policy only requires those three categories and two surfaces.
+The Rollout Gate does NOT require complete coverage. The composable partial attestation principle (Evidence Bundle SPEC R2) applies: a bundle that covers three of six MM categories and two of five surfaces can still pass—if the declared policy only requires those three categories and two surfaces.
 
 ## Quickstart (forward-pointer to M5)
 
@@ -62,12 +64,12 @@ jobs:
           dry-run: false
 ```
 
-Adopters wiring this **today** (against v0.0.0) will get a `decision: not-implemented` output and a clean `exit 0` — the action will not block their pipeline. Substantive enforcement begins at v0.1.0.
+Adopters wiring this **today** (against v0.0.0) will get a `decision: not-implemented` output and a clean `exit 0`—the action will not block their pipeline. Substantive enforcement begins at v0.1.0.
 
 ## Inputs (declared at v0.0.0; behavior at v0.1.0)
 
 | Input | Required | Default | Purpose |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `bundle-path` | yes | — | Filesystem path to the Evidence Bundle (directory, `.jsonl` file, or `.json` file with `bundle.rows`). |
 | `policy-file` | no | `tests/TESTING.md` | Path to the policy file the gate evaluates against. |
 | `predicate-uri` | no | `https://evals.intentsolutions.io/gate-result/v1` | Predicate URI to filter on when reading rows. |
@@ -78,7 +80,7 @@ Adopters wiring this **today** (against v0.0.0) will get a `decision: not-implem
 ## Outputs
 
 | Output | Purpose |
-|---|---|
+| --- | --- |
 | `decision` | One of `ship`, `no-ship`, `advisory`, `not-implemented`. |
 | `summary` | Markdown summary of the decision (gate pass rates, coverage table, failing rows, advisories). |
 | `signed-decision-row-path` | Filesystem path to the signed in-toto row attesting to the rollout decision itself. |
@@ -86,16 +88,16 @@ Adopters wiring this **today** (against v0.0.0) will get a `decision: not-implem
 ## Project status
 
 | Milestone | Status |
-|---|---|
-| **M4 — Substantive bootstrap** | **DONE** — this commit. Repo exists, design doc landed, action declaration stub exits cleanly. |
-| **M5 — Implementation** | Pending. First PR will pick a runtime (TS / Go / Python — see `000-docs/001-DR-DESIGN-rollout-gate-architecture-2026-05-12.md` § "Language choice"), wire the bundle parser, the policy parser, and the decision algorithm. |
-| **M6 — First adopter** | Pending. `audit-harness` self-adopts as the first downstream — eats its own dog food before any partner repo wires this in. |
+| --- | --- |
+| **M4—Substantive bootstrap** | **DONE**—this commit. Repo exists, design doc landed, action declaration stub exits cleanly. |
+| **M5—Implementation** | Pending. First PR will pick a runtime (TS / Go / Python—see `000-docs/001-DR-DESIGN-rollout-gate-architecture-2026-05-12.md` § "Language choice"), wire the bundle parser, the policy parser, and the decision algorithm. |
+| **M6—First adopter** | Pending. `audit-harness` self-adopts as the first downstream—eats its own dog food before any partner repo wires this in. |
 
 ## License
 
-[Apache 2.0](./LICENSE) — see `LICENSE` and [NOTICE](./NOTICE) at repo root.
+[Apache 2.0](./LICENSE)—see `LICENSE` and [NOTICE](./NOTICE) at repo root.
 
-Aligns with the rest of the Intent Eval Platform ecosystem (`intent-eval-lab`, `intent-eval-core`, `audit-harness`, `j-rig-binary-eval`) — every repo ships under a single OSI-approved license with explicit patent-grant language.
+Aligns with the rest of the Intent Eval Platform ecosystem (`intent-eval-lab`, `intent-eval-core`, `audit-harness`, `j-rig-binary-eval`)—every repo ships under a single OSI-approved license with explicit patent-grant language.
 
 ## Contributing
 
