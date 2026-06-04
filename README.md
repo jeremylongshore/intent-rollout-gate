@@ -11,7 +11,7 @@ The Rollout Gate is the **fourth repo** in the Intent Eval Platform convergence,
 | Sister repo | Role | License |
 | --- | --- | --- |
 | [`intent-eval-lab`](https://github.com/jeremylongshore/intent-eval-lab) | Methodology, Evidence Bundle spec, Intentional Mapping taxonomy, OTel RFC | Apache 2.0 |
-| [`audit-harness`](https://github.com/jeremylongshore/audit-harness) | Deterministic static gates—emits Evidence Bundle `gate-result/v1` rows | Apache 2.0 |
+| [`audit-harness`](https://github.com/jeremylongshore/intent-audit-harness) | Deterministic static gates—emits Evidence Bundle `gate-result/v1` rows | Apache 2.0 |
 | [`j-rig-binary-eval`](https://github.com/jeremylongshore/j-rig-binary-eval) | 7-layer behavioral judgment harness—emits and consumes Evidence Bundle rows | Apache 2.0 |
 | **`intent-rollout-gate`** *(this repo)* | **Consumer of the bundle—decides ship/no-ship at end of CI** | **Apache 2.0** |
 
