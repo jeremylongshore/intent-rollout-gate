@@ -171,9 +171,11 @@ Per [`intent-eval-lab/000-docs/001-DR-RFC-otel-agent-rollout-gate-signals-draft.
 
 Spans correlate via the standard OTel trace context. Operators can filter on `gate.decision == "no-ship"` to alert on every blocked deployment, regardless of which repo emitted the event.
 
-## 8. Language choice—DEFERRED to first M5 PR
+## 8. Language choice—RESOLVED (see DR-002)
 
-Three viable runtimes. The first M5 PR will lock the choice; until then, `action.yml` runs as a composite shell stub.
+> **Status update:** this deferral is now closed. **DR-002** (`004-AT-DECR-runtime-language-typescript-2026-06-10.md`) locks the runtime to **TypeScript-primary** per the upstream ISEDC DR-010 § 13.5 signing-surface lock. The tradeoff analysis below is retained as historical context; DR-002 is the authority for "what language is the gate."
+
+Three viable runtimes were weighed. The first M5 PR will lock the choice; until then, `action.yml` runs as a composite shell stub.
 
 | Track | Pros | Cons |
 | --- | --- | --- |
