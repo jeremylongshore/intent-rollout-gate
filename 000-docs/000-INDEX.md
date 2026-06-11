@@ -9,6 +9,7 @@ Per Doc Filing Standard v4.x. Files follow `NNN-CC-CODE-description.md`.
 | 002 | AA (Audit) | AUDT | [/appaudit devops playbook (2026-05-20)](./002-AA-AUDT-appaudit-devops-playbook.md) (+ PDF) |
 | 003 | RL (Release Report) | REPT | [Baseline release v0.0.1 (2026-05-26)](./003-RL-REPT-baseline-release-v0.0.1-2026-05-26.md) |
 | 004 | AT (Decision Record) | DECR | [DR-002 — Runtime language: TypeScript-primary (2026-06-10)](./004-AT-DECR-runtime-language-typescript-2026-06-10.md) |
+| 005 | AT (Architecture) | ARCH | [Repo Blueprint — intent-rollout-gate (2026-06-11)](./005-AT-ARCH-repo-blueprint.md) |
 
 ## Type codes used in this repo
 
@@ -16,7 +17,7 @@ Per Doc Filing Standard v4.x. Files follow `NNN-CC-CODE-description.md`.
 | --- | --- |
 | `INDEX` | Directory index (this file) |
 | `DR` | Design Record—architecture, design decisions, technical specs |
-| `AT` | Adversarial Testing record—ISEDC Decision Records, audit findings |
+| `AT` | Architecture / Adversarial-Testing record—per-repo blueprints (`AT-ARCH`), ISEDC Decision Records (`AT-DECR`), audit findings |
 | `RR` | Reference / Research record |
 | `PP` | Plan / Proposal |
 | `AA` | After-Action / Audit record |
