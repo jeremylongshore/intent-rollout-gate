@@ -52,4 +52,4 @@ If you find a security issue, **do not** open a public GitHub issue. See [SECURI
 
 ## License
 
-By contributing, you agree your contributions will be licensed under the [MIT License](./LICENSE).
+By contributing, you agree your contributions will be licensed under the [Apache License 2.0](./LICENSE).
