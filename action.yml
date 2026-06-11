@@ -74,6 +74,14 @@ runs:
   steps:
     - id: decide
       shell: bash
+      env:
+        # Pass inputs through the environment instead of expanding GitHub
+        # expressions directly into the shell script. Expression interpolation
+        # inside a bash run block lets attacker-controlled input values break
+        # out of the echoed JSON string; env vars are not re-parsed by bash.
+        BUNDLE_PATH: ${{ inputs.bundle-path }}
+        POLICY_FILE: ${{ inputs.policy-file }}
+        DRY_RUN: ${{ inputs.dry-run }}
       run: |
         echo "::notice title=intent-rollout-gate::Rollout Gate v0.0.0 — implementation lands in M5; this is the bootstrap action declaration. Inputs validated; no enforcement performed."
         echo "decision=not-implemented" >> "$GITHUB_OUTPUT"
@@ -81,6 +89,12 @@ runs:
         echo "signed-decision-row-path=" >> "$GITHUB_OUTPUT"
         # Emit a structured marker on stdout so downstream consumers piping
         # action logs can detect the no-op state without parsing notices.
-        echo "{\"version\":\"0.0.0\",\"status\":\"not-implemented\",\"bundle_path\":\"${{ inputs.bundle-path }}\",\"policy_file\":\"${{ inputs.policy-file }}\",\"dry_run\":\"${{ inputs.dry-run }}\"}"
+        # jq builds the JSON so input values are safely quoted/escaped rather
+        # than concatenated into the string by the shell.
+        jq -nc \
+          --arg bundle_path "$BUNDLE_PATH" \
+          --arg policy_file "$POLICY_FILE" \
+          --arg dry_run "$DRY_RUN" \
+          '{version:"0.0.0",status:"not-implemented",bundle_path:$bundle_path,policy_file:$policy_file,dry_run:$dry_run}'
         # Exit 0 by design: do NOT block adopters wiring early.
         exit 0

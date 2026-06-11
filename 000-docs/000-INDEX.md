@@ -8,6 +8,7 @@ Per Doc Filing Standard v4.x. Files follow `NNN-CC-CODE-description.md`.
 | 001 | DR (Design Record) | DESIGN | [Rollout Gate architecture (2026-05-12)](./001-DR-DESIGN-rollout-gate-architecture-2026-05-12.md) |
 | 002 | AA (Audit) | AUDT | [/appaudit devops playbook (2026-05-20)](./002-AA-AUDT-appaudit-devops-playbook.md) (+ PDF) |
 | 003 | RL (Release Report) | REPT | [Baseline release v0.0.1 (2026-05-26)](./003-RL-REPT-baseline-release-v0.0.1-2026-05-26.md) |
+| 004 | AT (Decision Record) | DECR | [DR-002 — Runtime language: TypeScript-primary (2026-06-10)](./004-AT-DECR-runtime-language-typescript-2026-06-10.md) |
 
 ## Type codes used in this repo
 
