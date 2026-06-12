@@ -15,6 +15,9 @@ importers:
         specifier: 2.0.0
         version: 2.0.0
     devDependencies:
+      '@intentsolutions/audit-harness':
+        specifier: ^1.1.7
+        version: 1.1.7
       '@types/node':
         specifier: ^22.0.0
         version: 22.19.21
@@ -357,6 +360,11 @@ packages:
   '@fastify/busboy@2.1.1':
     resolution: {integrity: sha512-vBZP4NlzfOlerQTnba4aqZoMhE/a9HY7HRqoOPaETQcSQuWEIyZMHGfVu6w9wGtGK5fED5qRs2DteVCjOH60sA==}
     engines: {node: '>=14'}
+
+  '@intentsolutions/audit-harness@1.1.7':
+    resolution: {integrity: sha512-KouMOUeqGIhCT2mfxjKV3mo+lIp36qQiOaFDRNPVu2WWCa+Rmi3K4ZcBJqIaOjlDsMIjP5aqs+5yJOYX+4WDYA==}
+    engines: {node: '>=18'}
+    hasBin: true
 
   '@intentsolutions/rollout-gate@2.0.0':
     resolution: {integrity: sha512-HtO/enlddagAIWJmf6YxKMhXnWumpAw1+8IeYVzCSeI6clcQk6bnNncNDhGvaPi5fm/JgTLY0ChE2ZOYA1yaGw==}
@@ -943,6 +951,8 @@ snapshots:
     optional: true
 
   '@fastify/busboy@2.1.1': {}
+
+  '@intentsolutions/audit-harness@1.1.7': {}
 
   '@intentsolutions/rollout-gate@2.0.0':
     dependencies:

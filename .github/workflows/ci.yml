@@ -29,6 +29,12 @@ jobs:
       - name: Install (frozen lockfile)
         run: pnpm install --frozen-lockfile
 
+      # Intent Solutions Testing SOP (DR-002 § 6 criterion 4): hash-pinned
+      # policy verification — a pinned-policy edit without a paired
+      # `pnpm exec audit-harness init` fails here by design.
+      - name: Verify audit-harness integrity
+        run: pnpm exec audit-harness verify
+
       - name: Typecheck
         run: pnpm run typecheck
 

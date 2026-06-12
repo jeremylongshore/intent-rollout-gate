@@ -28,7 +28,7 @@ The convergence couples at the schema layer (the `gate-result/v1` predicate URI)
 | Milestone | Status |
 | --- | --- |
 | **M4**—substantive bootstrap | DONE. Repo exists; design doc landed. |
-| **M5**—implementation | **DONE (v0.2.0).** Runtime locked to TypeScript by DR-002 (`000-docs/004-AT-DECR-runtime-language-typescript-2026-06-10.md`); decision logic delegated to the published `@intentsolutions/rollout-gate@2.0.0`. |
+| **M5**—implementation | **DONE (v0.1.0).** Runtime locked to TypeScript by DR-002 (`000-docs/004-AT-DECR-runtime-language-typescript-2026-06-10.md`); decision logic delegated to the published `@intentsolutions/rollout-gate@2.0.0`. |
 | **M6**—first downstream adopter | NOT STARTED. `audit-harness` self-adopts before any partner repo wires this in. |
 | **Decision-row signing** | NOT STARTED. `rollout-decision/v1` emit + sign + Rekor anchor behind the DNSSEC + CAA pre-condition (DR-004 § 6.1). |
 
@@ -85,7 +85,7 @@ bd sync                                # push to remote
 1. **Never bump the predicate URI casually.** Read Evidence Bundle SPEC R17 + R18 before any change to a URI string.
 2. **Never push a signed attestation to Rekor in a test environment.** Rekor entries are permanent; test signing must use a non-public Rekor instance or `rekor-url=""` (signing-only mode).
 3. **Test fixtures use synthetic gate IDs only.** No real `audit-harness` or `j-rig-binary-eval` partner-engagement gate IDs in fixtures. Use `synth-gate-1`, `synth-gate-2`, etc.
-4. **The action FAILS CLOSED as of v0.2.0**—a `block` decision fails the job unless `fail-on-block: 'false'` (or legacy `dry-run: 'true'`). The v0.0.x always-exit-0 stub contract is retired; do not reintroduce silent passes.
+4. **The action FAILS CLOSED as of v0.1.0**—a `block` decision fails the job unless `fail-on-block: 'false'` (or legacy `dry-run: 'true'`). The v0.0.x always-exit-0 stub contract is retired; do not reintroduce silent passes.
 
 <!-- BEGIN BEADS INTEGRATION v:1 profile:minimal hash:ca08a54f -->
 ## Beads Issue Tracker
