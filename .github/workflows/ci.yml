@@ -10,16 +10,44 @@ permissions:
   contents: read
 
 jobs:
-  lint-action-yaml:
-    name: Lint action.yml
+  check:
+    name: Typecheck + tests + dist-sync
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
 
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
           node-version: "22"
+          cache: pnpm
+
+      - name: Install (frozen lockfile)
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm run typecheck
+
+      - name: Unit tests
+        run: pnpm run test
+
+      - name: Dist in sync (rebuild + diff must be clean)
+        run: |
+          pnpm run build
+          git diff --exit-code dist/ || {
+            echo "::error::dist/index.js is stale — run 'pnpm run build' and commit the result."
+            exit 1
+          }
+
+  lint-action-yaml:
+    name: Lint action.yml
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
 
       - name: Validate action.yml structure (YAML well-formed + required keys)
         run: |
@@ -32,35 +60,48 @@ jobs:
           if missing:
               print(f"action.yml missing required keys: {missing}")
               sys.exit(1)
-          if 'using' not in doc.get('runs', {}):
+          runs = doc.get('runs', {})
+          if 'using' not in runs:
               print("action.yml missing runs.using")
               sys.exit(1)
-          print(f"action.yml OK — runs.using = {doc['runs']['using']}")
+          if runs['using'].startswith('node') and 'main' not in runs:
+              print("node runtime declared but runs.main missing")
+              sys.exit(1)
+          print(f"action.yml OK — runs.using = {runs['using']}, main = {runs.get('main')}")
           print(f"inputs: {list((doc.get('inputs') or {}).keys())}")
           print(f"outputs: {list((doc.get('outputs') or {}).keys())}")
           PY
 
-  smoke-action-stub:
-    name: Smoke — action stub exits 0
+  smoke-action:
+    name: Smoke — run the action against fixtures
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
 
-      - name: Create a synthetic empty bundle dir for smoke
-        run: mkdir -p smoke-evidence
-
-      - name: Run the bootstrap action against the synthetic bundle
-        id: gate
+      - name: Allow fixture → decision=allow, job succeeds
+        id: gate-allow
         uses: ./
         with:
-          bundle-path: smoke-evidence
-          policy-file: tests/TESTING.md
-          dry-run: "true"
+          bundle-path: tests/fixtures/evidence/allow-bundle.json
+          policy-path: tests/fixtures/policy.json
 
-      - name: Confirm decision == not-implemented (the v0.0.0 contract)
+      - name: Fail-row fixture, fail-on-block=false → decision=block, job still succeeds
+        id: gate-block
+        uses: ./
+        with:
+          bundle-path: tests/fixtures/evidence/fail-row-bundle.json
+          policy-path: tests/fixtures/policy.json
+          fail-on-block: "false"
+
+      - name: Assert outputs
+        env:
+          ALLOW_DECISION: ${{ steps.gate-allow.outputs.decision }}
+          ALLOW_REASONS: ${{ steps.gate-allow.outputs.reasons }}
+          BLOCK_DECISION: ${{ steps.gate-block.outputs.decision }}
+          BLOCK_REASONS: ${{ steps.gate-block.outputs.reasons }}
         run: |
-          if [ "${{ steps.gate.outputs.decision }}" != "not-implemented" ]; then
-            echo "Expected decision=not-implemented, got: ${{ steps.gate.outputs.decision }}"
-            exit 1
-          fi
-          echo "Bootstrap action emitted decision=not-implemented as expected."
+          [ "$ALLOW_DECISION" = "allow" ] || { echo "expected allow, got: $ALLOW_DECISION"; exit 1; }
+          [ "$ALLOW_REASONS" = "[]" ] || { echo "expected empty reasons, got: $ALLOW_REASONS"; exit 1; }
+          [ "$BLOCK_DECISION" = "block" ] || { echo "expected block, got: $BLOCK_DECISION"; exit 1; }
+          echo "$BLOCK_REASONS" | python3 -c 'import json,sys; r=json.load(sys.stdin); assert isinstance(r, list) and len(r) > 0, "expected non-empty reasons array"'
+          echo "Smoke OK: allow + non-failing block both behaved."
