@@ -1,7 +1,9 @@
 # ============================================================================
-# intent-rollout-gate — combined .gitignore
-# Language not yet locked (see 000-docs/001-DR-DESIGN-rollout-gate-architecture-…
-# § "Language choice"). Cover Node + Go + Python until M5 picks one.
+# intent-rollout-gate — .gitignore
+# Runtime language locked to TypeScript / Node by DR-002
+# (000-docs/004-AT-DECR-runtime-language-typescript-2026-06-10.md).
+# NOTE: dist/ is COMMITTED on purpose — GitHub Actions convention; the
+# dist-sync CI job verifies it matches src/ on every PR.
 # ============================================================================
 
 # --- OS / editor ------------------------------------------------------------
@@ -26,7 +28,6 @@ secrets/
 
 # --- Node / TypeScript -----------------------------------------------------
 node_modules/
-dist/
 build/
 out/
 *.tsbuildinfo
@@ -39,43 +40,6 @@ pnpm-debug.log*
 .eslintcache
 coverage/
 .nyc_output/
-
-# --- Go --------------------------------------------------------------------
-bin/
-pkg/
-*.exe
-*.exe~
-*.dll
-*.so
-*.dylib
-*.test
-*.out
-go.work
-go.work.sum
-
-# --- Python ----------------------------------------------------------------
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-.venv/
-venv/
-env/
-ENV/
-.pip-cache/
-.tox/
-.pytest_cache/
-.mypy_cache/
-.ruff_cache/
-htmlcov/
-.coverage
-.coverage.*
-*.egg-info/
-*.egg
-dist/
-build/
-pip-wheel-metadata/
 
 # --- Beads -----------------------------------------------------------------
 # Beads sqlite is local; the .beads/ dir is shared via bd sync, not git.
