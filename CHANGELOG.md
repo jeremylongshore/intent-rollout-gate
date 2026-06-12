@@ -9,9 +9,39 @@ versioning follows [SemVer 2.0.0](https://semver.org/spec/v2.0.0.html).
 
 ### Pending
 
-- **M5 — TypeScript runtime** (the substantive shell that consumes a bundle + a policy → ship/no-ship decision). Currently in flight on a feature branch (`feat/m5-typescript-runtime-lock-and-mvp` per repo CLAUDE.md). After M5.1 lands: this becomes a pnpm package and ships with proper `pnpm install + pnpm run check + pnpm run build`.
-- **`@j-rig/rollout-gate` consumption** per DR-018 § 9.2 (gated on j-rig v2.0.0 release of `iaj-E02b`). M5 runtime delegates decision logic to that package; this repo retains only the GitHub Action shell.
+- **Decision-row signing** — emit + sign the `rollout-decision/v1` in-toto row, behind the DNSSEC + CAA pre-condition (DR-004 § 6.1, DR-002 § 6.3). `signed-decision-row-path` output stays empty until then.
+- **`tests/TESTING.md` policy parsing** — deferred per DR-002 § 5; v0.1.0 consumes JSON policy documents only.
+- **M6 first adopter** — `audit-harness` self-adopts the gate (DR-002 § 6.5).
 - Phase 7.5 gist (deferred per release-sweep CTO call — `iep-gist-coverage` follow-up bead; each landing-page gist deserves bespoke `/appaudit` treatment).
+
+## [0.1.0] - 2026-06-11
+
+**M5 TypeScript MVP.** The action graduates from the v0.0.x composite no-op stub to a real Node-runtime action. Runtime language locked to TypeScript by [DR-002](000-docs/004-AT-DECR-runtime-language-typescript-2026-06-10.md) (recording the upstream DR-010 § 13.5 TS-primary lock). **Thin shell by design (Blueprint A):** every line of decision logic is delegated to the published [`@intentsolutions/rollout-gate@2.0.0`](https://www.npmjs.com/package/@intentsolutions/rollout-gate) package (Apache-2.0, sigstore provenance) — `decide()` / `parsePolicy()`; row validation reuses the kernel `@intentsolutions/core` gate-result/v1 statement schema. Zero gate semantics live in this repo.
+
+### Added
+
+- **Node runtime action** — `runs.using: node24`, `main: dist/index.js` (esbuild CJS bundle, node20-compatible transpile target per the DR-002 "Node 20+" lock). `dist/` is committed per GitHub Actions convention; CI enforces dist↔src sync (rebuild + `git diff --exit-code dist/`).
+- **Inputs:** `policy-path` (JSON policy file), `policy-json` (inline policy), `fail-on-block` (default `'true'`). Exactly one of `policy-path` / `policy-json` is required — both or neither blocks (fail closed).
+- **Outputs:** `reasons` (JSON array string of every blocking reason; `[]` exactly when allowed). `decision` now emits `allow` / `block` verbatim from the package (`allow` ≙ ship, `block` ≙ no-ship; the stub-era `not-implemented` value is retired).
+- **Step summary** — markdown table of evaluated required gates (pattern / status / matched gate IDs) + blocking rows + flat reason list; also exposed as the `summary` output.
+- **Fail-closed wiring** — missing/unreadable/invalid-JSON bundle file, ambiguous policy inputs, garbage policy (`parsePolicy` throws; no default-policy fallback), non-default `predicate-uri`, and any unexpected error all produce `decision=block`. The job fails on block unless `fail-on-block: 'false'` (or legacy `dry-run: 'true'`).
+- **Unit tests** — vitest suite over the shell wiring (input validation, policy resolution, summary rendering, exit behavior) against synthetic-gate-ID fixtures: an allow bundle, a fail-row bundle, a malformed bundle.
+- **CI** — `check` job (pnpm frozen install → typecheck → vitest → dist-sync), retained `lint-action-yaml` job (extended for the node runtime), new `smoke-action` job running the real action against the fixtures (allow path + non-failing block path).
+
+### Changed
+
+- **BREAKING (stub-era behavior):** the action no longer unconditionally exits 0. A `block` decision fails the job by default. The v0.0.x always-exit-0 contract was explicitly a bootstrap affordance ("substantive enforcement begins at v0.1.0").
+- `policy-file` input is now a **deprecated alias** for `policy-path` and its `tests/TESTING.md` default is removed (TESTING.md parsing stays deferred per DR-002 § 5; a markdown policy would fail closed anyway).
+- `dry-run` input is now a **deprecated alias** for `fail-on-block: 'false'`.
+- `predicate-uri`, `rekor-url`, `cosign-key` inputs are retained additively (Evidence Bundle SPEC R18) as **reserved**: only the default v1 predicate URI is accepted (anything else blocks), no Rekor push ever happens at v0.1.0, and `cosign-key` warns + no-ops. `signed-decision-row-path` output stays empty until decision-row signing lands.
+- `.gitignore` rewritten for the locked TS runtime (Go/Python sections removed; `dist/` now tracked).
+
+### Architectural bindings
+
+- [DR-002](000-docs/004-AT-DECR-runtime-language-typescript-2026-06-10.md) — runtime language TypeScript on Node 20+; § 6 acceptance criteria frame the v0.1.0-experimental → v0.2.0 transition (this release is the v0.1.0-experimental step: criteria 1 + 2 land, criterion 4 (Testing SOP gate) is installed here and must stay green, criteria 3 (signing preconditions) + 5 (M6 adoption) gate the future v0.2.0 graduation, tracked in [Unreleased])
+- [DR-018 § 9.2](https://github.com/jeremylongshore/intent-eval-lab/blob/main/000-docs/018-AT-DECR-isedc-council-session-5-jrig-reconciliation-2026-05-21.md) — decision-logic delegation to the j-rig-published rollout-gate package; this repo is the thin shell
+
+## [0.0.1] - 2026-05-26
 
 ## [0.0.1] - 2026-05-26
 
@@ -42,5 +72,6 @@ versioning follows [SemVer 2.0.0](https://semver.org/spec/v2.0.0.html).
 - CI workflow (`.github/workflows/ci.yml`) — `yamllint action.yml` for manifest validation. M5 substantive runtime adds the full TS gate chain.
 - Scaffolding files present: `AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING.md`, `LICENSE` (Apache 2.0), `NOTICE`, `README.md`, `SECURITY.md`, `CODE_OF_CONDUCT.md` (this release)
 
-[Unreleased]: https://github.com/jeremylongshore/intent-rollout-gate/compare/v0.0.1...HEAD
+[Unreleased]: https://github.com/jeremylongshore/intent-rollout-gate/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/jeremylongshore/intent-rollout-gate/compare/v0.0.1...v0.1.0
 [0.0.1]: https://github.com/jeremylongshore/intent-rollout-gate/releases/tag/v0.0.1

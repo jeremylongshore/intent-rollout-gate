@@ -27,36 +27,23 @@ The convergence couples at the schema layer (the `gate-result/v1` predicate URI)
 
 | Milestone | Status |
 | --- | --- |
-| **M4**—substantive bootstrap (this commit) | DONE. Repo exists; `action.yml` is a no-op stub; design doc landed. |
-| **M5**—implementation | NOT STARTED. First PR locks the runtime (TS / Go / Python—see architecture doc § "Language choice"). |
+| **M4**—substantive bootstrap | DONE. Repo exists; design doc landed. |
+| **M5**—implementation | **DONE (v0.1.0).** Runtime locked to TypeScript by DR-002 (`000-docs/004-AT-DECR-runtime-language-typescript-2026-06-10.md`); decision logic delegated to the published `@intentsolutions/rollout-gate@2.0.0`. |
 | **M6**—first downstream adopter | NOT STARTED. `audit-harness` self-adopts before any partner repo wires this in. |
+| **Decision-row signing** | NOT STARTED. `rollout-decision/v1` emit + sign + Rekor anchor behind the DNSSEC + CAA pre-condition (DR-004 § 6.1). |
 
-**Don't** start M5 work without first reading the architecture doc § "Language choice"—the deferred decision is non-trivial and locks the maintenance surface for years.
+**THIN SHELL rule (Blueprint A, DR-018 § 9.2):** this repo must never contain decision logic. `decide()` / `parsePolicy()` and all gate semantics live in the published `@intentsolutions/rollout-gate` package (j-rig monorepo). If decision behavior must change, change it upstream and bump the dependency here. PRs re-implementing gate semantics locally are out of order.
 
 ## Build & test commands
 
-**Currently:** the action is a composite shell stub. There is no build step. CI lints `action.yml` syntax and confirms the workflow runs end-to-end.
-
-**Once M5 lands** (commands will be specified by the runtime PR):
-
 ```bash
-# TypeScript track (if chosen):
-pnpm install
-pnpm run check        # lint + typecheck + test
-pnpm run build
-
-# Go track (if chosen):
-go mod tidy
-go vet ./...
-go test ./...
-go build ./cmd/intent-rollout-gate
-
-# Python track (if chosen):
-uv sync
-uv run ruff check .
-uv run mypy .
-uv run pytest
+pnpm install --frozen-lockfile
+pnpm run check        # typecheck + vitest unit tests
+pnpm run build        # esbuild bundle src/main.ts → dist/index.js (node20 target)
+pnpm run dist:check   # rebuild + git diff --exit-code dist/
 ```
+
+`dist/index.js` is **committed** (GitHub Actions convention). Any change to `src/` or the dependency lockfile requires re-running `pnpm run build` and committing the updated `dist/` in the same commit — the CI dist-sync job fails stale bundles. `action.yml` declares `runs.using: node24`; the esbuild transpile target stays node20-compatible per the DR-002 "Node 20+" lock.
 
 ## CISO + compliance bindings (carried from ISEDC DR-004)
 
@@ -98,7 +85,7 @@ bd sync                                # push to remote
 1. **Never bump the predicate URI casually.** Read Evidence Bundle SPEC R17 + R18 before any change to a URI string.
 2. **Never push a signed attestation to Rekor in a test environment.** Rekor entries are permanent; test signing must use a non-public Rekor instance or `rekor-url=""` (signing-only mode).
 3. **Test fixtures use synthetic gate IDs only.** No real `audit-harness` or `j-rig-binary-eval` partner-engagement gate IDs in fixtures. Use `synth-gate-1`, `synth-gate-2`, etc.
-4. **The action exits 0 by default in v0.0.0**—this is intentional, do not "fix" it. Adopters wiring this early should not be blocked by an un-implemented gate.
+4. **The action FAILS CLOSED as of v0.1.0**—a `block` decision fails the job unless `fail-on-block: 'false'` (or legacy `dry-run: 'true'`). The v0.0.x always-exit-0 stub contract is retired; do not reintroduce silent passes.
 
 <!-- BEGIN BEADS INTEGRATION v:1 profile:minimal hash:ca08a54f -->
 ## Beads Issue Tracker

@@ -1,0 +1,4 @@
+{
+  "not": "an evidence bundle",
+  "comment": "valid JSON, but neither the v2 plain-array form nor the v1 container form — the package must classify this as malformed and the action must block (fail closed)"
+}

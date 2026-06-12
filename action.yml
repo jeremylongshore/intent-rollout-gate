@@ -2,9 +2,10 @@ name: 'Intent Rollout Gate'
 author: 'Jeremy Longshore (Intent Solutions)'
 description: >-
   Consume an Evidence Bundle (in-toto Statement v1 rows under predicateType
-  https://evals.intentsolutions.io/gate-result/v1) and decide ship / no-ship
-  per the consuming repo's tests/TESTING.md policy. Part of the Intent Eval
-  Platform.
+  https://evals.intentsolutions.io/gate-result/v1) and a rollout policy, and
+  decide allow / block (fail closed). All decision logic is delegated to the
+  published @intentsolutions/rollout-gate package — this action is the thin
+  GitHub Actions shell. Part of the Intent Eval Platform.
 
 branding:
   icon: 'check-square'
@@ -13,88 +14,94 @@ branding:
 inputs:
   bundle-path:
     description: >-
-      Filesystem path to the Evidence Bundle. Accepts a directory of signed
-      Statement files, a JSON Lines file, or a JSON file with a top-level
-      bundle.rows array (per Evidence Bundle SPEC § 4.R1).
+      Filesystem path to the Evidence Bundle JSON file. Accepts both wire
+      forms: the v2 plain array of in-toto Statements (kernel
+      EvidenceBundlePayload) and the v1 legacy container
+      {"bundle_format":"json-array","rows":[...]}. A missing, unreadable, or
+      invalid-JSON file blocks (fail closed).
     required: true
+  policy-path:
+    description: >-
+      Path to the rollout policy JSON document ({"required_gates":[...],
+      "forbid_decisions":[...], "advisory_blocks":bool,
+      "allow_unknown_gates":bool} — see @intentsolutions/rollout-gate
+      parsePolicy). Exactly one of policy-path or policy-json is required;
+      both or neither blocks (fail closed). Parsing tests/TESTING.md directly
+      stays deferred per DR-002 § 5.
+    required: false
+    default: ''
+  policy-json:
+    description: >-
+      Inline rollout policy as a JSON string. Exactly one of policy-path or
+      policy-json is required; both or neither blocks (fail closed).
+    required: false
+    default: ''
+  fail-on-block:
+    description: >-
+      If 'true' (default), a block decision fails the job. If 'false', the
+      action succeeds and only reports outputs — observability rollouts ahead
+      of enforcement. Any value other than an explicit 'false' fails on block
+      (fail closed).
+    required: false
+    default: 'true'
   policy-file:
     description: >-
-      Path to the policy file the gate evaluates against. Defaults to
-      tests/TESTING.md — the same file audit-harness reads for thresholds
-      (enforcement travels with the code).
+      DEPRECATED alias for policy-path (v0.0.x input name, kept additive per
+      Evidence Bundle SPEC R18). Note the v0.0.x default of tests/TESTING.md
+      is GONE — TESTING.md parsing is deferred per DR-002 § 5 and a markdown
+      file would fail policy parsing anyway (fail closed).
     required: false
-    default: 'tests/TESTING.md'
+    default: ''
   predicate-uri:
     description: >-
-      Predicate URI to filter on when reading rows. The default value is the
-      stable v1 URI; consumers MUST NOT change this unless they want to consume
-      a different (e.g. v2) predicate type.
+      Reserved (v0.0.x input, kept additive). v0.2.0 evaluates only the
+      stable v1 URI https://evals.intentsolutions.io/gate-result/v1; any
+      other value blocks (fail closed).
     required: false
     default: 'https://evals.intentsolutions.io/gate-result/v1'
   rekor-url:
     description: >-
-      Rekor instance for transparency-log anchoring of the rollout-decision
-      row this action emits. Empty string disables anchoring (engagement-private
-      mode — verifiability reduces to whoever holds the signing key).
+      Reserved (v0.0.x input, kept additive). Transparency-log anchoring of
+      the rollout-decision row is NOT implemented at v0.2.0; no Rekor push
+      ever happens (the DNSSEC + CAA pre-condition per DR-004 § 6.1 gates
+      that milestone). Input is currently ignored.
     required: false
     default: 'https://rekor.sigstore.dev'
   cosign-key:
     description: >-
-      Path to a cosign keypair used to sign the rollout-decision row. If unset,
-      falls back to keyless OIDC (Sigstore Fulcio short-lived certificates).
+      Reserved (v0.0.x input, kept additive). Decision-row signing is NOT
+      implemented at v0.2.0; setting this emits a warning and performs no
+      signing.
     required: false
     default: ''
   dry-run:
     description: >-
-      If 'true', evaluate and report but exit 0 regardless of the verdict.
-      Useful for observability rollouts ahead of enforcement.
+      DEPRECATED alias for fail-on-block: 'false' (v0.0.x input, kept
+      additive). If 'true', evaluate and report but never fail the job.
     required: false
     default: 'false'
 
 outputs:
   decision:
     description: >-
-      One of: ship, no-ship, advisory, not-implemented. At v0.0.0 (this
-      bootstrap) always emits 'not-implemented'.
-    value: ${{ steps.decide.outputs.decision }}
+      'allow' or 'block' — verbatim from @intentsolutions/rollout-gate
+      decide() (allow corresponds to ship, block to no-ship in the
+      pre-implementation v0.0.x vocabulary). The v0.0.x 'not-implemented'
+      value is retired.
+  reasons:
+    description: >-
+      JSON array string of every blocking reason (empty array exactly when
+      decision is 'allow').
   summary:
     description: >-
-      Markdown summary of the decision (gate pass rates, coverage table,
-      failing rows, advisories). Empty at v0.0.0.
-    value: ${{ steps.decide.outputs.summary }}
+      Markdown summary of the decision: required-gate table, blocking rows,
+      and the flat reason list. Also written to the job step summary.
   signed-decision-row-path:
     description: >-
-      Filesystem path to the signed in-toto row attesting the rollout decision
-      itself (predicateType https://evals.intentsolutions.io/rollout-decision/v1).
-      Empty at v0.0.0.
-    value: ${{ steps.decide.outputs.signed-decision-row-path }}
+      Reserved — always empty at v0.2.0. Populated once decision-row signing
+      (predicateType https://evals.intentsolutions.io/rollout-decision/v1)
+      lands behind the DNSSEC + CAA pre-condition (DR-002 § 6.3).
 
 runs:
-  using: 'composite'
-  steps:
-    - id: decide
-      shell: bash
-      env:
-        # Pass inputs through the environment instead of expanding GitHub
-        # expressions directly into the shell script. Expression interpolation
-        # inside a bash run block lets attacker-controlled input values break
-        # out of the echoed JSON string; env vars are not re-parsed by bash.
-        BUNDLE_PATH: ${{ inputs.bundle-path }}
-        POLICY_FILE: ${{ inputs.policy-file }}
-        DRY_RUN: ${{ inputs.dry-run }}
-      run: |
-        echo "::notice title=intent-rollout-gate::Rollout Gate v0.0.0 — implementation lands in M5; this is the bootstrap action declaration. Inputs validated; no enforcement performed."
-        echo "decision=not-implemented" >> "$GITHUB_OUTPUT"
-        echo "summary=" >> "$GITHUB_OUTPUT"
-        echo "signed-decision-row-path=" >> "$GITHUB_OUTPUT"
-        # Emit a structured marker on stdout so downstream consumers piping
-        # action logs can detect the no-op state without parsing notices.
-        # jq builds the JSON so input values are safely quoted/escaped rather
-        # than concatenated into the string by the shell.
-        jq -nc \
-          --arg bundle_path "$BUNDLE_PATH" \
-          --arg policy_file "$POLICY_FILE" \
-          --arg dry_run "$DRY_RUN" \
-          '{version:"0.0.0",status:"not-implemented",bundle_path:$bundle_path,policy_file:$policy_file,dry_run:$dry_run}'
-        # Exit 0 by design: do NOT block adopters wiring early.
-        exit 0
+  using: 'node24'
+  main: 'dist/index.js'
