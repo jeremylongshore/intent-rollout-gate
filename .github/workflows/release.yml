@@ -1,0 +1,291 @@
+name: Release
+
+# Release pipeline for the Intent Rollout Gate GitHub Action.
+#
+# CANONICAL tag-trigger-only pattern (mirrors intent-eval-core's release.yml):
+# this workflow fires ONLY on a pushed tag `v*.*.*`. There is intentionally NO
+# auto-bump-on-push-to-main job — that pattern fails against branch protection
+# (the workflow cannot push a version-bump commit back to a protected `main`).
+# The release flow is: maintainer runs `npm version <patch|minor|major>` locally,
+# pushes the tag, and this workflow does the rest.
+#
+# Because this repo ships a GitHub *Action* (not an npm package), the committed
+# dist/index.js IS the published artifact (`uses: jeremylongshore/intent-rollout-gate@vX`
+# resolves to the tagged tree). So the release does NOT publish to npm. Instead it:
+#   1. Verifies the pushed tag matches package.json#version (drift guard).
+#   2. Rebuilds dist/index.js and asserts the committed bundle is reproducible
+#      (git diff clean) — a stale committed dist blocks the release.
+#   3. Creates the GitHub Release for the tag.
+#   4. Retags the floating major alias (e.g. v1) → the released tag, so
+#      `uses: jeremylongshore/intent-rollout-gate@v1` tracks the latest v1.x.y.
+#   5. Keyless-signs dist/index.js with cosign (Fulcio OIDC — no secret needed,
+#      GH Actions `id-token: write`) and pushes the attestation to the sigstore
+#      STAGING transparency log by default. Production Rekor is staged behind a
+#      guard (see the `use-production-rekor` input) and HELD — see § sign job.
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  # Manual dispatch is provided ONLY so a maintainer can re-run signing/release
+  # bookkeeping against an already-pushed tag. It cannot create a new version.
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing tag to (re)release, e.g. v0.1.0'
+        required: true
+        type: string
+      use-production-rekor:
+        description: >-
+          HELD — DO NOT ENABLE. Selects the sigstore PRODUCTION transparency
+          log (rekor.sigstore.dev) instead of the default STAGING log
+          (rekor.sigstage.dev). Production enablement is blocked pending the
+          CISO pre-flight (see the sign job comment block). Leave false.
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  # ─────────────────────────────────────────────────────────────────────────
+  # 1. Build + verify the release is reproducible and the tag is consistent.
+  # ─────────────────────────────────────────────────────────────────────────
+  build:
+    name: Verify tag + reproducible dist
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      tag: ${{ steps.resolve.outputs.tag }}
+      major: ${{ steps.resolve.outputs.major }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Resolve tag (push tag or dispatch input)
+        id: resolve
+        run: |
+          set -euo pipefail
+          if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
+            tag="${{ inputs.tag }}"
+          else
+            tag="${GITHUB_REF#refs/tags/}"
+          fi
+          case "$tag" in
+            v*.*.*) : ;;
+            *) echo "::error::tag '$tag' does not match v*.*.* — refusing"; exit 1 ;;
+          esac
+          major="${tag%%.*}"   # v1.2.3 -> v1
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "major=$major" >> "$GITHUB_OUTPUT"
+          echo "Resolved tag=$tag, floating-major-alias=$major"
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: pnpm
+
+      - name: Install (frozen lockfile)
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify tag matches package.json version (drift guard)
+        env:
+          TAG: ${{ steps.resolve.outputs.tag }}
+        run: |
+          set -euo pipefail
+          tag_version="${TAG#v}"
+          pkg_version="$(node -p "require('./package.json').version")"
+          if [ "$tag_version" != "$pkg_version" ]; then
+            echo "::error::Tag v$tag_version does not match package.json version $pkg_version — bump package.json and retag."
+            exit 1
+          fi
+          echo "Tag and package version both: $tag_version"
+
+      - name: Harness verify (hash-pinned policy artifacts)
+        run: pnpm exec audit-harness verify
+
+      - name: Typecheck
+        run: pnpm run typecheck
+
+      - name: Unit tests
+        run: pnpm run test
+
+      - name: Reproducible dist (rebuild → committed bundle must match)
+        run: |
+          set -euo pipefail
+          pnpm run build
+          if ! git diff --exit-code dist/; then
+            echo "::error::Committed dist/index.js is not reproducible from src/. Run 'pnpm run build' and commit the result before tagging."
+            exit 1
+          fi
+          echo "dist/index.js is reproducible and in sync."
+
+      - name: Upload dist artifact for the sign job
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/index.js
+          if-no-files-found: error
+          retention-days: 7
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # 2. Create the GitHub Release + retag the floating major alias.
+  # ─────────────────────────────────────────────────────────────────────────
+  release:
+    name: GitHub Release + floating major retag
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write   # create the Release + push the floating-major tag
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Create or update the GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ needs.build.outputs.tag }}
+        run: |
+          set -euo pipefail
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release $TAG already exists — leaving notes as-is."
+          else
+            gh release create "$TAG" \
+              --title "$TAG" \
+              --generate-notes \
+              --verify-tag
+            echo "Created release $TAG"
+          fi
+
+      - name: Retag floating major alias (e.g. v1 → released tag)
+        env:
+          TAG: ${{ needs.build.outputs.tag }}
+          MAJOR: ${{ needs.build.outputs.major }}
+        run: |
+          set -euo pipefail
+          # Move the floating major alias to point at the released commit so
+          # `uses: jeremylongshore/intent-rollout-gate@v1` tracks the latest
+          # v1.x.y. Force-update is intended for a floating alias.
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          released_sha="$(git rev-list -n1 "$TAG")"
+          git tag -f "$MAJOR" "$released_sha"
+          git push -f origin "refs/tags/$MAJOR"
+          echo "Floating alias $MAJOR now points at $released_sha (from $TAG)"
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # 3. Sign dist/index.js with cosign keyless (Fulcio OIDC) → STAGING Rekor.
+  # ─────────────────────────────────────────────────────────────────────────
+  #
+  # STAGING vs PRODUCTION transparency log — GUARDED, production HELD:
+  #
+  #   The default trust root is sigstore STAGING (fulcio.sigstage.dev +
+  #   rekor.sigstage.dev). Production (fulcio.sigstore.dev + rekor.sigstore.dev)
+  #   is selected ONLY when the `use-production-rekor` workflow_dispatch input is
+  #   explicitly `true`. Production is NOT the default and is HELD.
+  #
+  #   Production enablement is BLOCKED pending BOTH of:
+  #     (a) audit-harness iah-E06 DNSSEC/CAA pre-flight live — the Rekor
+  #         pre-flight check that refuses to push to production when the
+  #         predicate-URI host lacks DNSSEC/CAA. (Now merged to audit-harness
+  #         main; wiring it as a release gate here is the remaining step.)
+  #     (b) evals.intentsolutions.io DNSSEC enabled + CAA records pinned in DNS
+  #         (CISO binding — predicate URIs live ONLY at evals.intentsolutions.io;
+  #         DNSSEC + CAA pinning required before first signed PRODUCTION
+  #         attestation). See the umbrella CLAUDE.md "Operational rules" § 5.
+  #
+  #   Until both land, every attestation goes to the staging transparency log,
+  #   which is non-binding and safe to rotate. The staging signature still
+  #   exercises the full keyless OIDC path end-to-end.
+  sign:
+    name: cosign keyless sign dist (STAGING Rekor by default)
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write   # attach .sigstore bundle to the Release
+      id-token: write   # cosign keyless (Fulcio OIDC) — no secret needed
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3
+
+      - name: Download dist artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+
+      - name: Select transparency log (default STAGING; production GUARDED + HELD)
+        id: trust
+        env:
+          USE_PROD: ${{ inputs.use-production-rekor }}
+        run: |
+          set -euo pipefail
+          # use-production-rekor is only ever set via workflow_dispatch; on a
+          # tag push the input is empty, so the default branch (staging) wins.
+          if [ "${USE_PROD:-false}" = "true" ]; then
+            echo "::error::Production Rekor is HELD pending the CISO pre-flight (iah-E06 DNSSEC/CAA + evals.intentsolutions.io DNSSEC/CAA). Refusing to push to production."
+            exit 1
+          fi
+          {
+            echo "log=staging"
+            echo "rekor_url=https://rekor.sigstage.dev"
+            echo "fulcio_url=https://fulcio.sigstage.dev"
+            echo "oidc_issuer=https://oauth2.sigstage.dev/auth"
+          } >> "$GITHUB_OUTPUT"
+          echo "Signing target: STAGING transparency log (rekor.sigstage.dev)"
+
+      - name: cosign sign-blob dist/index.js (keyless → STAGING)
+        env:
+          REKOR_URL: ${{ steps.trust.outputs.rekor_url }}
+          FULCIO_URL: ${{ steps.trust.outputs.fulcio_url }}
+          OIDC_ISSUER: ${{ steps.trust.outputs.oidc_issuer }}
+        run: |
+          set -euo pipefail
+          # --new-bundle-format emits the sigstore protobuf Bundle (mediaType +
+          # verificationMaterial + messageSignature) consumable by sigstore-js
+          # verify(). Staging trust root is selected via the explicit
+          # --rekor-url / --fulcio-url / --oidc-issuer flags (no production
+          # endpoints are reachable from this default path).
+          cosign sign-blob \
+            --yes \
+            --new-bundle-format \
+            --rekor-url "$REKOR_URL" \
+            --fulcio-url "$FULCIO_URL" \
+            --oidc-issuer "$OIDC_ISSUER" \
+            --bundle dist/index.js.sigstore.json \
+            dist/index.js
+          test -s dist/index.js.sigstore.json || { echo "::error::cosign produced no bundle"; exit 1; }
+          echo "✓ signed dist/index.js → dist/index.js.sigstore.json (STAGING)"
+
+      - name: Attach signature bundle to the Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ needs.build.outputs.tag }}
+        run: |
+          set -euo pipefail
+          # release job runs in parallel; create-or-upload is idempotent so the
+          # ordering between the two jobs does not matter.
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" dist/index.js.sigstore.json --clobber
+          else
+            gh release create "$TAG" dist/index.js.sigstore.json \
+              --title "$TAG" --generate-notes --verify-tag
+          fi
+          echo "✓ dist/index.js.sigstore.json attached to release $TAG"
