@@ -49,6 +49,39 @@ jobs:
             exit 1
           }
 
+  dist-repro:
+    name: dist/index.js reproducibility (rebuild → diff must be empty)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: pnpm
+
+      - name: Install (frozen lockfile)
+        run: pnpm install --frozen-lockfile
+
+      # The committed dist/index.js IS the published Action artifact
+      # (`uses: ./` resolves to the tagged tree). Rebuild from src/ and assert
+      # the working tree is unchanged, so the release pipeline's identical
+      # reproducibility gate can never be surprised by a stale committed bundle.
+      - name: Rebuild dist and assert git diff is empty
+        run: |
+          set -euo pipefail
+          pnpm run build
+          if ! git diff --exit-code dist/; then
+            echo "::error::dist/index.js is not reproducible from src/ — run 'pnpm run build' and commit the result."
+            exit 1
+          fi
+          echo "dist/index.js is reproducible and in sync."
+
   lint-action-yaml:
     name: Lint action.yml
     runs-on: ubuntu-latest
