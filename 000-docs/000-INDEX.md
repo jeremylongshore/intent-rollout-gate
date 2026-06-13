@@ -10,6 +10,9 @@ Per Doc Filing Standard v4.x. Files follow `NNN-CC-CODE-description.md`.
 | 003 | RL (Release Report) | REPT | [Baseline release v0.0.1 (2026-05-26)](./003-RL-REPT-baseline-release-v0.0.1-2026-05-26.md) |
 | 004 | AT (Decision Record) | DECR | [DR-002 — Runtime language: TypeScript-primary (2026-06-10)](./004-AT-DECR-runtime-language-typescript-2026-06-10.md) |
 | 005 | AT (Architecture) | ARCH | [Repo Blueprint — intent-rollout-gate (2026-06-11)](./005-AT-ARCH-repo-blueprint.md) |
+| 006 | AT (Specification) | SPEC | [Evidence Bundle SPEC normative-lock verification — E08 acceptance record (2026-06-18)](./006-AT-SPEC-evidence-bundle-normative-lock-verification-2026-06-18.md) |
+| 007 | AT (Decision Record) | DECR | [SPEC normative-lock sign-off — acting-head-of-board (2026-06-18)](./007-AT-DECR-spec-normative-lock-sign-off-2026-06-18.md) |
+| 008 | RL (Release Report) | REPT | [Migration notes — v0.1.0-experimental -> v0.2.0 (2026-06-18)](./008-RL-REPT-v0.2.0-migration-notes-2026-06-18.md) |
 
 ## Type codes used in this repo
 
@@ -17,7 +20,7 @@ Per Doc Filing Standard v4.x. Files follow `NNN-CC-CODE-description.md`.
 | --- | --- |
 | `INDEX` | Directory index (this file) |
 | `DR` | Design Record—architecture, design decisions, technical specs |
-| `AT` | Architecture / Adversarial-Testing record—per-repo blueprints (`AT-ARCH`), ISEDC Decision Records (`AT-DECR`), audit findings |
+| `AT` | Architecture / Adversarial-Testing record—per-repo blueprints (`AT-ARCH`), specification / acceptance records (`AT-SPEC`), ISEDC Decision Records (`AT-DECR`), audit findings |
 | `RR` | Reference / Research record |
 | `PP` | Plan / Proposal |
 | `AA` | After-Action / Audit record |
