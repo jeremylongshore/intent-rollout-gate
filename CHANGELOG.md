@@ -11,21 +11,30 @@ versioning follows [SemVer 2.0.0](https://semver.org/spec/v2.0.0.html).
 
 - Phase 7.5 gist (deferred per release-sweep CTO call — `iep-gist-coverage` follow-up bead; each landing-page gist deserves bespoke `/appaudit` treatment).
 
-## [0.2.0] - Unreleased
+## [0.2.0] - 2026-06-18
 
-**Stable consumption contract.** Graduates the M5 TypeScript MVP from `v0.1.0` ("experimental" per [DR-002](000-docs/004-AT-DECR-runtime-language-typescript-2026-06-10.md) § 6 — behavior present, contract not yet frozen) to a frozen consumption contract. The action's public `uses:` interface stays forward-compatible: inputs/outputs are additive only ([Evidence Bundle SPEC](https://github.com/jeremylongshore/intent-eval-lab/blob/main/specs/evidence-bundle/v0.1.0-draft/SPEC.md) R18); no breaking change ships without a new predicate URI (SPEC R17). Adopters upgrade the pin; no workflow rewiring is required. Full migration guidance: [`000-docs/008-RL-REPT-v0.2.0-migration-notes-2026-06-18.md`](000-docs/008-RL-REPT-v0.2.0-migration-notes-2026-06-18.md).
+**Stable consumption contract + production-Rekor signing enabled.** Graduates the M5 TypeScript MVP from `v0.1.0` ("experimental" per [DR-002](000-docs/004-AT-DECR-runtime-language-typescript-2026-06-10.md) § 6 — behavior present, contract not yet frozen) to a frozen consumption contract, and enables the previously-HELD sigstore PRODUCTION transparency-log signing path behind the iah-E06 DNSSEC/CAA pre-flight (fail-closed). The action's public `uses:` interface stays forward-compatible: inputs/outputs are additive only ([Evidence Bundle SPEC](https://github.com/jeremylongshore/intent-eval-lab/blob/main/specs/evidence-bundle/v0.1.0-draft/SPEC.md) R18); no breaking change ships without a new predicate URI (SPEC R17). Adopters upgrade the pin; no workflow rewiring is required. Full migration guidance: [`000-docs/008-RL-REPT-v0.2.0-migration-notes-2026-06-18.md`](000-docs/008-RL-REPT-v0.2.0-migration-notes-2026-06-18.md).
+
+This release satisfies DR-002 § 6 acceptance criteria **1** (frozen consumption contract), **3** (decision-signing preconditions met — both gates now land), **4** (Testing SOP gate green), and **5** (M6 first-adopter path) for the signing surface; criterion **2** (additive-only `uses:` interface) is preserved.
+
+### Added
+
+- **Production-Rekor signing ENABLED (fail-closed).** The `release.yml` `sign` job previously HARD-REFUSED production (`use-production-rekor=true` → `exit 1`, HELD pending the CISO pre-flight). Both former preconditions are now met:
+  - **iah-E06 DNSSEC/CAA pre-flight is live and published** — [`@intentsolutions/audit-harness@1.1.8`](https://www.npmjs.com/package/@intentsolutions/audit-harness) ships `scripts/dnssec-check.sh` + `scripts/caa-check.sh` (read-only, fail-closed verification against trusted public resolvers).
+  - **`evals.intentsolutions.io` has DNSSEC enabled + CAA pinned** (CISO binding, DR-004 § 6.1) — verified live (DNSSEC fully validated; CAA pins the IS issuing CA).
+  - A new **iah-E06 production pre-flight** step (gated `if: inputs.use-production-rekor == true`) fetches the published scripts and runs BOTH against the predicate-URI host (`evals.intentsolutions.io`) under `set -euo pipefail`. EITHER non-zero exit fails the job → cosign NEVER anchors to production Rekor. Production is reachable ONLY via the explicit `use-production-rekor=true` workflow_dispatch; a plain tag push still goes to STAGING (byte-unchanged from v0.1.0). Production cosign uses the public-good trust root (`rekor.sigstore.dev` / `fulcio.sigstore.dev`) with the GitHub Actions ambient OIDC issuer (`token.actions.githubusercontent.com`).
 
 ### Changed
 
 - **Consumed-row contract frozen.** The kernel `@intentsolutions/core` `gate-result/v1` JSON Schema (`schemas/v1/gate-result.schema.json`, kernel 0.6.0) is pinned as the stable consumed-row contract for v0.2.0. Verified present and locked in [`000-docs/006-AT-SPEC-evidence-bundle-normative-lock-verification-2026-06-18.md`](000-docs/006-AT-SPEC-evidence-bundle-normative-lock-verification-2026-06-18.md) and ratified by the acting-head sign-off [`000-docs/007-AT-DECR-spec-normative-lock-sign-off-2026-06-18.md`](000-docs/007-AT-DECR-spec-normative-lock-sign-off-2026-06-18.md).
+- **`@intentsolutions/audit-harness` dev-dependency bumped `^1.1.7` → `^1.1.8`** — 1.1.8 is the first release to ship the iah-E06 pre-flight scripts the production gate consumes.
 - Decision logic remains delegated to [`@intentsolutions/rollout-gate@2.0.0`](https://www.npmjs.com/package/@intentsolutions/rollout-gate) (thin shell preserved); no gate semantics added to this repo.
 - The `policy-file` and `dry-run` deprecated aliases (introduced at v0.1.0) remain accepted — deprecated, not removed. Removing them would be a SemVer-major event with its own migration note.
 
-### Pending (gates the v0.2.0 graduation)
+### Pending (post-v0.2.0)
 
-- **Decision-row signing** — emit + sign the `rollout-decision/v1` in-toto row, behind the DNSSEC + CAA pre-condition (DR-004 § 6.1, DR-002 § 6.3). The signing path delegates to `audit-harness` `emit-evidence`, inheriting its refuse-on-unverified DNSSEC/CAA pre-flight (audit-harness #70). `signed-decision-row-path` output stays empty until the pre-condition is met.
+- **Decision-row signing (`rollout-decision/v1`)** — emit + sign the action's own in-toto decision row (distinct from signing the committed `dist/index.js` artifact, which this release enables). It delegates to `audit-harness` `emit-evidence`, inheriting the same DNSSEC/CAA pre-flight now wired here. `signed-decision-row-path` output stays empty until that lands.
 - **`tests/TESTING.md` policy parsing** — deferred per DR-002 § 5; v0.2.0 continues to consume JSON policy documents only.
-- **Testing SOP gate green** — in-repo `@intentsolutions/audit-harness` wired into CI + pre-commit; `pnpm run check` green with coverage + mutation floors met (DR-002 § 6 criterion 4).
 - **M6 first adopter** — `audit-harness` self-adopts the gate end-to-end before any partner repo (DR-002 § 6 criterion 5).
 
 ### Architectural bindings
