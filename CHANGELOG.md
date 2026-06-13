@@ -9,10 +9,30 @@ versioning follows [SemVer 2.0.0](https://semver.org/spec/v2.0.0.html).
 
 ### Pending
 
-- **Decision-row signing** — emit + sign the `rollout-decision/v1` in-toto row, behind the DNSSEC + CAA pre-condition (DR-004 § 6.1, DR-002 § 6.3). `signed-decision-row-path` output stays empty until then.
-- **`tests/TESTING.md` policy parsing** — deferred per DR-002 § 5; v0.1.0 consumes JSON policy documents only.
-- **M6 first adopter** — `audit-harness` self-adopts the gate (DR-002 § 6.5).
 - Phase 7.5 gist (deferred per release-sweep CTO call — `iep-gist-coverage` follow-up bead; each landing-page gist deserves bespoke `/appaudit` treatment).
+
+## [0.2.0] - Unreleased
+
+**Stable consumption contract.** Graduates the M5 TypeScript MVP from `v0.1.0` ("experimental" per [DR-002](000-docs/004-AT-DECR-runtime-language-typescript-2026-06-10.md) § 6 — behavior present, contract not yet frozen) to a frozen consumption contract. The action's public `uses:` interface stays forward-compatible: inputs/outputs are additive only ([Evidence Bundle SPEC](https://github.com/jeremylongshore/intent-eval-lab/blob/main/specs/evidence-bundle/v0.1.0-draft/SPEC.md) R18); no breaking change ships without a new predicate URI (SPEC R17). Adopters upgrade the pin; no workflow rewiring is required. Full migration guidance: [`000-docs/008-RL-REPT-v0.2.0-migration-notes-2026-06-18.md`](000-docs/008-RL-REPT-v0.2.0-migration-notes-2026-06-18.md).
+
+### Changed
+
+- **Consumed-row contract frozen.** The kernel `@intentsolutions/core` `gate-result/v1` JSON Schema (`schemas/v1/gate-result.schema.json`, kernel 0.6.0) is pinned as the stable consumed-row contract for v0.2.0. Verified present and locked in [`000-docs/006-AT-SPEC-evidence-bundle-normative-lock-verification-2026-06-18.md`](000-docs/006-AT-SPEC-evidence-bundle-normative-lock-verification-2026-06-18.md) and ratified by the acting-head sign-off [`000-docs/007-AT-DECR-spec-normative-lock-sign-off-2026-06-18.md`](000-docs/007-AT-DECR-spec-normative-lock-sign-off-2026-06-18.md).
+- Decision logic remains delegated to [`@intentsolutions/rollout-gate@2.0.0`](https://www.npmjs.com/package/@intentsolutions/rollout-gate) (thin shell preserved); no gate semantics added to this repo.
+- The `policy-file` and `dry-run` deprecated aliases (introduced at v0.1.0) remain accepted — deprecated, not removed. Removing them would be a SemVer-major event with its own migration note.
+
+### Pending (gates the v0.2.0 graduation)
+
+- **Decision-row signing** — emit + sign the `rollout-decision/v1` in-toto row, behind the DNSSEC + CAA pre-condition (DR-004 § 6.1, DR-002 § 6.3). The signing path delegates to `audit-harness` `emit-evidence`, inheriting its refuse-on-unverified DNSSEC/CAA pre-flight (audit-harness #70). `signed-decision-row-path` output stays empty until the pre-condition is met.
+- **`tests/TESTING.md` policy parsing** — deferred per DR-002 § 5; v0.2.0 continues to consume JSON policy documents only.
+- **Testing SOP gate green** — in-repo `@intentsolutions/audit-harness` wired into CI + pre-commit; `pnpm run check` green with coverage + mutation floors met (DR-002 § 6 criterion 4).
+- **M6 first adopter** — `audit-harness` self-adopts the gate end-to-end before any partner repo (DR-002 § 6 criterion 5).
+
+### Architectural bindings
+
+- [DR-002 § 6](000-docs/004-AT-DECR-runtime-language-typescript-2026-06-10.md) — the v0.1.0-experimental -> v0.2.0 acceptance criteria
+- [006-AT-SPEC](000-docs/006-AT-SPEC-evidence-bundle-normative-lock-verification-2026-06-18.md) — SPEC R14–R18 + kernel schema + DNSSEC/CAA pre-flight verification (E08 acceptance record)
+- [007-AT-DECR](000-docs/007-AT-DECR-spec-normative-lock-sign-off-2026-06-18.md) — acting-head-of-board sign-off ratifying the SPEC normative lock
 
 ## [0.1.0] - 2026-06-11
 
@@ -43,8 +63,6 @@ versioning follows [SemVer 2.0.0](https://semver.org/spec/v2.0.0.html).
 
 ## [0.0.1] - 2026-05-26
 
-## [0.0.1] - 2026-05-26
-
 **Baseline release.** Establishes the tag + CHANGELOG baseline for this repo. No npm-publish surface yet — this is a GitHub Action distributed via the `action.yml` manifest at the repo root. Tag enables GitHub Marketplace listing.
 
 ### Added
@@ -72,6 +90,7 @@ versioning follows [SemVer 2.0.0](https://semver.org/spec/v2.0.0.html).
 - CI workflow (`.github/workflows/ci.yml`) — `yamllint action.yml` for manifest validation. M5 substantive runtime adds the full TS gate chain.
 - Scaffolding files present: `AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING.md`, `LICENSE` (Apache 2.0), `NOTICE`, `README.md`, `SECURITY.md`, `CODE_OF_CONDUCT.md` (this release)
 
-[Unreleased]: https://github.com/jeremylongshore/intent-rollout-gate/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/jeremylongshore/intent-rollout-gate/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/jeremylongshore/intent-rollout-gate/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/jeremylongshore/intent-rollout-gate/compare/v0.0.1...v0.1.0
 [0.0.1]: https://github.com/jeremylongshore/intent-rollout-gate/releases/tag/v0.0.1
