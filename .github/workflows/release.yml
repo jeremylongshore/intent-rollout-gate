@@ -18,38 +18,42 @@ name: Release
 #   3. Creates the GitHub Release for the tag.
 #   4. Retags the floating major alias (e.g. v1) → the released tag, so
 #      `uses: jeremylongshore/intent-rollout-gate@v1` tracks the latest v1.x.y.
-#   5. Keyless-signs dist/index.js with cosign (Fulcio OIDC — no secret needed,
-#      GH Actions `id-token: write`) and pushes the attestation to the sigstore
-#      STAGING transparency log by default. Production Rekor is ENABLED but
-#      gated behind the iah-E06 DNSSEC/CAA pre-flight (fail-closed) and is
-#      reachable ONLY via the `use-production-rekor` dispatch input — see
-#      § sign job.
+#
+# Signing is DELIBERATE and SEPARATE from the tag-push release. A plain tag
+# push does build + GitHub Release + floating-major retag, but does NOT sign.
+# Signing — always to PRODUCTION sigstore (cosign default trust root) — runs
+# ONLY on workflow_dispatch, is ALWAYS gated by the iah-E06 DNSSEC/CAA
+# pre-flight (fail-closed), and defaults to a reversible dry-run. See § sign job.
 
 on:
   push:
     tags:
       - 'v*.*.*'
-  # Manual dispatch is provided ONLY so a maintainer can re-run signing/release
-  # bookkeeping against an already-pushed tag. It cannot create a new version.
+  # Manual dispatch drives the deliberate, gated signing operation (and can also
+  # re-run release bookkeeping against an already-pushed tag). It cannot create
+  # a new version. Signing ALWAYS targets PRODUCTION sigstore; the dry-run input
+  # controls only whether a permanent Rekor transparency-log entry is written.
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Existing tag to (re)release, e.g. v0.1.0'
+        description: 'Existing tag to (re)release / sign, e.g. v0.2.0'
         required: true
         type: string
-      use-production-rekor:
+      dry-run:
         description: >-
-          Selects the sigstore PRODUCTION transparency log (rekor.sigstore.dev)
-          instead of the default STAGING log (rekor.sigstage.dev). ENABLED but
-          GATED: when true, the sign job FIRST runs the iah-E06 DNSSEC + CAA
-          pre-flight against the predicate-URI host (evals.intentsolutions.io)
-          and FAILS CLOSED if either check does not pass — only then does cosign
-          anchor to production Rekor. A plain tag push never reaches production
-          (this input is only ever set via workflow_dispatch); staging stays the
-          tag-push default. See the sign job comment block.
+          DRY-RUN (default true, safe by default): when true, cosign obtains a
+          real PRODUCTION Fulcio cert and verifies the SCT against the default
+          (production) trust root, the iah-E06 DNSSEC/CAA pre-flight runs, but
+          NO transparency-log entry is written (--tlog-upload=false) and the
+          bundle is NOT attached to the Release — it is uploaded as a workflow
+          artifact for inspection only. Set to false to perform a REAL
+          production signature: a permanent rekor.sigstore.dev entry is written
+          and the bundle is attached to the GitHub Release. A Rekor entry is
+          permanent — a real fire is a one-way door. There is no staging path:
+          signing always targets the PRODUCTION trust root.
         required: false
         type: boolean
-        default: false
+        default: true
 
 permissions:
   contents: read
@@ -191,45 +195,55 @@ jobs:
           echo "Floating alias $MAJOR now points at $released_sha (from $TAG)"
 
   # ─────────────────────────────────────────────────────────────────────────
-  # 3. Sign dist/index.js with cosign keyless (Fulcio OIDC). STAGING Rekor by
-  #    default; PRODUCTION Rekor enabled but gated by the iah-E06 pre-flight.
+  # 3. Sign dist/index.js with cosign keyless against the PRODUCTION sigstore
+  #    trust root. DISPATCH-ONLY, iah-E06-gated, dry-run by default.
   # ─────────────────────────────────────────────────────────────────────────
   #
-  # STAGING vs PRODUCTION transparency log — production ENABLED, fail-closed:
+  # Production-only, deliberate, reversible signing:
   #
-  #   The default trust root is sigstore STAGING (fulcio.sigstage.dev +
-  #   rekor.sigstage.dev). Production (fulcio.sigstore.dev + rekor.sigstore.dev)
-  #   is selected ONLY when the `use-production-rekor` workflow_dispatch input is
-  #   explicitly `true`. A plain tag push never reaches production — the input is
-  #   empty on a tag push, so the staging default wins. Staging behavior is
-  #   unchanged from v0.1.0.
+  #   This job runs ONLY on workflow_dispatch (`if:` guard below). A plain tag
+  #   push does build + Release + floating-major retag and stops there — signing
+  #   is an explicit, gated, deliberate operation, never a side effect of a tag.
   #
-  #   Production is now ENABLED because BOTH former preconditions are met:
-  #     (a) audit-harness iah-E06 DNSSEC/CAA pre-flight is live and published —
-  #         @intentsolutions/audit-harness@1.1.8 ships scripts/dnssec-check.sh +
-  #         scripts/caa-check.sh (read-only, fail-closed verification of the
-  #         predicate-URI host's DNSSEC chain + CAA pinning).
-  #     (b) evals.intentsolutions.io has DNSSEC enabled + CAA records pinned in
-  #         DNS (CISO binding — predicate URIs live ONLY at
-  #         evals.intentsolutions.io; DNSSEC + CAA pinning required before the
-  #         first signed PRODUCTION attestation). See umbrella CLAUDE.md
-  #         "Operational rules" § 5.
+  #   There is NO staging path. Signing always targets the PRODUCTION sigstore
+  #   public-good trust root: cosign's DEFAULT trust root (fulcio.sigstore.dev +
+  #   rekor.sigstore.dev), with GitHub Actions ambient keyless OIDC (issuer
+  #   https://token.actions.githubusercontent.com via id-token: write). We do
+  #   NOT pass --rekor-url / --fulcio-url / --oidc-issuer overrides — cosign's
+  #   defaults already ARE the production endpoints + ambient GHA OIDC. (A prior
+  #   sigstage path was removed: signing to sigstage needs sigstage's own TUF
+  #   trust root but cosign defaults to production, so the SCT verification
+  #   failed — and sigstage is non-representative of where real attestations
+  #   live anyway.)
   #
-  #   THE GATE (fail-closed): when use-production-rekor=true the "iah-E06
-  #   production pre-flight" step below runs BOTH harness scripts against the
-  #   predicate-URI host under `set -euo pipefail`. If EITHER check exits
-  #   non-zero (DNSSEC not validated, or CAA not pinned, or no resolver tool),
-  #   the step fails → the job fails → cosign NEVER anchors to production Rekor.
-  #   Production signing happens only after both checks pass green. A Rekor entry
-  #   is permanent, so this gate is a one-way door: it can only make signing more
-  #   conservative, never less.
+  #   THE GATE (fail-closed, ALWAYS): production is the only target, so the
+  #   iah-E06 DNSSEC/CAA pre-flight runs on EVERY dispatch — both dry-run and
+  #   real fire. It is a read-only DNS verification and is part of what we
+  #   validate. It fetches the published @intentsolutions/audit-harness scripts
+  #   and runs BOTH DNSSEC + CAA checks against the predicate-URI host under
+  #   `set -euo pipefail`. If EITHER check exits non-zero (DNSSEC not validated,
+  #   CAA not pinned, or no resolver tool), the step fails → the job fails →
+  #   cosign NEVER runs. The pre-flight aborts the job before any signing.
+  #
+  #   DRY-RUN controls the Rekor write (the reversible part): a Rekor entry is
+  #   permanent, so a real fire is a one-way door. With dry-run=true (default),
+  #   cosign still obtains a real production Fulcio cert and verifies the SCT
+  #   against the default trust root, but --tlog-upload=false means NO
+  #   transparency-log entry is written and the bundle is NOT attached to the
+  #   Release (uploaded as a workflow artifact for inspection only). With
+  #   dry-run=false, --tlog-upload=true writes the permanent rekor.sigstore.dev
+  #   entry and the bundle is attached to the GitHub Release. The gate is
+  #   one-way: it can only make signing more conservative, never less.
   sign:
-    name: cosign keyless sign dist (STAGING default; production gated by iah-E06)
+    name: cosign keyless sign dist (PRODUCTION; dispatch-only, dry-run default, iah-E06-gated)
     needs: build
+    # DISPATCH-ONLY: a plain tag push never signs. Signing — especially the real
+    # production fire — is an explicit, deliberate, gated operation.
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
-      contents: write   # attach .sigstore bundle to the Release
+      contents: write   # attach .sigstore bundle to the Release (real fire only)
       id-token: write   # cosign keyless (Fulcio OIDC) — no secret needed
     steps:
       - name: Checkout
@@ -248,18 +262,17 @@ jobs:
 
       # iah-E06 DNSSEC/CAA pre-flight — THE FAIL-CLOSED PRODUCTION GATE.
       #
-      # Runs ONLY when production is requested (use-production-rekor == true; a
-      # plain tag push skips this step entirely and goes to staging). It fetches
-      # the published @intentsolutions/audit-harness pre-flight scripts and runs
-      # BOTH the DNSSEC and CAA verification against the predicate-URI host. Both
-      # scripts are read-only and fail-closed: they exit non-zero unless a
-      # trusted public resolver positively confirms (DNSSEC fully validated; CAA
-      # present + pinned). Under `set -euo pipefail`, EITHER non-zero exit aborts
-      # this step → fails the job → the cosign-to-production step never runs.
-      # This is the only thing standing between a dispatch and a permanent
-      # production Rekor entry, so it MUST run before "Select transparency log".
+      # Production is the only target, so this ALWAYS runs (dry-run AND real
+      # fire) — it is a read-only DNS verification and is part of what a dry-run
+      # validates. It fetches the published @intentsolutions/audit-harness
+      # pre-flight scripts and runs BOTH the DNSSEC and CAA verification against
+      # the predicate-URI host. Both scripts are read-only and fail-closed: they
+      # exit non-zero unless a trusted public resolver positively confirms
+      # (DNSSEC fully validated; CAA present + pinned). Under `set -euo
+      # pipefail`, EITHER non-zero exit aborts this step → fails the job → cosign
+      # never runs. This is the only thing standing between a dispatch and a
+      # cosign invocation, so it MUST run before the cosign step.
       - name: iah-E06 production pre-flight (DNSSEC + CAA, fail-closed)
-        if: ${{ inputs.use-production-rekor == true }}
         env:
           # Predicate URIs live ONLY at evals.intentsolutions.io (CISO binding).
           PREDICATE_URI_HOST: evals.intentsolutions.io
@@ -275,74 +288,71 @@ jobs:
           scripts_dir="$preflight_dir/node_modules/@intentsolutions/audit-harness/scripts"
           test -f "$scripts_dir/dnssec-check.sh" || { echo "::error::iah-E06 dnssec-check.sh missing from audit-harness@1.1.8 — refusing to sign to production"; exit 1; }
           test -f "$scripts_dir/caa-check.sh"    || { echo "::error::iah-E06 caa-check.sh missing from audit-harness@1.1.8 — refusing to sign to production"; exit 1; }
-          # Either non-zero exit aborts under set -e → job fails → no prod sign.
+          # Either non-zero exit aborts under set -e → job fails → no signing.
           bash "$scripts_dir/dnssec-check.sh" "$PRED_HOST"
           bash "$scripts_dir/caa-check.sh" "$PRED_HOST"
           echo "✓ iah-E06 pre-flight PASSED for '$PRED_HOST' — production signing authorized"
 
-      - name: Select transparency log (STAGING default; production via gated dispatch)
-        id: trust
-        env:
-          USE_PROD: ${{ inputs.use-production-rekor }}
+      - name: Resolve signing mode (dry-run controls the Rekor write)
+        id: mode
         run: |
           set -euo pipefail
-          # use-production-rekor is only ever set via workflow_dispatch; on a
-          # tag push the input is empty, so the default branch (staging) wins.
-          # When it IS true, the iah-E06 pre-flight step above has already passed
-          # (set -e would have failed the job otherwise), so reaching the
-          # production branch here means DNSSEC + CAA are verified.
-          if [ "${USE_PROD:-false}" = "true" ]; then
-            # PRODUCTION sigstore public-good trust root. cosign's defaults are
-            # already the production endpoints; we set them explicitly for an
-            # auditable, pinned invocation. OIDC issuer is the GitHub Actions
-            # ambient token issuer (id-token: write) — NOT a sigstage browser
-            # issuer — which is also the issuer downstream
-            # `cosign verify-blob --certificate-oidc-issuer` checks must expect.
-            {
-              echo "log=production"
-              echo "rekor_url=https://rekor.sigstore.dev"
-              echo "fulcio_url=https://fulcio.sigstore.dev"
-              echo "oidc_issuer=https://token.actions.githubusercontent.com"
-            } >> "$GITHUB_OUTPUT"
-            echo "Signing target: PRODUCTION transparency log (rekor.sigstore.dev) — iah-E06 pre-flight passed"
+          # dry-run=true  → TLOG_UPLOAD=false → cosign gets a real production
+          #                 Fulcio cert + verifies the SCT against the default
+          #                 trust root, but writes NO permanent Rekor entry.
+          # dry-run=false → TLOG_UPLOAD=true  → permanent rekor.sigstore.dev entry.
+          tlog="${{ inputs.dry-run && 'false' || 'true' }}"
+          echo "tlog_upload=$tlog" >> "$GITHUB_OUTPUT"
+          if [ "$tlog" = "true" ]; then
+            echo "mode=PRODUCTION — signed + logged to rekor.sigstore.dev" >> "$GITHUB_OUTPUT"
           else
-            {
-              echo "log=staging"
-              echo "rekor_url=https://rekor.sigstage.dev"
-              echo "fulcio_url=https://fulcio.sigstage.dev"
-              echo "oidc_issuer=https://oauth2.sigstage.dev/auth"
-            } >> "$GITHUB_OUTPUT"
-            echo "Signing target: STAGING transparency log (rekor.sigstage.dev)"
+            echo "mode=DRY-RUN — no Rekor entry written" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: cosign sign-blob dist/index.js (keyless → selected log)
+      - name: cosign sign-blob dist/index.js (keyless → PRODUCTION trust root)
         env:
-          LOG: ${{ steps.trust.outputs.log }}
-          REKOR_URL: ${{ steps.trust.outputs.rekor_url }}
-          FULCIO_URL: ${{ steps.trust.outputs.fulcio_url }}
-          OIDC_ISSUER: ${{ steps.trust.outputs.oidc_issuer }}
+          TLOG_UPLOAD: ${{ steps.mode.outputs.tlog_upload }}
+          MODE: ${{ steps.mode.outputs.mode }}
         run: |
           set -euo pipefail
-          # --new-bundle-format emits the sigstore protobuf Bundle (mediaType +
-          # verificationMaterial + messageSignature) consumable by sigstore-js
-          # verify(). The trust root (staging vs production) is selected by the
-          # "Select transparency log" step via the explicit --rekor-url /
-          # --fulcio-url / --oidc-issuer flags. cosign keyless uses the GH
-          # Actions ambient OIDC token (id-token: write) automatically — no
-          # --identity-token, no secret. Production is reached ONLY after the
-          # iah-E06 DNSSEC/CAA pre-flight passed (fail-closed gate above).
+          # PRODUCTION sigstore public-good trust root — cosign's DEFAULT. We do
+          # NOT pass --rekor-url / --fulcio-url / --oidc-issuer: cosign's
+          # defaults already are fulcio.sigstore.dev + rekor.sigstore.dev, and
+          # keyless uses the GH Actions ambient OIDC token (id-token: write,
+          # issuer https://token.actions.githubusercontent.com) automatically —
+          # no --identity-token, no secret. --new-bundle-format emits the
+          # sigstore protobuf Bundle (mediaType + verificationMaterial +
+          # messageSignature) consumable by sigstore-js verify().
+          #
+          # --tlog-upload="$TLOG_UPLOAD" is the reversible switch: false (dry-run)
+          # gets a real production Fulcio cert + verifies the SCT against the
+          # default trust root but writes NO permanent Rekor entry; true (real
+          # fire) writes the permanent rekor.sigstore.dev entry. Reached only
+          # after the iah-E06 DNSSEC/CAA pre-flight passed (fail-closed gate).
+          echo "Signing mode: $MODE (--tlog-upload=$TLOG_UPLOAD)"
           cosign sign-blob \
             --yes \
             --new-bundle-format \
-            --rekor-url "$REKOR_URL" \
-            --fulcio-url "$FULCIO_URL" \
-            --oidc-issuer "$OIDC_ISSUER" \
+            --tlog-upload="$TLOG_UPLOAD" \
             --bundle dist/index.js.sigstore.json \
             dist/index.js
           test -s dist/index.js.sigstore.json || { echo "::error::cosign produced no bundle"; exit 1; }
-          echo "✓ signed dist/index.js → dist/index.js.sigstore.json (${LOG^^})"
+          echo "✓ signed dist/index.js → dist/index.js.sigstore.json ($MODE)"
 
-      - name: Attach signature bundle to the Release
+      # DRY-RUN: do NOT attach/clobber the Release asset — this is a validation.
+      # Upload the bundle as a workflow artifact for inspection only.
+      - name: Upload signature bundle as artifact (dry-run only)
+        if: ${{ inputs.dry-run }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-sigstore-bundle-dryrun
+          path: dist/index.js.sigstore.json
+          if-no-files-found: error
+          retention-days: 7
+
+      # REAL FIRE: attach the production-signed bundle to the GitHub Release.
+      - name: Attach signature bundle to the Release (real fire only)
+        if: ${{ !inputs.dry-run }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAG: ${{ needs.build.outputs.tag }}
@@ -357,3 +367,8 @@ jobs:
               --title "$TAG" --generate-notes --verify-tag
           fi
           echo "✓ dist/index.js.sigstore.json attached to release $TAG"
+
+      - name: Echo final signing mode
+        env:
+          MODE: ${{ steps.mode.outputs.mode }}
+        run: echo "$MODE"
