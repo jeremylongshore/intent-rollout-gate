@@ -19,7 +19,9 @@
   },
   "dependencies": {
     "@actions/core": "^1.11.1",
-    "@intentsolutions/rollout-gate": "2.0.0"
+    "@intentsolutions/core": "^0.6.0",
+    "@intentsolutions/rollout-gate": "2.0.0",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@intentsolutions/audit-harness": "^1.1.7",

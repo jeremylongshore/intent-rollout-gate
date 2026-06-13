@@ -22,13 +22,68 @@ import {
   type DecideResult,
   type RolloutPolicy,
 } from "@intentsolutions/rollout-gate";
+import { GATE_RESULT_V1_URI } from "@intentsolutions/core";
+import { GateResultV1Schema } from "@intentsolutions/core/validators/v1";
 
-/** The only predicate URI this shell supports (Evidence Bundle SPEC R17). */
-export const SUPPORTED_PREDICATE_URI =
-  "https://evals.intentsolutions.io/gate-result/v1";
+/**
+ * The only predicate URI this shell supports (Evidence Bundle SPEC R17).
+ *
+ * SINGLE SOURCE OF TRUTH: re-exported verbatim from the canonical contracts
+ * kernel `@intentsolutions/core` (`GATE_RESULT_V1_URI`). This was previously a
+ * hand-rolled local string constant — the only local copy of a kernel-owned
+ * artifact in this shell. Aliased here so existing wiring + tests keep their
+ * name while the value comes from the kernel (drift-proof).
+ */
+export const SUPPORTED_PREDICATE_URI = GATE_RESULT_V1_URI;
 
 function errMessage(err: unknown): string {
   return err instanceof Error ? err.message : String(err);
+}
+
+/**
+ * OPTIONAL kernel-side narrowing (cab3): run every consumed gate-result
+ * predicate body through the canonical kernel Zod schema
+ * (`GateResultV1Schema` from `@intentsolutions/core`). This is ADVISORY only —
+ * it never changes the ship/no-ship decision (that stays 100% delegated to
+ * `@intentsolutions/rollout-gate`). It exists so a structurally-malformed
+ * predicate body that the decision package happens to tolerate is still
+ * surfaced as a `core.warning`, keeping the kernel the single source of truth
+ * for "what a valid gate-result/v1 body looks like".
+ *
+ * Returns the count of predicate bodies that fail kernel validation. Defensive
+ * by design: any unexpected bundle shape yields 0 (never throws) so this
+ * advisory pass can never break the fail-closed decision path.
+ */
+export function countKernelInvalidPredicates(bundle: unknown): number {
+  let rows: unknown[];
+  if (Array.isArray(bundle)) {
+    rows = bundle; // v2 plain-array EvidenceBundlePayload
+  } else if (
+    bundle !== null &&
+    typeof bundle === "object" &&
+    Array.isArray((bundle as { rows?: unknown }).rows)
+  ) {
+    rows = (bundle as { rows: unknown[] }).rows; // v1 legacy container
+  } else {
+    return 0;
+  }
+
+  let invalid = 0;
+  for (const row of rows) {
+    if (
+      row === null ||
+      typeof row !== "object" ||
+      (row as { predicateType?: unknown }).predicateType !==
+        SUPPORTED_PREDICATE_URI
+    ) {
+      continue; // not a gate-result/v1 row — not this validator's concern
+    }
+    const predicate = (row as { predicate?: unknown }).predicate;
+    if (!GateResultV1Schema.safeParse(predicate).success) {
+      invalid += 1;
+    }
+  }
+  return invalid;
 }
 
 /**
@@ -213,6 +268,19 @@ export async function run(): Promise<void> {
         failOnBlock
       );
       return;
+    }
+
+    // OPTIONAL kernel-side narrowing (cab3) — ADVISORY, never blocking. Flags
+    // gate-result/v1 predicate bodies that the kernel Zod schema rejects so the
+    // kernel stays the single source of truth for body validity. The decision
+    // itself is unaffected (still 100% delegated below).
+    const kernelInvalid = countKernelInvalidPredicates(bundle);
+    if (kernelInvalid > 0) {
+      core.warning(
+        `${kernelInvalid} gate-result/v1 predicate body(ies) failed kernel ` +
+          `@intentsolutions/core GateResultV1Schema validation (advisory only; ` +
+          `decision is unaffected)`
+      );
     }
 
     // ALL decision logic lives in @intentsolutions/rollout-gate.

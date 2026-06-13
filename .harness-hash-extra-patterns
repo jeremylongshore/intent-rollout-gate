@@ -1,0 +1,16 @@
+# Per-repo extra hash-pin patterns for audit-harness (read by harness-hash.sh).
+#
+# This repo is a GitHub Action shell with no .feature files and no coverage-
+# threshold config files (.c8rc.json / stryker.conf.json), so the harness'
+# default canonical patterns pin nothing here. The policy-enforcement surface
+# that MUST be tamper-evident in this repo is:
+#
+#   - action.yml        the gate's I/O contract (inputs/outputs/runs) — the
+#                       behavioral spec a consumer depends on
+#   - tests/TESTING.md  the testing policy (coverage floor + gate list) that
+#                       escape-scan reads; a silent edit here is an escape attempt
+#
+# An edit to either without a paired `audit-harness init` is flagged
+# HARNESS_TAMPERED by `audit-harness verify` in CI.
+action.yml
+tests/TESTING.md
