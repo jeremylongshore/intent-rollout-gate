@@ -1,0 +1,31 @@
+[
+  {
+    "_type": "https://in-toto.io/Statement/v1",
+    "subject": [
+      {
+        "name": "synth-tool:ci:synth-gate-1",
+        "digest": {
+          "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        }
+      }
+    ],
+    "predicateType": "https://evals.intentsolutions.io/gate-result/v1",
+    "predicate": {
+      "gate_id": "synth-tool:ci:synth-gate-1",
+      "gate_name": "synth-gate-1",
+      "gate_version": "1.0.0",
+      "gate_decision": "pass",
+      "gate_reasons": [],
+      "coverage": {
+        "dimensions_evaluated": ["static"],
+        "dimensions_skipped": []
+      },
+      "policy_ref": "not-a-sha256-prefixed-ref",
+      "policy_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "input_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "evaluated_at": "2026-06-10T12:00:00Z",
+      "runner": "github-actions@1.0.0",
+      "commit_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    }
+  }
+]

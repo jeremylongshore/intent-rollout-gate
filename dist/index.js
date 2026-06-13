@@ -45212,8 +45212,8 @@ var EvidenceStatementSchema2 = EvidenceStatementSchema.superRefine(
         message: "j-rig secondary check I1: subject[0].name must equal predicate.gate_id"
       });
     }
-    const SHA256_PREFIX_LEN2 = "sha256:".length;
-    if (subject0.digest.sha256 !== stmt.predicate.input_hash.slice(SHA256_PREFIX_LEN2)) {
+    const SHA256_PREFIX_LEN22 = "sha256:".length;
+    if (subject0.digest.sha256 !== stmt.predicate.input_hash.slice(SHA256_PREFIX_LEN22)) {
       ctx.addIssue({
         code: "custom",
         path: ["subject", 0, "digest", "sha256"],
@@ -45401,10 +45401,1399 @@ function patternToRegex(pattern) {
   return new RegExp(`^${escaped}$`);
 }
 
+// node_modules/.pnpm/@intentsolutions+core@0.6.0/node_modules/@intentsolutions/core/dist/predicates/gate-result-v1.js
+var GATE_RESULT_V1_URI2 = "https://evals.intentsolutions.io/gate-result/v1";
+
+// node_modules/.pnpm/@intentsolutions+core@0.6.0/node_modules/@intentsolutions/core/dist/validators/v1/_primitives.js
+var Uuidv7Schema2 = external_exports.string().regex(/^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/, "Must be a UUIDv7 (RFC 9562) \u2014 version nibble = 7, variant = 10xx").brand();
+var Sha256Schema2 = external_exports.string().regex(/^[a-f0-9]{64}$/, "Must be 64 lowercase hex chars").brand();
+var Sha256PrefixedSchema2 = external_exports.string().regex(/^sha256:[a-f0-9]{64}$/, "Must be sha256: + 64 lowercase hex chars per Blueprint B \xA7 7.4").brand();
+var Rfc3339Schema2 = external_exports.string().datetime({ offset: true }).brand();
+var SemVerSchema2 = external_exports.string().regex(/^[0-9]+\.[0-9]+\.[0-9]+(-[A-Za-z0-9.-]+)?(\+[A-Za-z0-9.-]+)?$/, "Must be SemVer 2.0.0").brand();
+var KebabSlugSchema2 = external_exports.string().regex(/^[a-z0-9][a-z0-9-]*$/, "Must be lowercase kebab-case").brand();
+var ActorIdentitySchema2 = external_exports.string().min(1).brand();
+var StorageKeySchema2 = external_exports.string().min(1).brand();
+var OtelSpanIdSchema2 = external_exports.string().regex(/^[a-f0-9]{16}$/, "Must be 16 lowercase hex chars (OTel span id)").brand();
+var RunnerIdentifierSchema2 = external_exports.string().regex(/^[a-z0-9][a-z0-9-]*@[0-9]+\.[0-9]+\.[0-9]+(-[A-Za-z0-9.-]+)?(\+[A-Za-z0-9.-]+)?$/, "Must be <kebab-slug>@<semver>").brand();
+var CommitShaSchema2 = external_exports.string().regex(/^[a-f0-9]{7,40}$/, "Must be 7..40 lowercase hex chars").brand();
+var SubjectNameSchema2 = external_exports.string().regex(/^[a-z0-9][a-z0-9-]*:(client|server|ci|sandbox|local):[a-zA-Z0-9][a-zA-Z0-9.-]*$/, "Must satisfy <tool>:<side>:<gate-id> per Blueprint B \xA7 7.3").brand();
+var MicroUsdSchema2 = external_exports.number().int().nonnegative().brand();
+var MmClassSchema2 = external_exports.enum(["MM-1", "MM-2", "MM-3", "MM-4", "MM-5", "MM-6"]);
+var MmClassIdSchema2 = external_exports.string().regex(/^MM-[0-9]+$/, "Must match MM-<number>");
+var CoverageSchema2 = external_exports.object({
+  dimensions_evaluated: external_exports.array(external_exports.string()),
+  dimensions_skipped: external_exports.array(external_exports.string())
+}).strict();
+
+// node_modules/.pnpm/@intentsolutions+core@0.6.0/node_modules/@intentsolutions/core/dist/validators/v1/eval-spec.js
+var ScoringAggregationRuleSchema = external_exports.enum(["majority", "unanimous", "weighted"]);
+var ScoringConfigSchema = external_exports.object({
+  aggregation_rule: ScoringAggregationRuleSchema,
+  extensions: external_exports.record(external_exports.string(), external_exports.unknown()).optional()
+}).passthrough();
+var RuntimeLimitsSchema = external_exports.object({
+  token_ceiling: external_exports.number().int().nonnegative(),
+  wall_clock_ceiling_ms: external_exports.number().int().nonnegative(),
+  memory_ceiling_mb: external_exports.number().int().nonnegative(),
+  concurrency_hint: external_exports.number().int().nonnegative()
+}).strict();
+var CompositionNodeKindSchema = external_exports.enum(["eval_run", "tool_invocation"]);
+var CompositionEdgeKindSchema = external_exports.enum(["feeds", "gates", "enriches"]);
+var CompositionNodeSchema = external_exports.object({
+  id: external_exports.string(),
+  kind: CompositionNodeKindSchema,
+  ref: Uuidv7Schema2
+}).strict();
+var CompositionEdgeSchema = external_exports.object({
+  from: external_exports.string(),
+  to: external_exports.string(),
+  kind: CompositionEdgeKindSchema
+}).strict();
+var CompositionDagSchema = external_exports.object({
+  nodes: external_exports.array(CompositionNodeSchema),
+  edges: external_exports.array(CompositionEdgeSchema)
+}).strict();
+var AssertionExpressionSchema = external_exports.unknown();
+var EvalSpecSchema2 = external_exports.object({
+  id: Uuidv7Schema2,
+  version: SemVerSchema2,
+  name: KebabSlugSchema2,
+  description: external_exports.string().min(1),
+  matchers: external_exports.array(Uuidv7Schema2),
+  assertions: external_exports.array(AssertionExpressionSchema),
+  scoring: ScoringConfigSchema,
+  composition: CompositionDagSchema,
+  expected_artifacts: external_exports.array(Sha256Schema2),
+  runtime_limits: RuntimeLimitsSchema,
+  provider_constraints: external_exports.array(external_exports.string()),
+  created_at: Rfc3339Schema2,
+  created_by: ActorIdentitySchema2,
+  content_hash: Sha256Schema2
+}).strict();
+
+// node_modules/.pnpm/@intentsolutions+core@0.6.0/node_modules/@intentsolutions/core/dist/validators/v1/eval-run.js
+var EvalRunStateSchema = external_exports.enum([
+  "queued",
+  "running",
+  "judged",
+  "reported",
+  "archived",
+  "skipped_due_to_gate",
+  "archived_failed"
+]);
+var EvalRunTerminalReasonSchema = external_exports.enum([
+  "queued_timeout_elapsed",
+  "run_timeout_elapsed",
+  "worker_crash_exhausted",
+  "credential_leak_detected",
+  "judge_unavailable_exhausted",
+  "token_ceiling_exceeded",
+  "evidence_contract_violation",
+  "upstream_feed_failed"
+]);
+var EvalRunSchema = external_exports.object({
+  id: Uuidv7Schema2,
+  eval_spec_id: Uuidv7Schema2,
+  eval_spec_version: SemVerSchema2,
+  eval_spec_content_hash: Sha256Schema2,
+  skill_snapshot_id: Uuidv7Schema2,
+  state: EvalRunStateSchema,
+  terminal_reason: EvalRunTerminalReasonSchema.nullable(),
+  queued_at: Rfc3339Schema2,
+  started_at: Rfc3339Schema2.nullable(),
+  judged_at: Rfc3339Schema2.nullable(),
+  reported_at: Rfc3339Schema2.nullable(),
+  archived_at: Rfc3339Schema2.nullable(),
+  worker_id: external_exports.string().min(1).nullable(),
+  lease_expires_at: Rfc3339Schema2.nullable(),
+  session_trace_id: Uuidv7Schema2,
+  evidence_bundle_id: Uuidv7Schema2.nullable(),
+  cost_record_id: Uuidv7Schema2,
+  parent_run_id: Uuidv7Schema2.nullable(),
+  idempotency_key: Uuidv7Schema2,
+  submitted_by: ActorIdentitySchema2
+}).strict();
+
+// node_modules/.pnpm/@intentsolutions+core@0.6.0/node_modules/@intentsolutions/core/dist/validators/v1/matcher-map.js
+var MatcherInputPatternSchema = external_exports.discriminatedUnion("kind", [
+  external_exports.object({
+    kind: external_exports.literal("regex"),
+    pattern: external_exports.string(),
+    flags: external_exports.string().optional()
+  }).strict(),
+  external_exports.object({
+    kind: external_exports.literal("json-schema"),
+    schema: external_exports.record(external_exports.string(), external_exports.unknown())
+  }).strict(),
+  external_exports.object({
+    kind: external_exports.literal("structural"),
+    /** Wholly undefined per Blueprint B § 2.3 (bd_000-projects-ra9a). */
+    matcher: external_exports.unknown()
+  })
+]);
+var MatcherExpectedBehaviorKindV1Schema = external_exports.enum([
+  "exact",
+  "semantic",
+  "contract-conformance",
+  "redaction-confirmed"
+]);
+var MatcherExpectedBehaviorSchema = external_exports.union([
+  external_exports.object({
+    kind: MatcherExpectedBehaviorKindV1Schema,
+    payload: external_exports.unknown().optional()
+  }),
+  external_exports.object({
+    kind: external_exports.string(),
+    payload: external_exports.unknown(),
+    extension: external_exports.literal(true)
+  })
+]);
+var MatcherMapSchema = external_exports.object({
+  id: Uuidv7Schema2,
+  mm_class: MmClassSchema2,
+  name: KebabSlugSchema2,
+  input_pattern: MatcherInputPatternSchema,
+  expected_behavior: MatcherExpectedBehaviorSchema,
+  version: SemVerSchema2,
+  content_hash: Sha256Schema2,
+  description: external_exports.string().min(1),
+  created_at: Rfc3339Schema2,
+  created_by: ActorIdentitySchema2
+}).strict();
+
+// node_modules/.pnpm/@intentsolutions+core@0.6.0/node_modules/@intentsolutions/core/dist/validators/v1/evidence-bundle.js
+var SigningModeSchema2 = external_exports.enum([
+  "sigstore_staging",
+  "rekor_production",
+  "unsigned_experimental"
+]);
+var VerificationStatusSchema2 = external_exports.enum(["verified", "unverified", "failed"]);
+var InTotoSubjectSchema2 = external_exports.object({
+  name: SubjectNameSchema2,
+  digest: external_exports.object({
+    sha256: Sha256Schema2
+  }).passthrough()
+}).strict();
+var EvidenceBundleSchema2 = external_exports.object({
+  id: Uuidv7Schema2,
+  eval_run_id: Uuidv7Schema2,
+  created_at: Rfc3339Schema2,
+  predicate_uri_set: external_exports.array(external_exports.string().url()),
+  row_count: external_exports.number().int().nonnegative(),
+  subject_set: external_exports.array(InTotoSubjectSchema2),
+  storage_key: StorageKeySchema2,
+  signing_mode: SigningModeSchema2,
+  rekor_log_indices: external_exports.array(external_exports.number().int().nonnegative()),
+  verification_status: VerificationStatusSchema2,
+  verification_last_checked_at: Rfc3339Schema2,
+  // Pre-registration commitment hash (D2 binding, v0.2.0 additive). Optional
+  // + nullable so v0.1.0 bundles (which never set it) still parse; cross-field
+  // invariants that govern when it MUST be non-null land in iec-E12.
+  pre_registration_hash: Sha256PrefixedSchema2.nullable().optional()
+}).strict();
+
+// node_modules/.pnpm/@intentsolutions+core@0.6.0/node_modules/@intentsolutions/core/dist/validators/v1/gate-result-v1.js
+var GateDecisionSchema2 = external_exports.enum(["pass", "fail", "advisory", "error"]);
+var AdvisorySeveritySchema2 = external_exports.enum(["info", "warn", "error"]);
+var ReplayFidelityLevelSchema2 = external_exports.enum(["RF-0", "RF-1", "RF-2", "RF-3", "RF-4"]);
+var SubjectSideSchema2 = external_exports.enum(["client", "server", "ci", "sandbox", "local"]);
+var GateResultV1Schema2 = external_exports.object({
+  gate_id: SubjectNameSchema2,
+  gate_name: KebabSlugSchema2,
+  gate_version: SemVerSchema2,
+  gate_decision: GateDecisionSchema2,
+  gate_reasons: external_exports.array(external_exports.string()),
+  coverage: CoverageSchema2,
+  policy_ref: external_exports.string().regex(/^sha256:[a-f0-9]{64}:.+$/, "Must be sha256:<hex>:<path>"),
+  policy_hash: Sha256PrefixedSchema2,
+  input_hash: Sha256PrefixedSchema2,
+  evaluated_at: Rfc3339Schema2,
+  runner: RunnerIdentifierSchema2,
+  commit_sha: CommitShaSchema2,
+  metadata: external_exports.record(external_exports.string(), external_exports.unknown()).optional(),
+  failure_mode: external_exports.string().optional(),
+  advisory_severity: AdvisorySeveritySchema2.optional(),
+  cost_record_ref: Uuidv7Schema2.optional(),
+  replay_fidelity_level: ReplayFidelityLevelSchema2.optional()
+}).strict().superRefine((data, ctx) => {
+  if (data.gate_decision === "advisory" && data.advisory_severity === void 0) {
+    ctx.addIssue({
+      code: "custom",
+      message: 'gate_decision="advisory" requires advisory_severity per Blueprint B \xA7 7.4 conditional rule',
+      path: ["advisory_severity"]
+    });
+  }
+  if ((data.gate_decision === "fail" || data.gate_decision === "advisory" || data.gate_decision === "error") && data.gate_reasons.length === 0) {
+    ctx.addIssue({
+      code: "custom",
+      message: 'gate_reasons MUST be non-empty when gate_decision is "fail", "advisory", or "error" per Blueprint B \xA7 7.4 line 829 (empty permitted ONLY for pass)',
+      path: ["gate_reasons"]
+    });
+  }
+});
+var GATE_RESULT_V1_URI3 = "https://evals.intentsolutions.io/gate-result/v1";
+
+// node_modules/.pnpm/@intentsolutions+core@0.6.0/node_modules/@intentsolutions/core/dist/validators/v1/evidence-statement.js
+var IN_TOTO_STATEMENT_V1_TYPE2 = "https://in-toto.io/Statement/v1";
+var SHA256_PREFIX_LEN2 = "sha256:".length;
+var EvidenceStatementSchema3 = external_exports.object({
+  _type: external_exports.literal(IN_TOTO_STATEMENT_V1_TYPE2),
+  subject: external_exports.array(InTotoSubjectSchema2).min(1),
+  predicateType: external_exports.literal(GATE_RESULT_V1_URI3),
+  predicate: GateResultV1Schema2,
+  /** Non-normative experimental fields. Never used for ship/no-ship decisions. */
+  extensions: external_exports.record(external_exports.string(), external_exports.unknown()).optional()
+}).strict().superRefine((data, ctx) => {
+  const subject0 = data.subject[0];
+  if (subject0 === void 0)
+    return;
+  if (subject0.name !== data.predicate.gate_id) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["subject", 0, "name"],
+      message: "subject[0].name must equal predicate.gate_id (Blueprint B \xA7 7.3 line 792 invariant I1)"
+    });
+  }
+  if (subject0.digest.sha256 !== data.predicate.input_hash.slice(SHA256_PREFIX_LEN2)) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["subject", 0, "digest", "sha256"],
+      message: "subject[0].digest.sha256 must equal predicate.input_hash without the sha256: prefix (Blueprint B \xA7 7.3 line 792 invariant I2)"
+    });
+  }
+});
+var EvidenceBundlePayloadSchema2 = external_exports.array(EvidenceStatementSchema3);
+
+// node_modules/.pnpm/@intentsolutions+core@0.6.0/node_modules/@intentsolutions/core/dist/validators/v1/judge-decision.js
+var JudgeVerdictSchema = external_exports.enum(["PASS", "FAIL", "ADVISORY", "NOT_APPLICABLE", "ERROR"]);
+var VerdictSourceSchema = external_exports.enum([
+  "deterministic",
+  "llm_with_seed",
+  "llm_no_seed",
+  "hybrid"
+]);
+var JudgeSeedSchema = external_exports.union([external_exports.number().int(), external_exports.string()]);
+var JudgeDecisionSchema = external_exports.object({
+  id: Uuidv7Schema2,
+  eval_run_id: Uuidv7Schema2,
+  session_trace_id: Uuidv7Schema2,
+  matcher_map_id: Uuidv7Schema2,
+  judge_identity: external_exports.string().min(1),
+  judge_version: SemVerSchema2,
+  verdict: JudgeVerdictSchema,
+  verdict_source: VerdictSourceSchema,
+  confidence: external_exports.number().gte(0).lte(1).nullable(),
+  reasoning: external_exports.string().nullable(),
+  input_hash: Sha256Schema2,
+  seed: JudgeSeedSchema.nullable(),
+  evaluated_at: Rfc3339Schema2,
+  latency_ms: external_exports.number().int().nonnegative(),
+  cost_record_ref: Uuidv7Schema2
+}).strict();
+
+// node_modules/.pnpm/@intentsolutions+core@0.6.0/node_modules/@intentsolutions/core/dist/validators/v1/runtime-receipt.js
+var EvalRunTerminalStateSchema = external_exports.enum([
+  "archived",
+  "skipped_due_to_gate",
+  "archived_failed"
+]);
+var ActualResourceUsageSchema = external_exports.object({
+  tokens_consumed: external_exports.number().int().nonnegative(),
+  wall_clock_ms: external_exports.number().int().nonnegative(),
+  peak_memory_mb: external_exports.number().int().nonnegative(),
+  network_egress_bytes: external_exports.number().int().nonnegative()
+}).strict();
+var RuntimeReceiptSchema = external_exports.object({
+  id: Uuidv7Schema2,
+  eval_run_id: Uuidv7Schema2,
+  created_at: Rfc3339Schema2,
+  eval_spec_content_hash: Sha256Schema2,
+  skill_snapshot_sha: Sha256Schema2,
+  provider_adapter_versions: external_exports.record(external_exports.string(), external_exports.string()),
+  tool_versions: external_exports.record(external_exports.string(), external_exports.string()),
+  runtime_limits_in_effect: RuntimeLimitsSchema,
+  actual_resource_usage: ActualResourceUsageSchema,
+  worker_identity: external_exports.string().min(1),
+  worker_host_fingerprint: Sha256Schema2,
+  terminal_state: EvalRunTerminalStateSchema,
+  terminal_reason: EvalRunTerminalReasonSchema,
+  evidence_bundle_id: Uuidv7Schema2,
+  cost_record_id: Uuidv7Schema2
+}).strict();
+
+// node_modules/.pnpm/@intentsolutions+core@0.6.0/node_modules/@intentsolutions/core/dist/validators/v1/regression-pack.js
+var RegressionPackStateSchema = external_exports.enum(["draft", "committed", "superseded"]);
+var MatcherOutcomeRowSchema = external_exports.object({
+  pass: external_exports.number().int().nonnegative(),
+  fail: external_exports.number().int().nonnegative(),
+  advisory: external_exports.number().int().nonnegative().optional(),
+  not_applicable: external_exports.number().int().nonnegative().optional(),
+  error: external_exports.number().int().nonnegative().optional()
+}).strict();
+var RegressionOutcomeSummarySchema = external_exports.object({
+  "MM-1": MatcherOutcomeRowSchema.optional(),
+  "MM-2": MatcherOutcomeRowSchema.optional(),
+  "MM-3": MatcherOutcomeRowSchema.optional(),
+  "MM-4": MatcherOutcomeRowSchema.optional(),
+  "MM-5": MatcherOutcomeRowSchema.optional(),
+  "MM-6": MatcherOutcomeRowSchema.optional()
+}).strict();
+var RegressionPackSchema = external_exports.object({
+  id: Uuidv7Schema2,
+  name: KebabSlugSchema2,
+  purpose: external_exports.string().min(1),
+  skill_snapshot_sha: Sha256Schema2,
+  eval_spec_ids: external_exports.array(Uuidv7Schema2),
+  eval_run_ids: external_exports.array(Uuidv7Schema2),
+  outcome_summary: RegressionOutcomeSummarySchema,
+  ancestor_pack_id: Uuidv7Schema2.nullable(),
+  delta_declaration: external_exports.string(),
+  created_at: Rfc3339Schema2,
+  created_by: ActorIdentitySchema2,
+  content_hash: Sha256Schema2
+}).strict();
+
+// node_modules/.pnpm/@intentsolutions+core@0.6.0/node_modules/@intentsolutions/core/dist/validators/v1/rollout-gate.js
+var RolloutGateDecisionSchema = external_exports.enum(["ship", "no_ship", "advisory", "error"]);
+var RolloutGateSchema = external_exports.object({
+  id: Uuidv7Schema2,
+  eval_run_id: Uuidv7Schema2,
+  evidence_bundle_id: Uuidv7Schema2,
+  policy_ref: external_exports.string().regex(/^sha256:[a-f0-9]{64}:.+$/, "Must be sha256:<hex>:<path>"),
+  policy_content_hash: Sha256Schema2,
+  decision: RolloutGateDecisionSchema,
+  decision_reasons: external_exports.array(external_exports.string()),
+  coverage: CoverageSchema2,
+  evaluated_at: Rfc3339Schema2,
+  gate_version: SemVerSchema2,
+  signing_mode: SigningModeSchema2,
+  rekor_log_index: external_exports.number().int().nonnegative().nullable()
+}).strict();
+
+// node_modules/.pnpm/@intentsolutions+core@0.6.0/node_modules/@intentsolutions/core/dist/validators/v1/skill-snapshot.js
+var SkillSnapshotSchema = external_exports.object({
+  id: Uuidv7Schema2,
+  skill_id: KebabSlugSchema2,
+  source_sha: Sha256Schema2,
+  dependency_lock_sha: Sha256Schema2,
+  config_sha: Sha256Schema2,
+  /** Load-bearing: sha256(source_sha || dependency_lock_sha || config_sha). */
+  combined_sha: Sha256Schema2,
+  version_label: SemVerSchema2.nullable(),
+  storage_key: StorageKeySchema2,
+  created_at: Rfc3339Schema2,
+  created_by: ActorIdentitySchema2
+}).strict();
+
+// node_modules/.pnpm/@intentsolutions+core@0.6.0/node_modules/@intentsolutions/core/dist/validators/v1/session-trace.js
+var SessionTraceSchema = external_exports.object({
+  id: Uuidv7Schema2,
+  eval_run_id: Uuidv7Schema2,
+  created_at: Rfc3339Schema2,
+  closed_at: Rfc3339Schema2.nullable(),
+  root_span_id: OtelSpanIdSchema2,
+  total_spans: external_exports.number().int().nonnegative(),
+  max_loop_depth: external_exports.number().int().nonnegative(),
+  total_tool_invocations: external_exports.number().int().nonnegative(),
+  total_judge_decisions: external_exports.number().int().nonnegative(),
+  trace_blob_storage_key: StorageKeySchema2
+}).strict();
+
+// node_modules/.pnpm/@intentsolutions+core@0.6.0/node_modules/@intentsolutions/core/dist/validators/v1/tool-invocation.js
+var ToolInvocationErrorSchema = external_exports.object({
+  enum_class: external_exports.string(),
+  message: external_exports.string()
+}).strict();
+var ToolInvocationSchema = external_exports.object({
+  id: Uuidv7Schema2,
+  session_trace_id: Uuidv7Schema2,
+  parent_span_id: OtelSpanIdSchema2,
+  tool_id: external_exports.string().min(1),
+  tool_version: SemVerSchema2,
+  args: external_exports.record(external_exports.string(), external_exports.unknown()),
+  args_hash: Sha256Schema2,
+  result_summary: external_exports.record(external_exports.string(), external_exports.unknown()),
+  result_hash: Sha256Schema2,
+  result_storage_key: StorageKeySchema2.nullable(),
+  invoked_at: Rfc3339Schema2,
+  latency_ms: external_exports.number().int().nonnegative(),
+  cost_record_ref: Uuidv7Schema2,
+  error: ToolInvocationErrorSchema.nullable(),
+  retry_attempt: external_exports.number().int().nonnegative()
+}).strict();
+
+// node_modules/.pnpm/@intentsolutions+core@0.6.0/node_modules/@intentsolutions/core/dist/validators/v1/cost-record.js
+var CostAttributionClassSchema = external_exports.enum([
+  "run",
+  "provider",
+  "judge",
+  "replay",
+  "cache_decision",
+  "optimizer_experiment",
+  "system"
+]);
+var CostRecordSchema = external_exports.object({
+  id: Uuidv7Schema2,
+  eval_run_id: Uuidv7Schema2.nullable(),
+  tool_invocation_id: Uuidv7Schema2.nullable(),
+  attribution_class: CostAttributionClassSchema,
+  provider_id: external_exports.string().min(1).nullable(),
+  tokens_consumed: external_exports.number().int().nonnegative(),
+  prompt_tokens: external_exports.number().int().nonnegative(),
+  completion_tokens: external_exports.number().int().nonnegative(),
+  cached_tokens: external_exports.number().int().nonnegative(),
+  wall_clock_ms: external_exports.number().int().nonnegative(),
+  external_api_cost_micro_usd: MicroUsdSchema2,
+  recorded_at: Rfc3339Schema2,
+  cost_basis_version: external_exports.string().min(1)
+}).strict();
+
+// node_modules/.pnpm/@intentsolutions+core@0.6.0/node_modules/@intentsolutions/core/dist/validators/v1/failure-taxonomy.js
+var FailureTaxonomyStatusSchema = external_exports.enum(["proposed", "canonical", "deprecated"]);
+var FailureTaxonomyExampleSchema = external_exports.object({
+  ref: external_exports.string(),
+  description: external_exports.string().optional()
+}).strict();
+var FailureTaxonomySchema = external_exports.object({
+  id: Uuidv7Schema2,
+  mm_class: MmClassIdSchema2,
+  name: KebabSlugSchema2,
+  description: external_exports.string().min(1),
+  discriminating_question: external_exports.string().min(1),
+  examples: external_exports.array(FailureTaxonomyExampleSchema),
+  version: SemVerSchema2,
+  status: FailureTaxonomyStatusSchema,
+  created_at: Rfc3339Schema2,
+  created_by: ActorIdentitySchema2
+}).strict();
+
+// node_modules/.pnpm/@intentsolutions+core@0.6.0/node_modules/@intentsolutions/core/dist/validators/v1/retraction-v1.js
+var RetractionReasonClassSchema = external_exports.enum([
+  "partner-request",
+  "methodology-error",
+  "data-quality",
+  "consent-withdrawn",
+  "legal-hold",
+  "pre-publication-recall"
+]);
+var RetractedSubjectSchema = external_exports.object({
+  bundle_id: Uuidv7Schema2.optional(),
+  storage_key: StorageKeySchema2.optional(),
+  content_hash: Sha256PrefixedSchema2.optional()
+}).strict().refine((s) => s.bundle_id !== void 0 || s.storage_key !== void 0 || s.content_hash !== void 0, {
+  message: "retracted_subject MUST carry at least one of bundle_id, storage_key, content_hash"
+});
+var RetractionV1Schema = external_exports.object({
+  retracted_subject: RetractedSubjectSchema,
+  reason_class: RetractionReasonClassSchema,
+  reason: external_exports.string().optional(),
+  retracted_at: Rfc3339Schema2,
+  retracted_by: ActorIdentitySchema2.optional()
+}).strict();
+
+// node_modules/.pnpm/@intentsolutions+core@0.6.0/node_modules/@intentsolutions/core/dist/validators/v1/dashboard-render-v1.js
+var RenderedArtifactSchema = external_exports.object({
+  uri: external_exports.string().min(1).optional(),
+  content_hash: Sha256PrefixedSchema2,
+  media_type: external_exports.string().min(1).optional()
+}).strict();
+var DashboardInputBundleSchema = external_exports.object({
+  bundle_id: Uuidv7Schema2.optional(),
+  content_hash: Sha256PrefixedSchema2.optional()
+}).strict().refine((b) => b.bundle_id !== void 0 || b.content_hash !== void 0, {
+  message: "each input_bundles entry MUST carry at least one of bundle_id, content_hash"
+});
+var DashboardRenderV1Schema = external_exports.object({
+  rendered_artifact: RenderedArtifactSchema,
+  input_bundles: external_exports.array(DashboardInputBundleSchema).min(1),
+  rendered_at: Rfc3339Schema2,
+  renderer: RunnerIdentifierSchema2,
+  renderer_config_hash: Sha256PrefixedSchema2.optional()
+}).strict();
+
+// node_modules/.pnpm/@intentsolutions+core@0.6.0/node_modules/@intentsolutions/core/dist/validators/v1/authoring/marketplace-tier.js
+var IS_MARKETPLACE_DEPRECATED_FIELDS = {
+  "compatible-with": "compatibility",
+  when_to_use: "description"
+};
+var IS_MARKETPLACE_RESERVED_NAMES = [
+  "skill",
+  "claude",
+  "anthropic",
+  "mcp",
+  "plugin",
+  "agent"
+];
+var SKILL_DESCRIPTION_MAX = 1536;
+function requiredFieldsIssues(artifact, requiredFields) {
+  const issues = [];
+  for (const field of requiredFields) {
+    if (!(field in artifact)) {
+      issues.push({ message: `missing required field "${field}"`, path: [field] });
+    }
+  }
+  return issues;
+}
+function deprecationRegistryIssues(artifact) {
+  const issues = [];
+  for (const [deprecated, replacement] of Object.entries(IS_MARKETPLACE_DEPRECATED_FIELDS)) {
+    if (deprecated in artifact) {
+      issues.push({
+        message: `deprecated field "${deprecated}" \u2014 migrate to "${replacement}"`,
+        path: [deprecated]
+      });
+    }
+  }
+  return issues;
+}
+function securityChecksIssues(artifact) {
+  const issues = [];
+  const name = artifact["name"];
+  if (typeof name === "string") {
+    if (IS_MARKETPLACE_RESERVED_NAMES.includes(name)) {
+      issues.push({ message: `name "${name}" is a reserved word`, path: ["name"] });
+    }
+    if (/[<>]/.test(name)) {
+      issues.push({ message: "name must not contain XML angle brackets", path: ["name"] });
+    }
+  }
+  const description = artifact["description"];
+  if (typeof description === "string") {
+    if (/<[^>]+>/.test(description)) {
+      issues.push({ message: "description must not contain XML tags", path: ["description"] });
+    }
+    if (description.includes("${")) {
+      issues.push({
+        message: "description must not contain shell-substitution sequences",
+        path: ["description"]
+      });
+    }
+  }
+  return issues;
+}
+function disclosureMarkersIssues(artifact) {
+  const issues = [];
+  const description = artifact["description"];
+  if (typeof description === "string" && description.length > SKILL_DESCRIPTION_MAX) {
+    issues.push({
+      message: `description exceeds the ${SKILL_DESCRIPTION_MAX}-character token budget`,
+      path: ["description"]
+    });
+  }
+  return issues;
+}
+function universalFoldsIssues(artifact) {
+  return [
+    ...deprecationRegistryIssues(artifact),
+    ...securityChecksIssues(artifact),
+    ...disclosureMarkersIssues(artifact)
+  ];
+}
+var AuthoringArtifactSchema = external_exports.record(external_exports.string(), external_exports.unknown());
+function attach(checker) {
+  return AuthoringArtifactSchema.superRefine((data, ctx) => {
+    for (const issue2 of checker(data)) {
+      ctx.addIssue({ code: "custom", message: issue2.message, path: [...issue2.path] });
+    }
+  });
+}
+var DeprecationRegistrySchema = attach(deprecationRegistryIssues);
+var SecurityChecksSchema = attach(securityChecksIssues);
+var DisclosureMarkersSchema = attach(disclosureMarkersIssues);
+var UniversalFoldsSchema = attach(universalFoldsIssues);
+
+// node_modules/.pnpm/@intentsolutions+core@0.6.0/node_modules/@intentsolutions/core/dist/validators/v1/authoring/skill-frontmatter.js
+var SKILL_FRONTMATTER_BASE_REQUIRED = ["name", "description"];
+var SKILL_FRONTMATTER_OVERLAY_REQUIRED = [
+  "allowed-tools",
+  "version",
+  "author",
+  "license",
+  "compatibility",
+  "tags"
+];
+var SKILL_FRONTMATTER_REQUIRED_FIELDS = [
+  ...SKILL_FRONTMATTER_BASE_REQUIRED,
+  ...SKILL_FRONTMATTER_OVERLAY_REQUIRED
+];
+var SKILL_NAME_PATTERN = /^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/;
+var SKILL_NAME_MAX = 64;
+var SKILL_COMPATIBILITY_MAX = 500;
+var SEMVER_PATTERN = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/;
+var ENV_VAR_NAME_PATTERN = /^[A-Z][A-Z0-9_]*$/;
+var VISIBILITY_ARRAY_FIELDS = [
+  "requires_env",
+  "requires_tools",
+  "fallback_for_env",
+  "fallback_for_tools"
+];
+function isStringArray(value) {
+  return Array.isArray(value) && value.every((item) => typeof item === "string");
+}
+function isPlainObject2(value) {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+function upstreamBaseIssues(artifact) {
+  const issues = [...requiredFieldsIssues(artifact, SKILL_FRONTMATTER_BASE_REQUIRED)];
+  if ("name" in artifact) {
+    const name = artifact["name"];
+    if (typeof name !== "string") {
+      issues.push({ message: "name must be a string", path: ["name"] });
+    } else {
+      if (name.length > SKILL_NAME_MAX) {
+        issues.push({
+          message: `name must be at most ${SKILL_NAME_MAX} characters`,
+          path: ["name"]
+        });
+      }
+      if (!SKILL_NAME_PATTERN.test(name)) {
+        issues.push({
+          message: "name must be kebab-case (lowercase letters, digits, hyphens)",
+          path: ["name"]
+        });
+      }
+    }
+  }
+  if ("description" in artifact && typeof artifact["description"] !== "string") {
+    issues.push({ message: "description must be a string", path: ["description"] });
+  }
+  if ("license" in artifact && typeof artifact["license"] !== "string") {
+    issues.push({ message: "license must be a string", path: ["license"] });
+  }
+  if ("compatibility" in artifact) {
+    const compatibility = artifact["compatibility"];
+    if (typeof compatibility !== "string") {
+      issues.push({ message: "compatibility must be a string", path: ["compatibility"] });
+    } else if (compatibility.length > SKILL_COMPATIBILITY_MAX) {
+      issues.push({
+        message: `compatibility must be at most ${SKILL_COMPATIBILITY_MAX} characters`,
+        path: ["compatibility"]
+      });
+    }
+  }
+  if ("metadata" in artifact && !isPlainObject2(artifact["metadata"])) {
+    issues.push({ message: "metadata must be an object", path: ["metadata"] });
+  }
+  return issues;
+}
+function isOverlayIssues(artifact) {
+  const issues = [
+    ...requiredFieldsIssues(artifact, SKILL_FRONTMATTER_OVERLAY_REQUIRED)
+  ];
+  if ("allowed-tools" in artifact) {
+    const allowedTools = artifact["allowed-tools"];
+    if (typeof allowedTools !== "string" && !isStringArray(allowedTools)) {
+      issues.push({
+        message: "allowed-tools must be a string or an array of strings",
+        path: ["allowed-tools"]
+      });
+    }
+  }
+  if ("version" in artifact) {
+    const version2 = artifact["version"];
+    if (typeof version2 !== "string") {
+      issues.push({ message: "version must be a string", path: ["version"] });
+    } else if (!SEMVER_PATTERN.test(version2)) {
+      issues.push({ message: "version must be strict SemVer 2.0.0", path: ["version"] });
+    }
+  }
+  if ("author" in artifact && typeof artifact["author"] !== "string") {
+    issues.push({ message: "author must be a string", path: ["author"] });
+  }
+  if ("tags" in artifact && !isStringArray(artifact["tags"])) {
+    issues.push({ message: "tags must be an array of strings", path: ["tags"] });
+  }
+  for (const field of VISIBILITY_ARRAY_FIELDS) {
+    if (field in artifact && !isStringArray(artifact[field])) {
+      issues.push({ message: `${field} must be an array of strings`, path: [field] });
+    }
+  }
+  if ("required_environment_variables" in artifact) {
+    issues.push(...requiredEnvVarIssues(artifact["required_environment_variables"]));
+  }
+  for (const group of [["requires_env", "fallback_for_env"]]) {
+    issues.push(...mutuallyExclusiveIssues(artifact, group));
+  }
+  return issues;
+}
+function requiredEnvVarIssues(value) {
+  const path = ["required_environment_variables"];
+  if (!Array.isArray(value)) {
+    return [{ message: "required_environment_variables must be an array", path }];
+  }
+  const issues = [];
+  value.forEach((entry, index) => {
+    const entryPath = [...path, String(index)];
+    if (!isPlainObject2(entry)) {
+      issues.push({
+        message: "required_environment_variables entry must be an object",
+        path: entryPath
+      });
+      return;
+    }
+    const name = entry["name"];
+    if (typeof name !== "string" || !ENV_VAR_NAME_PATTERN.test(name)) {
+      issues.push({
+        message: "env-var name must be UPPER_SNAKE_CASE",
+        path: [...entryPath, "name"]
+      });
+    }
+    if (typeof entry["prompt"] !== "string") {
+      issues.push({ message: "env-var prompt is required", path: [...entryPath, "prompt"] });
+    }
+  });
+  return issues;
+}
+function mutuallyExclusiveIssues(artifact, fields) {
+  const issues = [];
+  const seen = /* @__PURE__ */ new Map();
+  for (const field of fields) {
+    const value = artifact[field];
+    if (!isStringArray(value)) {
+      continue;
+    }
+    for (const item of value) {
+      const prior = seen.get(item);
+      if (prior !== void 0 && prior !== field) {
+        issues.push({
+          message: `"${item}" must not appear in both ${prior} and ${field}`,
+          path: [field]
+        });
+      } else {
+        seen.set(item, field);
+      }
+    }
+  }
+  return issues;
+}
+function skillFrontmatterIssues(artifact) {
+  return [
+    ...upstreamBaseIssues(artifact),
+    ...universalFoldsIssues(artifact),
+    ...isOverlayIssues(artifact)
+  ];
+}
+var SkillFrontmatterSchema2 = attach(skillFrontmatterIssues);
+
+// node_modules/.pnpm/@intentsolutions+core@0.6.0/node_modules/@intentsolutions/core/dist/validators/v1/authoring/plugin-manifest.js
+var PLUGIN_MANIFEST_BASE_REQUIRED = ["name"];
+var PLUGIN_MANIFEST_OVERLAY_REQUIRED = [
+  "version",
+  "description",
+  "author",
+  "homepage",
+  "license",
+  "keywords",
+  "commands"
+];
+var PLUGIN_MANIFEST_REQUIRED_FIELDS = [
+  ...PLUGIN_MANIFEST_BASE_REQUIRED,
+  ...PLUGIN_MANIFEST_OVERLAY_REQUIRED
+];
+var PLUGIN_NAME_PATTERN = /^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/;
+var PLUGIN_NAME_MAX = 64;
+var SEMVER_PATTERN2 = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/;
+function isStringArray2(value) {
+  return Array.isArray(value) && value.every((item) => typeof item === "string");
+}
+function isPlainObject3(value) {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+function isUri(value) {
+  try {
+    new URL(value);
+    return true;
+  } catch {
+    return false;
+  }
+}
+function upstreamBaseIssues2(artifact) {
+  const issues = [...requiredFieldsIssues(artifact, PLUGIN_MANIFEST_BASE_REQUIRED)];
+  if ("name" in artifact) {
+    const name = artifact["name"];
+    if (typeof name !== "string") {
+      issues.push({ message: "name must be a string", path: ["name"] });
+    } else {
+      if (name.length > PLUGIN_NAME_MAX) {
+        issues.push({
+          message: `name must be at most ${PLUGIN_NAME_MAX} characters`,
+          path: ["name"]
+        });
+      }
+      if (!PLUGIN_NAME_PATTERN.test(name)) {
+        issues.push({
+          message: "name must be kebab-case (lowercase letters, digits, hyphens)",
+          path: ["name"]
+        });
+      }
+    }
+  }
+  if ("version" in artifact && typeof artifact["version"] !== "string") {
+    issues.push({ message: "version must be a string", path: ["version"] });
+  }
+  if ("description" in artifact && typeof artifact["description"] !== "string") {
+    issues.push({ message: "description must be a string", path: ["description"] });
+  }
+  if ("author" in artifact) {
+    const author = artifact["author"];
+    if (!isPlainObject3(author)) {
+      issues.push({ message: "author must be an object", path: ["author"] });
+    } else {
+      for (const key of ["name"]) {
+        if (!(key in author)) {
+          issues.push({ message: `author.${key} is required`, path: ["author", key] });
+        }
+      }
+    }
+  }
+  if ("homepage" in artifact) {
+    const homepage = artifact["homepage"];
+    if (typeof homepage !== "string") {
+      issues.push({ message: "homepage must be a string", path: ["homepage"] });
+    } else if (!isUri(homepage)) {
+      issues.push({ message: "homepage must be a valid URI", path: ["homepage"] });
+    }
+  }
+  if ("repository" in artifact) {
+    const repository = artifact["repository"];
+    if (typeof repository !== "string") {
+      issues.push({ message: "repository must be a string", path: ["repository"] });
+    } else if (!isUri(repository)) {
+      issues.push({ message: "repository must be a valid URI", path: ["repository"] });
+    }
+  }
+  if ("license" in artifact && typeof artifact["license"] !== "string") {
+    issues.push({ message: "license must be a string", path: ["license"] });
+  }
+  if ("keywords" in artifact && !isStringArray2(artifact["keywords"])) {
+    issues.push({ message: "keywords must be an array of strings", path: ["keywords"] });
+  }
+  if ("commands" in artifact && !isStringArray2(artifact["commands"])) {
+    issues.push({ message: "commands must be an array of strings", path: ["commands"] });
+  }
+  if ("metadata" in artifact && !isPlainObject3(artifact["metadata"])) {
+    issues.push({ message: "metadata must be an object", path: ["metadata"] });
+  }
+  return issues;
+}
+function isOverlayIssues2(artifact) {
+  const issues = [...requiredFieldsIssues(artifact, PLUGIN_MANIFEST_OVERLAY_REQUIRED)];
+  if ("version" in artifact) {
+    const version2 = artifact["version"];
+    if (typeof version2 !== "string") {
+      issues.push({ message: "version must be a string", path: ["version"] });
+    } else if (!SEMVER_PATTERN2.test(version2)) {
+      issues.push({ message: "version must be strict SemVer 2.0.0", path: ["version"] });
+    }
+  }
+  return issues;
+}
+function pluginManifestIssues(artifact) {
+  return [
+    ...upstreamBaseIssues2(artifact),
+    ...universalFoldsIssues(artifact),
+    ...isOverlayIssues2(artifact)
+  ];
+}
+var PluginManifestSchema = attach(pluginManifestIssues);
+
+// node_modules/.pnpm/@intentsolutions+core@0.6.0/node_modules/@intentsolutions/core/dist/validators/v1/authoring/agent-definition.js
+var AGENT_DEFINITION_BASE_REQUIRED = ["name", "description"];
+var AGENT_DEFINITION_OVERLAY_REQUIRED = [
+  "tools",
+  "model",
+  "color",
+  "version",
+  "author",
+  "tags"
+];
+var AGENT_DEFINITION_REQUIRED_FIELDS = [
+  ...AGENT_DEFINITION_BASE_REQUIRED,
+  ...AGENT_DEFINITION_OVERLAY_REQUIRED
+];
+var AGENT_NAME_PATTERN = /^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/;
+var AGENT_NAME_MAX = 64;
+var AGENT_MODEL_VALUES = ["sonnet", "opus", "haiku", "fable", "inherit"];
+var AGENT_COLOR_VALUES = [
+  "red",
+  "blue",
+  "green",
+  "yellow",
+  "purple",
+  "orange",
+  "pink",
+  "cyan"
+];
+var SEMVER_PATTERN3 = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/;
+function isStringArray3(value) {
+  return Array.isArray(value) && value.every((item) => typeof item === "string");
+}
+function isPlainObject4(value) {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+function upstreamBaseIssues3(artifact) {
+  const issues = [...requiredFieldsIssues(artifact, AGENT_DEFINITION_BASE_REQUIRED)];
+  if ("name" in artifact) {
+    const name = artifact["name"];
+    if (typeof name !== "string") {
+      issues.push({ message: "name must be a string", path: ["name"] });
+    } else {
+      if (name.length > AGENT_NAME_MAX) {
+        issues.push({
+          message: `name must be at most ${AGENT_NAME_MAX} characters`,
+          path: ["name"]
+        });
+      }
+      if (!AGENT_NAME_PATTERN.test(name)) {
+        issues.push({
+          message: "name must be kebab-case (lowercase letters, digits, hyphens)",
+          path: ["name"]
+        });
+      }
+    }
+  }
+  if ("description" in artifact && typeof artifact["description"] !== "string") {
+    issues.push({ message: "description must be a string", path: ["description"] });
+  }
+  if ("tools" in artifact && !isStringArray3(artifact["tools"])) {
+    issues.push({ message: "tools must be an array of strings", path: ["tools"] });
+  }
+  if ("model" in artifact) {
+    const model = artifact["model"];
+    if (typeof model !== "string") {
+      issues.push({ message: "model must be a string", path: ["model"] });
+    } else if (!AGENT_MODEL_VALUES.includes(model)) {
+      issues.push({
+        message: `model must be one of: ${AGENT_MODEL_VALUES.join(", ")}`,
+        path: ["model"]
+      });
+    }
+  }
+  if ("color" in artifact) {
+    const color = artifact["color"];
+    if (typeof color !== "string") {
+      issues.push({ message: "color must be a string", path: ["color"] });
+    } else if (!AGENT_COLOR_VALUES.includes(color)) {
+      issues.push({
+        message: `color must be one of: ${AGENT_COLOR_VALUES.join(", ")}`,
+        path: ["color"]
+      });
+    }
+  }
+  if ("metadata" in artifact && !isPlainObject4(artifact["metadata"])) {
+    issues.push({ message: "metadata must be an object", path: ["metadata"] });
+  }
+  return issues;
+}
+function isOverlayIssues3(artifact) {
+  const issues = [
+    ...requiredFieldsIssues(artifact, AGENT_DEFINITION_OVERLAY_REQUIRED)
+  ];
+  if ("version" in artifact) {
+    const version2 = artifact["version"];
+    if (typeof version2 !== "string") {
+      issues.push({ message: "version must be a string", path: ["version"] });
+    } else if (!SEMVER_PATTERN3.test(version2)) {
+      issues.push({ message: "version must be strict SemVer 2.0.0", path: ["version"] });
+    }
+  }
+  if ("author" in artifact && typeof artifact["author"] !== "string") {
+    issues.push({ message: "author must be a string", path: ["author"] });
+  }
+  if ("tags" in artifact && !isStringArray3(artifact["tags"])) {
+    issues.push({ message: "tags must be an array of strings", path: ["tags"] });
+  }
+  return issues;
+}
+function agentDefinitionIssues(artifact) {
+  return [
+    ...upstreamBaseIssues3(artifact),
+    ...universalFoldsIssues(artifact),
+    ...isOverlayIssues3(artifact)
+  ];
+}
+var AgentDefinitionSchema = attach(agentDefinitionIssues);
+
+// node_modules/.pnpm/@intentsolutions+core@0.6.0/node_modules/@intentsolutions/core/dist/validators/v1/authoring/mcp-config.js
+var MCP_CONFIG_BASE_REQUIRED = ["name", "command", "args", "transport", "env"];
+var MCP_CONFIG_OVERLAY_REQUIRED = ["description", "version", "enabled"];
+var MCP_CONFIG_REQUIRED_FIELDS = [
+  ...MCP_CONFIG_BASE_REQUIRED,
+  ...MCP_CONFIG_OVERLAY_REQUIRED
+];
+var MCP_NAME_PATTERN = /^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/;
+var MCP_NAME_MAX = 64;
+var MCP_TRANSPORT_VALUES = ["stdio", "http", "sse", "ws"];
+var SEMVER_PATTERN4 = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/;
+function isStringArray4(value) {
+  return Array.isArray(value) && value.every((item) => typeof item === "string");
+}
+function isPlainObject5(value) {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+function upstreamBaseIssues4(artifact) {
+  const issues = [...requiredFieldsIssues(artifact, MCP_CONFIG_BASE_REQUIRED)];
+  if ("name" in artifact) {
+    const name = artifact["name"];
+    if (typeof name !== "string") {
+      issues.push({ message: "name must be a string", path: ["name"] });
+    } else {
+      if (name.length > MCP_NAME_MAX) {
+        issues.push({
+          message: `name must be at most ${MCP_NAME_MAX} characters`,
+          path: ["name"]
+        });
+      }
+      if (!MCP_NAME_PATTERN.test(name)) {
+        issues.push({
+          message: "name must be kebab-case (lowercase letters, digits, hyphens)",
+          path: ["name"]
+        });
+      }
+    }
+  }
+  if ("command" in artifact) {
+    const command = artifact["command"];
+    if (typeof command !== "string") {
+      issues.push({ message: "command must be a string", path: ["command"] });
+    } else if (command.length < 1) {
+      issues.push({ message: "command must not be empty", path: ["command"] });
+    }
+  }
+  if ("args" in artifact && !isStringArray4(artifact["args"])) {
+    issues.push({ message: "args must be an array of strings", path: ["args"] });
+  }
+  if ("transport" in artifact) {
+    const transport = artifact["transport"];
+    if (typeof transport !== "string") {
+      issues.push({ message: "transport must be a string", path: ["transport"] });
+    } else if (!MCP_TRANSPORT_VALUES.includes(transport)) {
+      issues.push({
+        message: `transport must be one of: ${MCP_TRANSPORT_VALUES.join(", ")}`,
+        path: ["transport"]
+      });
+    }
+  }
+  if ("env" in artifact && !isPlainObject5(artifact["env"])) {
+    issues.push({ message: "env must be an object", path: ["env"] });
+  }
+  if ("metadata" in artifact && !isPlainObject5(artifact["metadata"])) {
+    issues.push({ message: "metadata must be an object", path: ["metadata"] });
+  }
+  return issues;
+}
+function isOverlayIssues4(artifact) {
+  const issues = [...requiredFieldsIssues(artifact, MCP_CONFIG_OVERLAY_REQUIRED)];
+  if ("description" in artifact && typeof artifact["description"] !== "string") {
+    issues.push({ message: "description must be a string", path: ["description"] });
+  }
+  if ("version" in artifact) {
+    const version2 = artifact["version"];
+    if (typeof version2 !== "string") {
+      issues.push({ message: "version must be a string", path: ["version"] });
+    } else if (!SEMVER_PATTERN4.test(version2)) {
+      issues.push({ message: "version must be strict SemVer 2.0.0", path: ["version"] });
+    }
+  }
+  if ("enabled" in artifact && typeof artifact["enabled"] !== "boolean") {
+    issues.push({ message: "enabled must be a boolean", path: ["enabled"] });
+  }
+  return issues;
+}
+function mcpConfigIssues(artifact) {
+  return [
+    ...upstreamBaseIssues4(artifact),
+    ...universalFoldsIssues(artifact),
+    ...isOverlayIssues4(artifact)
+  ];
+}
+var McpConfigSchema = attach(mcpConfigIssues);
+
+// node_modules/.pnpm/@intentsolutions+core@0.6.0/node_modules/@intentsolutions/core/dist/validators/v1/authoring/hook-config.js
+var HOOK_CONFIG_BASE_REQUIRED = ["event", "matcher", "type", "command"];
+var HOOK_CONFIG_OVERLAY_REQUIRED = [
+  "description",
+  "enabled",
+  "timeout",
+  "blocking"
+];
+var HOOK_CONFIG_REQUIRED_FIELDS = [
+  ...HOOK_CONFIG_BASE_REQUIRED,
+  ...HOOK_CONFIG_OVERLAY_REQUIRED
+];
+var HOOK_EVENT_VALUES = [
+  "SessionStart",
+  "Setup",
+  "UserPromptSubmit",
+  "UserPromptExpansion",
+  "PreToolUse",
+  "PermissionRequest",
+  "PermissionDenied",
+  "PostToolUse",
+  "PostToolUseFailure",
+  "PostToolBatch",
+  "Notification",
+  "MessageDisplay",
+  "SubagentStart",
+  "SubagentStop",
+  "TaskCreated",
+  "TaskCompleted",
+  "Stop",
+  "StopFailure",
+  "TeammateIdle",
+  "InstructionsLoaded",
+  "ConfigChange",
+  "CwdChanged",
+  "FileChanged",
+  "WorktreeCreate",
+  "WorktreeRemove",
+  "PreCompact",
+  "PostCompact",
+  "Elicitation",
+  "ElicitationResult",
+  "SessionEnd"
+];
+var HOOK_TYPE_VALUES = ["command", "http", "mcp_tool", "prompt", "agent"];
+function isPlainObject6(value) {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+function upstreamBaseIssues5(artifact) {
+  const issues = [...requiredFieldsIssues(artifact, HOOK_CONFIG_BASE_REQUIRED)];
+  if ("event" in artifact) {
+    const event = artifact["event"];
+    if (typeof event !== "string") {
+      issues.push({ message: "event must be a string", path: ["event"] });
+    } else if (!HOOK_EVENT_VALUES.includes(event)) {
+      issues.push({
+        message: `event must be one of: ${HOOK_EVENT_VALUES.join(", ")}`,
+        path: ["event"]
+      });
+    }
+  }
+  if ("matcher" in artifact) {
+    const matcher = artifact["matcher"];
+    if (typeof matcher !== "string") {
+      issues.push({ message: "matcher must be a string", path: ["matcher"] });
+    } else if (matcher.length < 1) {
+      issues.push({ message: "matcher must not be empty", path: ["matcher"] });
+    }
+  }
+  if ("type" in artifact) {
+    const type = artifact["type"];
+    if (typeof type !== "string") {
+      issues.push({ message: "type must be a string", path: ["type"] });
+    } else if (!HOOK_TYPE_VALUES.includes(type)) {
+      issues.push({
+        message: `type must be one of: ${HOOK_TYPE_VALUES.join(", ")}`,
+        path: ["type"]
+      });
+    }
+  }
+  if ("command" in artifact) {
+    const command = artifact["command"];
+    if (typeof command !== "string") {
+      issues.push({ message: "command must be a string", path: ["command"] });
+    } else if (command.length < 1) {
+      issues.push({ message: "command must not be empty", path: ["command"] });
+    }
+  }
+  if ("metadata" in artifact && !isPlainObject6(artifact["metadata"])) {
+    issues.push({ message: "metadata must be an object", path: ["metadata"] });
+  }
+  return issues;
+}
+function isOverlayIssues5(artifact) {
+  const issues = [...requiredFieldsIssues(artifact, HOOK_CONFIG_OVERLAY_REQUIRED)];
+  if ("description" in artifact && typeof artifact["description"] !== "string") {
+    issues.push({ message: "description must be a string", path: ["description"] });
+  }
+  if ("enabled" in artifact && typeof artifact["enabled"] !== "boolean") {
+    issues.push({ message: "enabled must be a boolean", path: ["enabled"] });
+  }
+  if ("timeout" in artifact) {
+    const timeout = artifact["timeout"];
+    if (typeof timeout !== "number" || !Number.isInteger(timeout)) {
+      issues.push({ message: "timeout must be an integer", path: ["timeout"] });
+    } else if (timeout < 0) {
+      issues.push({ message: "timeout must be at least 0", path: ["timeout"] });
+    }
+  }
+  if ("blocking" in artifact && typeof artifact["blocking"] !== "boolean") {
+    issues.push({ message: "blocking must be a boolean", path: ["blocking"] });
+  }
+  return issues;
+}
+function hookConfigIssues(artifact) {
+  return [
+    ...upstreamBaseIssues5(artifact),
+    ...universalFoldsIssues(artifact),
+    ...isOverlayIssues5(artifact)
+  ];
+}
+var HookConfigSchema = attach(hookConfigIssues);
+
+// node_modules/.pnpm/@intentsolutions+core@0.6.0/node_modules/@intentsolutions/core/dist/validators/v1/authoring/marketplace-catalog.js
+var MARKETPLACE_CATALOG_BASE_REQUIRED = ["name", "owner", "plugins"];
+var MARKETPLACE_CATALOG_OVERLAY_REQUIRED = [
+  "version",
+  "description",
+  "license",
+  "homepage",
+  "keywords"
+];
+var MARKETPLACE_CATALOG_REQUIRED_FIELDS = [
+  ...MARKETPLACE_CATALOG_BASE_REQUIRED,
+  ...MARKETPLACE_CATALOG_OVERLAY_REQUIRED
+];
+var MARKETPLACE_NAME_PATTERN = /^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/;
+var MARKETPLACE_NAME_MAX = 64;
+var SEMVER_PATTERN5 = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/;
+function isStringArray5(value) {
+  return Array.isArray(value) && value.every((item) => typeof item === "string");
+}
+function isPlainObject7(value) {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+function isUri2(value) {
+  try {
+    new URL(value);
+    return true;
+  } catch {
+    return false;
+  }
+}
+function upstreamBaseIssues6(artifact) {
+  const issues = [
+    ...requiredFieldsIssues(artifact, MARKETPLACE_CATALOG_BASE_REQUIRED)
+  ];
+  if ("name" in artifact) {
+    const name = artifact["name"];
+    if (typeof name !== "string") {
+      issues.push({ message: "name must be a string", path: ["name"] });
+    } else {
+      if (name.length > MARKETPLACE_NAME_MAX) {
+        issues.push({
+          message: `name must be at most ${MARKETPLACE_NAME_MAX} characters`,
+          path: ["name"]
+        });
+      }
+      if (!MARKETPLACE_NAME_PATTERN.test(name)) {
+        issues.push({
+          message: "name must be kebab-case (lowercase letters, digits, hyphens)",
+          path: ["name"]
+        });
+      }
+    }
+  }
+  if ("owner" in artifact) {
+    const owner = artifact["owner"];
+    if (!isPlainObject7(owner)) {
+      issues.push({ message: "owner must be an object", path: ["owner"] });
+    } else {
+      for (const key of ["name"]) {
+        if (!(key in owner)) {
+          issues.push({ message: `owner.${key} is required`, path: ["owner", key] });
+        }
+      }
+    }
+  }
+  if ("plugins" in artifact) {
+    const plugins = artifact["plugins"];
+    if (!Array.isArray(plugins)) {
+      issues.push({ message: "plugins must be an array", path: ["plugins"] });
+    } else {
+      if (plugins.length < 1) {
+        issues.push({ message: "plugins must not be empty", path: ["plugins"] });
+      }
+      plugins.forEach((entry, index) => {
+        if (!isPlainObject7(entry)) {
+          issues.push({
+            message: "plugins entry must be an object",
+            path: ["plugins", String(index)]
+          });
+          return;
+        }
+        for (const key of ["name", "source"]) {
+          if (!(key in entry)) {
+            issues.push({
+              message: `plugins[${index}].${key} is required`,
+              path: ["plugins", String(index), key]
+            });
+          }
+        }
+      });
+    }
+  }
+  if ("metadata" in artifact && !isPlainObject7(artifact["metadata"])) {
+    issues.push({ message: "metadata must be an object", path: ["metadata"] });
+  }
+  return issues;
+}
+function isOverlayIssues6(artifact) {
+  const issues = [
+    ...requiredFieldsIssues(artifact, MARKETPLACE_CATALOG_OVERLAY_REQUIRED)
+  ];
+  if ("version" in artifact) {
+    const version2 = artifact["version"];
+    if (typeof version2 !== "string") {
+      issues.push({ message: "version must be a string", path: ["version"] });
+    } else if (!SEMVER_PATTERN5.test(version2)) {
+      issues.push({ message: "version must be strict SemVer 2.0.0", path: ["version"] });
+    }
+  }
+  if ("description" in artifact && typeof artifact["description"] !== "string") {
+    issues.push({ message: "description must be a string", path: ["description"] });
+  }
+  if ("license" in artifact && typeof artifact["license"] !== "string") {
+    issues.push({ message: "license must be a string", path: ["license"] });
+  }
+  if ("homepage" in artifact) {
+    const homepage = artifact["homepage"];
+    if (typeof homepage !== "string") {
+      issues.push({ message: "homepage must be a string", path: ["homepage"] });
+    } else if (!isUri2(homepage)) {
+      issues.push({ message: "homepage must be a valid URI", path: ["homepage"] });
+    }
+  }
+  if ("keywords" in artifact && !isStringArray5(artifact["keywords"])) {
+    issues.push({ message: "keywords must be an array of strings", path: ["keywords"] });
+  }
+  return issues;
+}
+function marketplaceCatalogIssues(artifact) {
+  return [
+    ...upstreamBaseIssues6(artifact),
+    ...universalFoldsIssues(artifact),
+    ...isOverlayIssues6(artifact)
+  ];
+}
+var MarketplaceCatalogSchema = attach(marketplaceCatalogIssues);
+
 // src/run.ts
-var SUPPORTED_PREDICATE_URI = "https://evals.intentsolutions.io/gate-result/v1";
+var SUPPORTED_PREDICATE_URI = GATE_RESULT_V1_URI2;
 function errMessage(err) {
   return err instanceof Error ? err.message : String(err);
+}
+function countKernelInvalidPredicates(bundle) {
+  let rows;
+  if (Array.isArray(bundle)) {
+    rows = bundle;
+  } else if (bundle !== null && typeof bundle === "object" && Array.isArray(bundle.rows)) {
+    rows = bundle.rows;
+  } else {
+    return 0;
+  }
+  let invalid = 0;
+  for (const row of rows) {
+    if (row === null || typeof row !== "object" || row.predicateType !== SUPPORTED_PREDICATE_URI) {
+      continue;
+    }
+    const predicate = row.predicate;
+    if (!GateResultV1Schema2.safeParse(predicate).success) {
+      invalid += 1;
+    }
+  }
+  return invalid;
 }
 function renderSummary(decision, reasons, result) {
   const esc2 = (s) => s.replace(/\|/g, "\\|");
@@ -45537,6 +46926,12 @@ async function run() {
         failOnBlock
       );
       return;
+    }
+    const kernelInvalid = countKernelInvalidPredicates(bundle);
+    if (kernelInvalid > 0) {
+      core.warning(
+        `${kernelInvalid} gate-result/v1 predicate body(ies) failed kernel @intentsolutions/core GateResultV1Schema validation (advisory only; decision is unaffected)`
+      );
     }
     const result = decide(bundle, policy);
     await conclude(result.decision, result.reasons, result, failOnBlock);
