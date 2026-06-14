@@ -46769,34 +46769,11 @@ function marketplaceCatalogIssues(artifact) {
 }
 var MarketplaceCatalogSchema = attach(marketplaceCatalogIssues);
 
-// src/run.ts
-var SUPPORTED_PREDICATE_URI = GATE_RESULT_V1_URI2;
-function errMessage(err) {
-  return err instanceof Error ? err.message : String(err);
-}
-function countKernelInvalidPredicates(bundle) {
-  let rows;
-  if (Array.isArray(bundle)) {
-    rows = bundle;
-  } else if (bundle !== null && typeof bundle === "object" && Array.isArray(bundle.rows)) {
-    rows = bundle.rows;
-  } else {
-    return 0;
-  }
-  let invalid = 0;
-  for (const row of rows) {
-    if (row === null || typeof row !== "object" || row.predicateType !== SUPPORTED_PREDICATE_URI) {
-      continue;
-    }
-    const predicate = row.predicate;
-    if (!GateResultV1Schema2.safeParse(predicate).success) {
-      invalid += 1;
-    }
-  }
-  return invalid;
+// src/summary.ts
+function esc2(value) {
+  return value.replace(/\|/g, "\\|");
 }
 function renderSummary(decision, reasons, result) {
-  const esc2 = (s) => s.replace(/\|/g, "\\|");
   const lines = [
     "## Intent Rollout Gate",
     "",
@@ -46837,6 +46814,33 @@ function renderSummary(decision, reasons, result) {
     lines.push("");
   }
   return lines.join("\n");
+}
+
+// src/run.ts
+var SUPPORTED_PREDICATE_URI = GATE_RESULT_V1_URI2;
+function errMessage(err) {
+  return err instanceof Error ? err.message : String(err);
+}
+function countKernelInvalidPredicates(bundle) {
+  let rows;
+  if (Array.isArray(bundle)) {
+    rows = bundle;
+  } else if (bundle !== null && typeof bundle === "object" && Array.isArray(bundle.rows)) {
+    rows = bundle.rows;
+  } else {
+    return 0;
+  }
+  let invalid = 0;
+  for (const row of rows) {
+    if (row === null || typeof row !== "object" || row.predicateType !== SUPPORTED_PREDICATE_URI) {
+      continue;
+    }
+    const predicate = row.predicate;
+    if (!GateResultV1Schema2.safeParse(predicate).success) {
+      invalid += 1;
+    }
+  }
+  return invalid;
 }
 async function conclude(decision, reasons, result, failOnBlock) {
   const summary2 = renderSummary(decision, reasons, result);
