@@ -24,6 +24,16 @@ import {
 } from "@intentsolutions/rollout-gate";
 import { GATE_RESULT_V1_URI } from "@intentsolutions/core";
 import { GateResultV1Schema } from "@intentsolutions/core/validators/v1";
+import { renderSummary } from "./summary";
+
+/**
+ * Re-exported so existing wiring + tests keep importing `renderSummary` from
+ * this module. The implementation lives in `./summary` (iar-summary-renderer
+ * Option C carve-out): the step-summary markdown renderer is its own pure,
+ * directly-unit-tested module, while this shell owns the actual
+ * `$GITHUB_STEP_SUMMARY` write + exit wiring in `conclude()`.
+ */
+export { renderSummary };
 
 /**
  * The only predicate URI this shell supports (Evidence Bundle SPEC R17).
@@ -84,66 +94,6 @@ export function countKernelInvalidPredicates(bundle: unknown): number {
     }
   }
   return invalid;
-}
-
-/**
- * Render the step-summary markdown: decision headline, a table of evaluated
- * required gates, a table of blocking rows, and the flat reason list.
- * Pure function — unit-tested directly.
- */
-export function renderSummary(
-  decision: string,
-  reasons: string[],
-  result: DecideResult | null
-): string {
-  const esc = (s: string): string => s.replace(/\|/g, "\\|");
-  const lines: string[] = [
-    "## Intent Rollout Gate",
-    "",
-    `**Decision:** \`${decision}\``,
-    "",
-  ];
-
-  if (result !== null) {
-    lines.push("### Required gates", "");
-    lines.push("| Pattern | Status | Matched gate IDs |");
-    lines.push("| --- | --- | --- |");
-    if (result.evaluated.required_gates.length === 0) {
-      lines.push("| _(none declared)_ | — | — |");
-    }
-    for (const gate of result.evaluated.required_gates) {
-      const matched =
-        gate.matched_gate_ids.length > 0
-          ? gate.matched_gate_ids.map((id) => `\`${esc(id)}\``).join(", ")
-          : "—";
-      lines.push(`| \`${esc(gate.pattern)}\` | ${gate.status} | ${matched} |`);
-    }
-    lines.push("");
-
-    const blockingRows = result.evaluated.rows.filter((row) => row.blocking);
-    lines.push("### Blocking rows", "");
-    if (blockingRows.length === 0) {
-      lines.push("_None._");
-    } else {
-      lines.push("| Row | Gate ID | Reasons |");
-      lines.push("| --- | --- | --- |");
-      for (const row of blockingRows) {
-        const gateId = row.gate_id === null ? "_(schema-invalid)_" : `\`${esc(row.gate_id)}\``;
-        lines.push(`| ${row.index} | ${gateId} | ${esc(row.reasons.join("; "))} |`);
-      }
-    }
-    lines.push("");
-  }
-
-  if (reasons.length > 0) {
-    lines.push("### Blocking reasons", "");
-    for (const reason of reasons) {
-      lines.push(`- ${reason}`);
-    }
-    lines.push("");
-  }
-
-  return lines.join("\n");
 }
 
 /**
