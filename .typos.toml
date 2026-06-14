@@ -1,0 +1,38 @@
+# typos configuration — advisory spell-check lane.
+# Domain terms below are NOT typos in the Intent Eval Platform context.
+# See .github/workflows/typos.yml (crate-ci/typos, advisory / non-blocking).
+
+[default.extend-words]
+# IEP platform + repo shorthands
+iep = "iep"
+isedc = "isedc"
+iec = "iec"
+iel = "iel"
+iah = "iah"
+iar = "iar"
+iaj = "iaj"
+# Supply-chain / signing vocabulary
+sops = "sops"
+sigstore = "sigstore"
+rekor = "rekor"
+cosign = "cosign"
+fulcio = "fulcio"
+# Tooling / language vocabulary
+zod = "zod"
+deps = "deps"
+crate = "crate"
+structs = "structs"
+ot = "ot"        # OpenTelemetry abbreviation appears in attribute namespaces
+ser = "ser"      # serde-style serialize shorthand
+
+[files]
+extend-exclude = [
+  "node_modules",
+  "dist",
+  "*.lock",
+  "pnpm-lock.yaml",
+  ".beads",
+  "*.snap",
+  "**/__snapshots__/**",
+  "tests/fixtures/**",
+]
