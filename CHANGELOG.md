@@ -11,6 +11,31 @@ versioning follows [SemVer 2.0.0](https://semver.org/spec/v2.0.0.html).
 
 - Phase 7.5 gist (deferred per release-sweep CTO call — `iep-gist-coverage` follow-up bead; each landing-page gist deserves bespoke `/appaudit` treatment).
 
+## [0.3.0] - 2026-06-15
+
+**Release-pipeline hardening + provenance correctness.** No change to the action's public `uses:` interface (inputs/outputs are byte-identical to v0.2.0) — this release hardens the release/signing pipeline itself and fixes a provenance-correctness bug in the dispatch re-release path. Adopters upgrade the pin; no workflow rewiring is required.
+
+### Fixed
+
+- **Checkout now pins to the dispatched tag, not `main` (provenance one-way-door fix).** On `workflow_dispatch` the `build`, `release`, and `sign` jobs previously resolved `GITHUB_REF` (the default branch) — so a re-release / sign dispatch would rebuild and attest `dist/index.js` bytes from `main`, NOT the bytes consumers resolve via `uses: jeremylongshore/intent-rollout-gate@<tag>`. Every checkout now sets `ref: ${{ inputs.tag }}`; on a plain tag-push event `inputs.tag` is empty and checkout correctly falls back to the pushed tag. This closes a wrong-bytes attestation class — a signed-provenance one-way door (CISO reproducible-from-tag invariant). (#32)
+
+### Changed
+
+- **Production signing is dispatch-only with a reversible dry-run; the sigstage path is removed.** The `sign` job runs ONLY on `workflow_dispatch` — a plain tag push does build + GitHub Release + floating-major retag and stops, never signing. Signing always targets the PRODUCTION sigstore public-good trust root (cosign defaults: `fulcio.sigstore.dev` + `rekor.sigstore.dev`, GitHub Actions ambient OIDC); `dry-run` (default `true`) controls only whether a permanent Rekor transparency-log entry is written. The non-representative sigstage path was dropped (its SCT verification failed against cosign's production-default TUF trust root). (#27)
+- **The iah-E06 DNSSEC/CAA pre-flight always gates production signing (fail-closed).** Because production is the only target, the read-only DNSSEC + CAA verification against `evals.intentsolutions.io` runs on EVERY dispatch (dry-run and real fire); either non-zero exit aborts before cosign runs. (#27)
+
+### Added
+
+- **`release.sh` helper + extracted `GITHUB_STEP_SUMMARY` renderer.** Step-summary rendering moved out of `src/main.ts` into a dedicated `src/summary.ts` module (unit-tested independently); a `release.sh` script standardizes the local bump-tag-push flow. (#29)
+- **ntfy CI-failure alert over the tailnet.** A new `alert-on-failure` job joins the tailnet via Tailscale OIDC and pushes a high-priority alert to the `prod-deploys` ntfy topic when a tag-release build or release job fails. (#28)
+- **Advisory `actionlint` CI lane** — non-blocking workflow-manifest linting. (#31)
+- **Advisory `typos` spell-check CI lane** — non-blocking. (#30)
+
+### Architectural bindings
+
+- [DR-004 § 6.1](https://github.com/jeremylongshore/intent-eval-lab/blob/main/000-docs/004-AT-DECR-isedc-council-record-2026-05-10.md) — CISO DNSSEC + CAA pre-condition for any Rekor push referencing an `evals.intentsolutions.io` predicate URI; the always-on pre-flight enforces it
+- ISEDC E09 DR / CISO reproducible-from-tag invariant — the #32 checkout-tag-pin fix closes the wrong-bytes attestation class
+
 ## [0.2.0] - 2026-06-18
 
 **Stable consumption contract + production-Rekor signing enabled.** Graduates the M5 TypeScript MVP from `v0.1.0` ("experimental" per [DR-002](000-docs/004-AT-DECR-runtime-language-typescript-2026-06-10.md) § 6 — behavior present, contract not yet frozen) to a frozen consumption contract, and enables the previously-HELD sigstore PRODUCTION transparency-log signing path behind the iah-E06 DNSSEC/CAA pre-flight (fail-closed). The action's public `uses:` interface stays forward-compatible: inputs/outputs are additive only ([Evidence Bundle SPEC](https://github.com/jeremylongshore/intent-eval-lab/blob/main/specs/evidence-bundle/v0.1.0-draft/SPEC.md) R18); no breaking change ships without a new predicate URI (SPEC R17). Adopters upgrade the pin; no workflow rewiring is required. Full migration guidance: [`000-docs/008-RL-REPT-v0.2.0-migration-notes-2026-06-18.md`](000-docs/008-RL-REPT-v0.2.0-migration-notes-2026-06-18.md).
