@@ -73,6 +73,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
         with:
+          # Pin to the dispatched tag on workflow_dispatch (re-release/sign): without
+          # this, checkout resolves GITHUB_REF (default branch) and the rebuilt+signed
+          # dist would attest bytes from main, not the tag consumers resolve via @<tag>.
+          # On a tag-push event inputs.tag is empty -> checkout falls back to the pushed
+          # tag (GITHUB_REF), which is the correct ref. (umbrella review 2026-06-14)
+          ref: ${{ inputs.tag }}
           fetch-depth: 0
 
       - name: Resolve tag (push tag or dispatch input)
@@ -160,6 +166,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
         with:
+          # Pin to the dispatched tag on workflow_dispatch (re-release/sign): without
+          # this, checkout resolves GITHUB_REF (default branch) and the rebuilt+signed
+          # dist would attest bytes from main, not the tag consumers resolve via @<tag>.
+          # On a tag-push event inputs.tag is empty -> checkout falls back to the pushed
+          # tag (GITHUB_REF), which is the correct ref. (umbrella review 2026-06-14)
+          ref: ${{ inputs.tag }}
           fetch-depth: 0
 
       - name: Create or update the GitHub Release
@@ -249,6 +261,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
         with:
+          # Pin to the dispatched tag on workflow_dispatch (re-release/sign): without
+          # this, checkout resolves GITHUB_REF (default branch) and the rebuilt+signed
+          # dist would attest bytes from main, not the tag consumers resolve via @<tag>.
+          # On a tag-push event inputs.tag is empty -> checkout falls back to the pushed
+          # tag (GITHUB_REF), which is the correct ref. (umbrella review 2026-06-14)
+          ref: ${{ inputs.tag }}
           fetch-depth: 0
 
       - name: Install cosign
