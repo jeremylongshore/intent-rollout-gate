@@ -136,8 +136,13 @@ jobs:
           echo "$NOSHIP_SUMMARY" | grep -q '\*\*Decision:\*\* `block`' || { echo "::error::no-ship decision row not marked block"; exit 1; }
           echo "$SHIP_SUMMARY" | grep -q '\*\*Decision:\*\* `allow`' || { echo "::error::ship decision row not marked allow"; exit 1; }
 
-          # The step summary file the runner wrote must contain the decision row too.
-          grep -q "## Intent Rollout Gate" "$GITHUB_STEP_SUMMARY" || { echo "::error::\$GITHUB_STEP_SUMMARY missing the decision row"; exit 1; }
+          # NOTE on $GITHUB_STEP_SUMMARY: the Action writes the decision row to the
+          # step summary of ITS OWN step (each GitHub Actions step gets a fresh
+          # $GITHUB_STEP_SUMMARY file), so this assert step's $GITHUB_STEP_SUMMARY
+          # is a DIFFERENT, empty file — checking it here would be wrong. The
+          # decision-row emit is proven above via the `summary` STEP OUTPUT (the
+          # same markdown the Action wrote to its step summary), which is the
+          # consumer-facing emit surface a downstream repo actually reads.
 
           echo "Dogfood OK: real bundle → allow on ship, block on no-ship, decision row emitted for both."
 
