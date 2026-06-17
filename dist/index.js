@@ -45401,10 +45401,10 @@ function patternToRegex(pattern) {
   return new RegExp(`^${escaped}$`);
 }
 
-// node_modules/.pnpm/@intentsolutions+core@0.6.0/node_modules/@intentsolutions/core/dist/predicates/gate-result-v1.js
+// node_modules/.pnpm/@intentsolutions+core@0.7.0/node_modules/@intentsolutions/core/dist/predicates/gate-result-v1.js
 var GATE_RESULT_V1_URI2 = "https://evals.intentsolutions.io/gate-result/v1";
 
-// node_modules/.pnpm/@intentsolutions+core@0.6.0/node_modules/@intentsolutions/core/dist/validators/v1/_primitives.js
+// node_modules/.pnpm/@intentsolutions+core@0.7.0/node_modules/@intentsolutions/core/dist/validators/v1/_primitives.js
 var Uuidv7Schema2 = external_exports.string().regex(/^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/, "Must be a UUIDv7 (RFC 9562) \u2014 version nibble = 7, variant = 10xx").brand();
 var Sha256Schema2 = external_exports.string().regex(/^[a-f0-9]{64}$/, "Must be 64 lowercase hex chars").brand();
 var Sha256PrefixedSchema2 = external_exports.string().regex(/^sha256:[a-f0-9]{64}$/, "Must be sha256: + 64 lowercase hex chars per Blueprint B \xA7 7.4").brand();
@@ -45425,10 +45425,19 @@ var CoverageSchema2 = external_exports.object({
   dimensions_skipped: external_exports.array(external_exports.string())
 }).strict();
 
-// node_modules/.pnpm/@intentsolutions+core@0.6.0/node_modules/@intentsolutions/core/dist/validators/v1/eval-spec.js
+// node_modules/.pnpm/@intentsolutions+core@0.7.0/node_modules/@intentsolutions/core/dist/validators/v1/eval-spec.js
 var ScoringAggregationRuleSchema = external_exports.enum(["majority", "unanimous", "weighted"]);
+var ScoringWeightDimensionSchema = external_exports.enum(["matcher", "mm-class", "judge"]);
+var ScoringWeightSchema = external_exports.object({
+  key: external_exports.string(),
+  weight: external_exports.number().nonnegative()
+}).strict();
+var ScoringTiebreakerSchema = external_exports.enum(["fail-closed", "fail-open", "first-listed"]);
 var ScoringConfigSchema = external_exports.object({
   aggregation_rule: ScoringAggregationRuleSchema,
+  weight_dimension: ScoringWeightDimensionSchema.optional(),
+  weights: external_exports.array(ScoringWeightSchema).optional(),
+  tiebreaker: ScoringTiebreakerSchema.optional(),
   extensions: external_exports.record(external_exports.string(), external_exports.unknown()).optional()
 }).passthrough();
 var RuntimeLimitsSchema = external_exports.object({
@@ -45453,7 +45462,27 @@ var CompositionDagSchema = external_exports.object({
   nodes: external_exports.array(CompositionNodeSchema),
   edges: external_exports.array(CompositionEdgeSchema)
 }).strict();
-var AssertionExpressionSchema = external_exports.unknown();
+var AssertionClassSchema = external_exports.enum([
+  "output-equals",
+  "output-contains",
+  "output-matches",
+  "schema-conforms",
+  "judge-verdict",
+  "matcher-satisfied"
+]);
+var AssertionExpressionSchema = external_exports.union([
+  external_exports.object({
+    class: AssertionClassSchema,
+    target: external_exports.unknown(),
+    negate: external_exports.boolean().optional()
+  }).strict(),
+  external_exports.object({
+    class: external_exports.string(),
+    target: external_exports.unknown(),
+    negate: external_exports.boolean().optional(),
+    extension: external_exports.literal(true)
+  }).strict()
+]);
 var EvalSpecSchema2 = external_exports.object({
   id: Uuidv7Schema2,
   version: SemVerSchema2,
@@ -45468,10 +45497,12 @@ var EvalSpecSchema2 = external_exports.object({
   provider_constraints: external_exports.array(external_exports.string()),
   created_at: Rfc3339Schema2,
   created_by: ActorIdentitySchema2,
-  content_hash: Sha256Schema2
+  content_hash: Sha256Schema2,
+  /** RESERVED multi-tenancy slot (deferral-G, bd_000-projects-k0fj). */
+  tenant_id: Uuidv7Schema2.optional()
 }).strict();
 
-// node_modules/.pnpm/@intentsolutions+core@0.6.0/node_modules/@intentsolutions/core/dist/validators/v1/eval-run.js
+// node_modules/.pnpm/@intentsolutions+core@0.7.0/node_modules/@intentsolutions/core/dist/validators/v1/eval-run.js
 var EvalRunStateSchema = external_exports.enum([
   "queued",
   "running",
@@ -45511,10 +45542,34 @@ var EvalRunSchema = external_exports.object({
   cost_record_id: Uuidv7Schema2,
   parent_run_id: Uuidv7Schema2.nullable(),
   idempotency_key: Uuidv7Schema2,
-  submitted_by: ActorIdentitySchema2
+  submitted_by: ActorIdentitySchema2,
+  /** RESERVED multi-tenancy slot (deferral-G, bd_000-projects-k0fj). */
+  tenant_id: Uuidv7Schema2.optional()
 }).strict();
 
-// node_modules/.pnpm/@intentsolutions+core@0.6.0/node_modules/@intentsolutions/core/dist/validators/v1/matcher-map.js
+// node_modules/.pnpm/@intentsolutions+core@0.7.0/node_modules/@intentsolutions/core/dist/validators/v1/matcher-map.js
+var StructuralOpSchema = external_exports.enum([
+  "exists",
+  "absent",
+  "equals",
+  "type-is",
+  "matches",
+  "length-equals"
+]);
+var StructuralConstraintSchema = external_exports.object({
+  path: external_exports.string().min(1),
+  op: StructuralOpSchema,
+  /**
+   * Required for value-bearing ops; omitted for presence ops (exists/absent).
+   * `.optional()` so the key may be absent — `z.unknown()` alone is treated
+   * as non-optional by Zod 4 under `.strict()`.
+   */
+  value: external_exports.unknown().optional()
+}).strict();
+var StructuralMatcherSchema = external_exports.object({
+  mode: external_exports.literal("all"),
+  constraints: external_exports.array(StructuralConstraintSchema)
+}).strict();
 var MatcherInputPatternSchema = external_exports.discriminatedUnion("kind", [
   external_exports.object({
     kind: external_exports.literal("regex"),
@@ -45527,9 +45582,9 @@ var MatcherInputPatternSchema = external_exports.discriminatedUnion("kind", [
   }).strict(),
   external_exports.object({
     kind: external_exports.literal("structural"),
-    /** Wholly undefined per Blueprint B § 2.3 (bd_000-projects-ra9a). */
-    matcher: external_exports.unknown()
-  })
+    /** Structural payload LOCKED per deferral-B (bd_000-projects-ra9a). */
+    matcher: StructuralMatcherSchema
+  }).strict()
 ]);
 var MatcherExpectedBehaviorKindV1Schema = external_exports.enum([
   "exact",
@@ -45561,7 +45616,7 @@ var MatcherMapSchema = external_exports.object({
   created_by: ActorIdentitySchema2
 }).strict();
 
-// node_modules/.pnpm/@intentsolutions+core@0.6.0/node_modules/@intentsolutions/core/dist/validators/v1/evidence-bundle.js
+// node_modules/.pnpm/@intentsolutions+core@0.7.0/node_modules/@intentsolutions/core/dist/validators/v1/evidence-bundle.js
 var SigningModeSchema2 = external_exports.enum([
   "sigstore_staging",
   "rekor_production",
@@ -45592,11 +45647,19 @@ var EvidenceBundleSchema2 = external_exports.object({
   pre_registration_hash: Sha256PrefixedSchema2.nullable().optional()
 }).strict();
 
-// node_modules/.pnpm/@intentsolutions+core@0.6.0/node_modules/@intentsolutions/core/dist/validators/v1/gate-result-v1.js
+// node_modules/.pnpm/@intentsolutions+core@0.7.0/node_modules/@intentsolutions/core/dist/validators/v1/gate-result-v1.js
 var GateDecisionSchema2 = external_exports.enum(["pass", "fail", "advisory", "error"]);
 var AdvisorySeveritySchema2 = external_exports.enum(["info", "warn", "error"]);
 var ReplayFidelityLevelSchema2 = external_exports.enum(["RF-0", "RF-1", "RF-2", "RF-3", "RF-4"]);
 var SubjectSideSchema2 = external_exports.enum(["client", "server", "ci", "sandbox", "local"]);
+var CoverageDimensionStatusSchema = external_exports.enum(["evaluated", "skipped"]);
+var CoverageDimensionDetailSchema = external_exports.object({
+  id: external_exports.string(),
+  status: CoverageDimensionStatusSchema,
+  skip_reason: external_exports.string().optional(),
+  threshold: external_exports.number().optional(),
+  observed: external_exports.number().optional()
+}).strict();
 var GateResultV1Schema2 = external_exports.object({
   gate_id: SubjectNameSchema2,
   gate_name: KebabSlugSchema2,
@@ -45614,7 +45677,8 @@ var GateResultV1Schema2 = external_exports.object({
   failure_mode: external_exports.string().optional(),
   advisory_severity: AdvisorySeveritySchema2.optional(),
   cost_record_ref: Uuidv7Schema2.optional(),
-  replay_fidelity_level: ReplayFidelityLevelSchema2.optional()
+  replay_fidelity_level: ReplayFidelityLevelSchema2.optional(),
+  coverage_detail: external_exports.array(CoverageDimensionDetailSchema).optional()
 }).strict().superRefine((data, ctx) => {
   if (data.gate_decision === "advisory" && data.advisory_severity === void 0) {
     ctx.addIssue({
@@ -45630,10 +45694,24 @@ var GateResultV1Schema2 = external_exports.object({
       path: ["gate_reasons"]
     });
   }
+  if (data.coverage_detail !== void 0) {
+    const evaluated = new Set(data.coverage.dimensions_evaluated);
+    const skipped = new Set(data.coverage.dimensions_skipped);
+    data.coverage_detail.forEach((detail, i) => {
+      const pool = detail.status === "evaluated" ? evaluated : skipped;
+      if (!pool.has(detail.id)) {
+        ctx.addIssue({
+          code: "custom",
+          message: `coverage_detail[${i}].id "${detail.id}" (status=${detail.status}) is not in coverage.dimensions_${detail.status === "evaluated" ? "evaluated" : "skipped"} (deferral-D cross-field invariant)`,
+          path: ["coverage_detail", i, "id"]
+        });
+      }
+    });
+  }
 });
 var GATE_RESULT_V1_URI3 = "https://evals.intentsolutions.io/gate-result/v1";
 
-// node_modules/.pnpm/@intentsolutions+core@0.6.0/node_modules/@intentsolutions/core/dist/validators/v1/evidence-statement.js
+// node_modules/.pnpm/@intentsolutions+core@0.7.0/node_modules/@intentsolutions/core/dist/validators/v1/evidence-statement.js
 var IN_TOTO_STATEMENT_V1_TYPE2 = "https://in-toto.io/Statement/v1";
 var SHA256_PREFIX_LEN2 = "sha256:".length;
 var EvidenceStatementSchema3 = external_exports.object({
@@ -45664,7 +45742,7 @@ var EvidenceStatementSchema3 = external_exports.object({
 });
 var EvidenceBundlePayloadSchema2 = external_exports.array(EvidenceStatementSchema3);
 
-// node_modules/.pnpm/@intentsolutions+core@0.6.0/node_modules/@intentsolutions/core/dist/validators/v1/judge-decision.js
+// node_modules/.pnpm/@intentsolutions+core@0.7.0/node_modules/@intentsolutions/core/dist/validators/v1/judge-decision.js
 var JudgeVerdictSchema = external_exports.enum(["PASS", "FAIL", "ADVISORY", "NOT_APPLICABLE", "ERROR"]);
 var VerdictSourceSchema = external_exports.enum([
   "deterministic",
@@ -45691,7 +45769,7 @@ var JudgeDecisionSchema = external_exports.object({
   cost_record_ref: Uuidv7Schema2
 }).strict();
 
-// node_modules/.pnpm/@intentsolutions+core@0.6.0/node_modules/@intentsolutions/core/dist/validators/v1/runtime-receipt.js
+// node_modules/.pnpm/@intentsolutions+core@0.7.0/node_modules/@intentsolutions/core/dist/validators/v1/runtime-receipt.js
 var EvalRunTerminalStateSchema = external_exports.enum([
   "archived",
   "skipped_due_to_gate",
@@ -45721,7 +45799,7 @@ var RuntimeReceiptSchema = external_exports.object({
   cost_record_id: Uuidv7Schema2
 }).strict();
 
-// node_modules/.pnpm/@intentsolutions+core@0.6.0/node_modules/@intentsolutions/core/dist/validators/v1/regression-pack.js
+// node_modules/.pnpm/@intentsolutions+core@0.7.0/node_modules/@intentsolutions/core/dist/validators/v1/regression-pack.js
 var RegressionPackStateSchema = external_exports.enum(["draft", "committed", "superseded"]);
 var MatcherOutcomeRowSchema = external_exports.object({
   pass: external_exports.number().int().nonnegative(),
@@ -45753,7 +45831,7 @@ var RegressionPackSchema = external_exports.object({
   content_hash: Sha256Schema2
 }).strict();
 
-// node_modules/.pnpm/@intentsolutions+core@0.6.0/node_modules/@intentsolutions/core/dist/validators/v1/rollout-gate.js
+// node_modules/.pnpm/@intentsolutions+core@0.7.0/node_modules/@intentsolutions/core/dist/validators/v1/rollout-gate.js
 var RolloutGateDecisionSchema = external_exports.enum(["ship", "no_ship", "advisory", "error"]);
 var RolloutGateSchema = external_exports.object({
   id: Uuidv7Schema2,
@@ -45770,7 +45848,7 @@ var RolloutGateSchema = external_exports.object({
   rekor_log_index: external_exports.number().int().nonnegative().nullable()
 }).strict();
 
-// node_modules/.pnpm/@intentsolutions+core@0.6.0/node_modules/@intentsolutions/core/dist/validators/v1/skill-snapshot.js
+// node_modules/.pnpm/@intentsolutions+core@0.7.0/node_modules/@intentsolutions/core/dist/validators/v1/skill-snapshot.js
 var SkillSnapshotSchema = external_exports.object({
   id: Uuidv7Schema2,
   skill_id: KebabSlugSchema2,
@@ -45782,10 +45860,12 @@ var SkillSnapshotSchema = external_exports.object({
   version_label: SemVerSchema2.nullable(),
   storage_key: StorageKeySchema2,
   created_at: Rfc3339Schema2,
-  created_by: ActorIdentitySchema2
+  created_by: ActorIdentitySchema2,
+  /** RESERVED multi-tenancy slot (deferral-G, bd_000-projects-k0fj). */
+  tenant_id: Uuidv7Schema2.optional()
 }).strict();
 
-// node_modules/.pnpm/@intentsolutions+core@0.6.0/node_modules/@intentsolutions/core/dist/validators/v1/session-trace.js
+// node_modules/.pnpm/@intentsolutions+core@0.7.0/node_modules/@intentsolutions/core/dist/validators/v1/session-trace.js
 var SessionTraceSchema = external_exports.object({
   id: Uuidv7Schema2,
   eval_run_id: Uuidv7Schema2,
@@ -45799,9 +45879,10 @@ var SessionTraceSchema = external_exports.object({
   trace_blob_storage_key: StorageKeySchema2
 }).strict();
 
-// node_modules/.pnpm/@intentsolutions+core@0.6.0/node_modules/@intentsolutions/core/dist/validators/v1/tool-invocation.js
+// node_modules/.pnpm/@intentsolutions+core@0.7.0/node_modules/@intentsolutions/core/dist/validators/v1/tool-invocation.js
+var ErrorClassSchema = external_exports.string().regex(/^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)+$/, "Must be a <domain>.<condition> error class");
 var ToolInvocationErrorSchema = external_exports.object({
-  enum_class: external_exports.string(),
+  enum_class: ErrorClassSchema,
   message: external_exports.string()
 }).strict();
 var ToolInvocationSchema = external_exports.object({
@@ -45822,7 +45903,7 @@ var ToolInvocationSchema = external_exports.object({
   retry_attempt: external_exports.number().int().nonnegative()
 }).strict();
 
-// node_modules/.pnpm/@intentsolutions+core@0.6.0/node_modules/@intentsolutions/core/dist/validators/v1/cost-record.js
+// node_modules/.pnpm/@intentsolutions+core@0.7.0/node_modules/@intentsolutions/core/dist/validators/v1/cost-record.js
 var CostAttributionClassSchema = external_exports.enum([
   "run",
   "provider",
@@ -45848,7 +45929,7 @@ var CostRecordSchema = external_exports.object({
   cost_basis_version: external_exports.string().min(1)
 }).strict();
 
-// node_modules/.pnpm/@intentsolutions+core@0.6.0/node_modules/@intentsolutions/core/dist/validators/v1/failure-taxonomy.js
+// node_modules/.pnpm/@intentsolutions+core@0.7.0/node_modules/@intentsolutions/core/dist/validators/v1/failure-taxonomy.js
 var FailureTaxonomyStatusSchema = external_exports.enum(["proposed", "canonical", "deprecated"]);
 var FailureTaxonomyExampleSchema = external_exports.object({
   ref: external_exports.string(),
@@ -45867,7 +45948,7 @@ var FailureTaxonomySchema = external_exports.object({
   created_by: ActorIdentitySchema2
 }).strict();
 
-// node_modules/.pnpm/@intentsolutions+core@0.6.0/node_modules/@intentsolutions/core/dist/validators/v1/retraction-v1.js
+// node_modules/.pnpm/@intentsolutions+core@0.7.0/node_modules/@intentsolutions/core/dist/validators/v1/retraction-v1.js
 var RetractionReasonClassSchema = external_exports.enum([
   "partner-request",
   "methodology-error",
@@ -45891,7 +45972,7 @@ var RetractionV1Schema = external_exports.object({
   retracted_by: ActorIdentitySchema2.optional()
 }).strict();
 
-// node_modules/.pnpm/@intentsolutions+core@0.6.0/node_modules/@intentsolutions/core/dist/validators/v1/dashboard-render-v1.js
+// node_modules/.pnpm/@intentsolutions+core@0.7.0/node_modules/@intentsolutions/core/dist/validators/v1/dashboard-render-v1.js
 var RenderedArtifactSchema = external_exports.object({
   uri: external_exports.string().min(1).optional(),
   content_hash: Sha256PrefixedSchema2,
@@ -45911,7 +45992,7 @@ var DashboardRenderV1Schema = external_exports.object({
   renderer_config_hash: Sha256PrefixedSchema2.optional()
 }).strict();
 
-// node_modules/.pnpm/@intentsolutions+core@0.6.0/node_modules/@intentsolutions/core/dist/validators/v1/authoring/marketplace-tier.js
+// node_modules/.pnpm/@intentsolutions+core@0.7.0/node_modules/@intentsolutions/core/dist/validators/v1/authoring/marketplace-tier.js
 var IS_MARKETPLACE_DEPRECATED_FIELDS = {
   "compatible-with": "compatibility",
   when_to_use: "description"
@@ -46002,7 +46083,7 @@ var SecurityChecksSchema = attach(securityChecksIssues);
 var DisclosureMarkersSchema = attach(disclosureMarkersIssues);
 var UniversalFoldsSchema = attach(universalFoldsIssues);
 
-// node_modules/.pnpm/@intentsolutions+core@0.6.0/node_modules/@intentsolutions/core/dist/validators/v1/authoring/skill-frontmatter.js
+// node_modules/.pnpm/@intentsolutions+core@0.7.0/node_modules/@intentsolutions/core/dist/validators/v1/authoring/skill-frontmatter.js
 var SKILL_FRONTMATTER_BASE_REQUIRED = ["name", "description"];
 var SKILL_FRONTMATTER_OVERLAY_REQUIRED = [
   "allowed-tools",
@@ -46175,7 +46256,7 @@ function skillFrontmatterIssues(artifact) {
 }
 var SkillFrontmatterSchema2 = attach(skillFrontmatterIssues);
 
-// node_modules/.pnpm/@intentsolutions+core@0.6.0/node_modules/@intentsolutions/core/dist/validators/v1/authoring/plugin-manifest.js
+// node_modules/.pnpm/@intentsolutions+core@0.7.0/node_modules/@intentsolutions/core/dist/validators/v1/authoring/plugin-manifest.js
 var PLUGIN_MANIFEST_BASE_REQUIRED = ["name"];
 var PLUGIN_MANIFEST_OVERLAY_REQUIRED = [
   "version",
@@ -46297,7 +46378,7 @@ function pluginManifestIssues(artifact) {
 }
 var PluginManifestSchema = attach(pluginManifestIssues);
 
-// node_modules/.pnpm/@intentsolutions+core@0.6.0/node_modules/@intentsolutions/core/dist/validators/v1/authoring/agent-definition.js
+// node_modules/.pnpm/@intentsolutions+core@0.7.0/node_modules/@intentsolutions/core/dist/validators/v1/authoring/agent-definition.js
 var AGENT_DEFINITION_BASE_REQUIRED = ["name", "description"];
 var AGENT_DEFINITION_OVERLAY_REQUIRED = [
   "tools",
@@ -46414,7 +46495,7 @@ function agentDefinitionIssues(artifact) {
 }
 var AgentDefinitionSchema = attach(agentDefinitionIssues);
 
-// node_modules/.pnpm/@intentsolutions+core@0.6.0/node_modules/@intentsolutions/core/dist/validators/v1/authoring/mcp-config.js
+// node_modules/.pnpm/@intentsolutions+core@0.7.0/node_modules/@intentsolutions/core/dist/validators/v1/authoring/mcp-config.js
 var MCP_CONFIG_BASE_REQUIRED = ["name", "command", "args", "transport", "env"];
 var MCP_CONFIG_OVERLAY_REQUIRED = ["description", "version", "enabled"];
 var MCP_CONFIG_REQUIRED_FIELDS = [
@@ -46509,7 +46590,7 @@ function mcpConfigIssues(artifact) {
 }
 var McpConfigSchema = attach(mcpConfigIssues);
 
-// node_modules/.pnpm/@intentsolutions+core@0.6.0/node_modules/@intentsolutions/core/dist/validators/v1/authoring/hook-config.js
+// node_modules/.pnpm/@intentsolutions+core@0.7.0/node_modules/@intentsolutions/core/dist/validators/v1/authoring/hook-config.js
 var HOOK_CONFIG_BASE_REQUIRED = ["event", "matcher", "type", "command"];
 var HOOK_CONFIG_OVERLAY_REQUIRED = [
   "description",
@@ -46632,7 +46713,7 @@ function hookConfigIssues(artifact) {
 }
 var HookConfigSchema = attach(hookConfigIssues);
 
-// node_modules/.pnpm/@intentsolutions+core@0.6.0/node_modules/@intentsolutions/core/dist/validators/v1/authoring/marketplace-catalog.js
+// node_modules/.pnpm/@intentsolutions+core@0.7.0/node_modules/@intentsolutions/core/dist/validators/v1/authoring/marketplace-catalog.js
 var MARKETPLACE_CATALOG_BASE_REQUIRED = ["name", "owner", "plugins"];
 var MARKETPLACE_CATALOG_OVERLAY_REQUIRED = [
   "version",
