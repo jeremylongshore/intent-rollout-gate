@@ -1,0 +1,196 @@
+name: Dogfood (iar-E10)
+
+# iar-E10 internal dogfood (pv6): run the PUBLISHED Action (`uses: ./`) against a
+# REAL Evidence Bundle generated from THIS repo's own state — a kernel-valid
+# gate-result/v1 bundle whose in-toto subject digest is the live sha256 of
+# dist/index.js (the bytes the Action actually executes), with the real HEAD
+# commit_sha, real policy digest, and real package-version runner. NOT a
+# synthetic always-pass fixture.
+#
+# It asserts BOTH outcomes the gate exists to produce against the SAME real
+# subject:
+#   - SHIP    (all gate rows pass)  → decision=allow, empty reasons, job succeeds
+#   - NO-SHIP (one gate row fails)  → decision=block, with the real failing gate
+#                                     named, AND fail-on-block enforcement fails
+#                                     the job (exit non-zero).
+# It also asserts the DECISION-ROW emit: the Action's step-summary "decision row"
+# (## Intent Rollout Gate + the required-gate table) is written to
+# $GITHUB_STEP_SUMMARY, and the `summary` / `reasons` / `decision` /
+# `signed-decision-row-path` outputs are populated.
+#
+# Production-Rekor decision-row SIGNING is deliberately NOT exercised here: that
+# is dispatch-only / dry-run-default and iah-E06 DNSSEC/CAA-gated in release.yml.
+# This dogfood never writes to a transparency log.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  dogfood:
+    name: Run the published Action against a real kernel-valid bundle
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: pnpm
+
+      - name: Install (frozen lockfile)
+        run: pnpm install --frozen-lockfile
+
+      # The dist bundle the Action runs MUST be in sync with src/ for the
+      # subject digest to mean anything — rebuild and fail if stale.
+      - name: Rebuild dist (subject digest must reflect committed src/)
+        run: |
+          pnpm run build
+          git diff --exit-code dist/ || {
+            echo "::error::dist/index.js is stale — run 'pnpm run build' and commit before dogfooding."
+            exit 1
+          }
+
+      # Generate the REAL bundle. The generator validates every predicate body
+      # against the kernel @intentsolutions/core GateResultV1Schema and exits
+      # non-zero (writing nothing) if any row is invalid — so this step
+      # succeeding is itself proof the bundle is kernel-valid.
+      - name: Generate real kernel-validated Evidence Bundle from repo state
+        run: |
+          mkdir -p .dogfood
+          node scripts/dogfood-bundle.mjs \
+            --out-dir .dogfood \
+            --policy tests/fixtures/dogfood-policy.json
+          echo "::group::ship.bundle.json"
+          cat .dogfood/ship.bundle.json
+          echo "::endgroup::"
+          echo "::group::no-ship.bundle.json"
+          cat .dogfood/no-ship.bundle.json
+          echo "::endgroup::"
+
+      # ---- SHIP: all-pass real bundle → allow, job succeeds ----
+      - name: SHIP — run the published Action against the all-pass real bundle
+        id: ship
+        uses: ./
+        with:
+          bundle-path: .dogfood/ship.bundle.json
+          policy-path: tests/fixtures/dogfood-policy.json
+
+      # ---- NO-SHIP (observe): same real subject, one fail row, fail-on-block=false ----
+      - name: NO-SHIP (observe) — block without failing the job (fail-on-block=false)
+        id: noship_observe
+        uses: ./
+        with:
+          bundle-path: .dogfood/no-ship.bundle.json
+          policy-path: tests/fixtures/dogfood-policy.json
+          fail-on-block: "false"
+
+      - name: Assert ship + no-ship decisions and the decision-row emit
+        env:
+          SHIP_DECISION: ${{ steps.ship.outputs.decision }}
+          SHIP_REASONS: ${{ steps.ship.outputs.reasons }}
+          SHIP_SUMMARY: ${{ steps.ship.outputs.summary }}
+          SHIP_SIGNED_PATH: ${{ steps.ship.outputs.signed-decision-row-path }}
+          NOSHIP_DECISION: ${{ steps.noship_observe.outputs.decision }}
+          NOSHIP_REASONS: ${{ steps.noship_observe.outputs.reasons }}
+          NOSHIP_SUMMARY: ${{ steps.noship_observe.outputs.summary }}
+        run: |
+          set -euo pipefail
+          # The python3 -c one-liners below intentionally use single quotes so
+          # the shell does NOT expand their contents (the JSON is read from
+          # stdin, not interpolated). shellcheck SC2016 is a false positive here.
+          # shellcheck disable=SC2016
+
+          # --- SHIP assertions ---
+          [ "$SHIP_DECISION" = "allow" ] || { echo "::error::SHIP expected allow, got '$SHIP_DECISION'"; exit 1; }
+          [ "$SHIP_REASONS" = "[]" ] || { echo "::error::SHIP expected empty reasons, got '$SHIP_REASONS'"; exit 1; }
+          # signed-decision-row-path is reserved (empty at this version), but must
+          # be a declared, present output.
+          [ "$SHIP_SIGNED_PATH" = "" ] || { echo "::error::SHIP expected empty signed-decision-row-path (reserved), got '$SHIP_SIGNED_PATH'"; exit 1; }
+
+          # --- NO-SHIP (observe) assertions ---
+          [ "$NOSHIP_DECISION" = "block" ] || { echo "::error::NO-SHIP expected block, got '$NOSHIP_DECISION'"; exit 1; }
+          echo "$NOSHIP_REASONS" | python3 -c 'import json,sys; r=json.load(sys.stdin); assert isinstance(r, list) and len(r) > 0, "expected non-empty reasons array"'
+          # the block must name THIS repo's real failing gate, proving the
+          # decision came from the real bundle, not a default.
+          echo "$NOSHIP_REASONS" | python3 -c 'import json,sys; r=" ".join(json.load(sys.stdin)); assert "intent-rollout-gate:ci:typecheck-and-tests" in r, "block reason must name the real failing gate"'
+
+          # --- DECISION-ROW emit assertions (the human-scannable decision row) ---
+          # The Action renders a "## Intent Rollout Gate" decision block with the
+          # required-gate table into both the `summary` output and
+          # $GITHUB_STEP_SUMMARY. Assert the output carries it for both decisions.
+          for s in "$SHIP_SUMMARY" "$NOSHIP_SUMMARY"; do
+            echo "$s" | grep -q "## Intent Rollout Gate" || { echo "::error::decision-row summary missing header"; exit 1; }
+            echo "$s" | grep -q "intent-rollout-gate:ci:\*" || { echo "::error::decision-row summary missing the real required-gate pattern"; exit 1; }
+          done
+          echo "$NOSHIP_SUMMARY" | grep -q '\*\*Decision:\*\* `block`' || { echo "::error::no-ship decision row not marked block"; exit 1; }
+          echo "$SHIP_SUMMARY" | grep -q '\*\*Decision:\*\* `allow`' || { echo "::error::ship decision row not marked allow"; exit 1; }
+
+          # The step summary file the runner wrote must contain the decision row too.
+          grep -q "## Intent Rollout Gate" "$GITHUB_STEP_SUMMARY" || { echo "::error::\$GITHUB_STEP_SUMMARY missing the decision row"; exit 1; }
+
+          echo "Dogfood OK: real bundle → allow on ship, block on no-ship, decision row emitted for both."
+
+  # ---- NO-SHIP (enforce): the default fail-on-block MUST fail the job ----
+  # Proven in its own job because a failing Action step would otherwise fail the
+  # whole workflow. We invert the expectation: the gate step is EXPECTED to fail,
+  # and the job succeeds only if it did.
+  dogfood-enforce:
+    name: NO-SHIP enforcement — default fail-on-block fails the job on block
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: pnpm
+
+      - name: Install (frozen lockfile)
+        run: pnpm install --frozen-lockfile
+
+      - name: Rebuild dist
+        run: |
+          pnpm run build
+          git diff --exit-code dist/
+
+      - name: Generate real bundle
+        run: |
+          mkdir -p .dogfood
+          node scripts/dogfood-bundle.mjs \
+            --out-dir .dogfood \
+            --policy tests/fixtures/dogfood-policy.json
+
+      - name: NO-SHIP (enforce) — expect the Action to FAIL the job
+        id: noship_enforce
+        continue-on-error: true
+        uses: ./
+        with:
+          bundle-path: .dogfood/no-ship.bundle.json
+          policy-path: tests/fixtures/dogfood-policy.json
+          # fail-on-block defaults to true → a block decision must fail this step.
+
+      - name: Assert the gate step actually failed (fail-closed enforcement)
+        env:
+          OUTCOME: ${{ steps.noship_enforce.outcome }}
+          DECISION: ${{ steps.noship_enforce.outputs.decision }}
+        run: |
+          set -euo pipefail
+          [ "$OUTCOME" = "failure" ] || { echo "::error::expected the gate step to FAIL on block (fail-on-block default), but outcome was '$OUTCOME'"; exit 1; }
+          [ "$DECISION" = "block" ] || { echo "::error::expected decision=block, got '$DECISION'"; exit 1; }
+          echo "Enforcement OK: a real no-ship bundle failed the job under default fail-on-block."

@@ -12,8 +12,8 @@ importers:
         specifier: ^1.11.1
         version: 1.11.1
       '@intentsolutions/core':
-        specifier: ^0.6.0
-        version: 0.6.0
+        specifier: ^0.7.0
+        version: 0.7.0
       '@intentsolutions/rollout-gate':
         specifier: 2.0.0
         version: 2.0.0
@@ -372,8 +372,8 @@ packages:
     engines: {node: '>=18'}
     hasBin: true
 
-  '@intentsolutions/core@0.6.0':
-    resolution: {integrity: sha512-YNV9o2cBPCyd1HAks9yYy33fZKxPM44GFuzKiVxtp0XJwgLbNZQXz2/kgBlJ+IQxwAJu6seFcxgyFa5J7DYFhw==}
+  '@intentsolutions/core@0.7.0':
+    resolution: {integrity: sha512-4ID9MktX4g7LAghPE/nBUtvNh9o9IQy5oMul/Bx0wnO6hYxTrf6YTi6yORsSJO65McZDbOiFoBnIDAzNrC1Vbw==}
     engines: {node: '>=20.0.0', pnpm: '>=9.0.0'}
 
   '@intentsolutions/rollout-gate@2.0.0':
@@ -964,7 +964,7 @@ snapshots:
 
   '@intentsolutions/audit-harness@1.1.8': {}
 
-  '@intentsolutions/core@0.6.0':
+  '@intentsolutions/core@0.7.0':
     dependencies:
       zod: 4.4.3
 
