@@ -7,16 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Pending
-
-- Phase 7.5 gist (deferred per release-sweep CTO call — `iep-gist-coverage` follow-up bead; each landing-page gist deserves bespoke `/appaudit` treatment).
-- **Decision-row signing (`rollout-decision/v1`)** — emit + sign the action's own in-toto decision row (distinct from signing the committed `dist/index.js` artifact, which v0.2.0 enabled). It delegates to `audit-harness` `emit-evidence`, inheriting the same DNSSEC/CAA pre-flight already wired here. The `signed-decision-row-path` output stays empty until this lands.
-- **`tests/TESTING.md` policy parsing** — deferred per DR-002 § 5; the action continues to consume JSON policy documents only.
-- **M6 first adopter** — `audit-harness` self-adopts the gate end-to-end before any partner repo (DR-002 § 6 criterion 5).
+> **Pending follow-ups:**
+>
+> - Phase 7.5 gist (deferred per release-sweep CTO call — `iep-gist-coverage` follow-up bead; each landing-page gist deserves bespoke `/appaudit` treatment).
+> - **Decision-row signing (`rollout-decision/v1`)** — emit + sign the action's own in-toto decision row (distinct from signing the committed `dist/index.js` artifact, which v0.2.0 enabled). It delegates to `audit-harness` `emit-evidence`, inheriting the same DNSSEC/CAA pre-flight already wired here. The `signed-decision-row-path` output stays empty until this lands.
+> - **`tests/TESTING.md` policy parsing** — deferred per DR-002 § 5; the action continues to consume JSON policy documents only.
+> - **M6 first adopter** — `audit-harness` self-adopts the gate end-to-end before any partner repo (DR-002 § 6 criterion 5).
 
 ## [0.3.0] - 2026-06-15
 
 **Release-pipeline hardening + provenance correctness.** No change to the action's public `uses:` interface (inputs/outputs are byte-identical to v0.2.0) — this release hardens the release/signing pipeline itself and fixes a provenance-correctness bug in the dispatch re-release path. Adopters upgrade the pin; no workflow rewiring is required.
+
+> **Architectural bindings:**
+>
+> - [DR-004 § 6.1](https://github.com/jeremylongshore/intent-eval-lab/blob/main/000-docs/004-AT-DECR-isedc-council-record-2026-05-10.md) — CISO DNSSEC + CAA pre-condition for any Rekor push referencing an `evals.intentsolutions.io` predicate URI; the always-on pre-flight enforces it.
+> - ISEDC E09 DR / CISO reproducible-from-tag invariant — the #32 checkout-tag-pin fix closes the wrong-bytes attestation class.
 
 ### Added
 
@@ -35,16 +40,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Checkout now pins to the dispatched tag, not `main` (provenance one-way-door fix).** On `workflow_dispatch` the `build`, `release`, and `sign` jobs previously resolved `GITHUB_REF` (the default branch) — so a re-release / sign dispatch would rebuild and attest `dist/index.js` bytes from `main`, NOT the bytes consumers resolve via `uses: jeremylongshore/intent-rollout-gate@<tag>`. Every checkout now sets `ref: ${{ inputs.tag }}`; on a plain tag-push event `inputs.tag` is empty and checkout correctly falls back to the pushed tag. This closes a wrong-bytes attestation class — a signed-provenance one-way door (CISO reproducible-from-tag invariant). (#32)
 
-### Architectural bindings
-
-- [DR-004 § 6.1](https://github.com/jeremylongshore/intent-eval-lab/blob/main/000-docs/004-AT-DECR-isedc-council-record-2026-05-10.md) — CISO DNSSEC + CAA pre-condition for any Rekor push referencing an `evals.intentsolutions.io` predicate URI; the always-on pre-flight enforces it.
-- ISEDC E09 DR / CISO reproducible-from-tag invariant — the #32 checkout-tag-pin fix closes the wrong-bytes attestation class.
-
 ## [0.2.0] - 2026-06-13
 
 **Stable consumption contract + production-Rekor signing enabled.** Graduates the M5 TypeScript MVP from `v0.1.0` ("experimental" per [DR-002](000-docs/004-AT-DECR-runtime-language-typescript-2026-06-10.md) § 6 — behavior present, contract not yet frozen) to a frozen consumption contract, and enables the previously-HELD sigstore PRODUCTION transparency-log signing path behind the iah-E06 DNSSEC/CAA pre-flight (fail-closed). The action's public `uses:` interface stays forward-compatible: inputs/outputs are additive only ([Evidence Bundle SPEC](https://github.com/jeremylongshore/intent-eval-lab/blob/main/specs/evidence-bundle/v0.1.0-draft/SPEC.md) R18); no breaking change ships without a new predicate URI (SPEC R17). Adopters upgrade the pin; no workflow rewiring is required. Full migration guidance: [`000-docs/008-RL-REPT-v0.2.0-migration-notes-2026-06-18.md`](000-docs/008-RL-REPT-v0.2.0-migration-notes-2026-06-18.md).
 
 This release satisfies DR-002 § 6 acceptance criteria **1** (frozen consumption contract), **3** (decision-signing preconditions met — both gates now land), **4** (Testing SOP gate green), and **5** (M6 first-adopter path) for the signing surface; criterion **2** (additive-only `uses:` interface) is preserved.
+
+> **Architectural bindings:**
+>
+> - [DR-002 § 6](000-docs/004-AT-DECR-runtime-language-typescript-2026-06-10.md) — the v0.1.0-experimental → v0.2.0 acceptance criteria.
+> - [006-AT-SPEC](000-docs/006-AT-SPEC-evidence-bundle-normative-lock-verification-2026-06-18.md) — SPEC R14–R18 + kernel schema + DNSSEC/CAA pre-flight verification (E08 acceptance record).
+> - [007-AT-DECR](000-docs/007-AT-DECR-spec-normative-lock-sign-off-2026-06-18.md) — acting-head-of-board sign-off ratifying the SPEC normative lock.
 
 ### Added
 
@@ -63,15 +69,14 @@ This release satisfies DR-002 § 6 acceptance criteria **1** (frozen consumption
 - Decision logic remains delegated to [`@intentsolutions/rollout-gate@2.0.0`](https://www.npmjs.com/package/@intentsolutions/rollout-gate) (thin shell preserved); no gate semantics added to this repo.
 - The `policy-file` and `dry-run` deprecated aliases (introduced at v0.1.0) remain accepted — deprecated, not removed. Removing them would be a SemVer-major event with its own migration note.
 
-### Architectural bindings
-
-- [DR-002 § 6](000-docs/004-AT-DECR-runtime-language-typescript-2026-06-10.md) — the v0.1.0-experimental → v0.2.0 acceptance criteria.
-- [006-AT-SPEC](000-docs/006-AT-SPEC-evidence-bundle-normative-lock-verification-2026-06-18.md) — SPEC R14–R18 + kernel schema + DNSSEC/CAA pre-flight verification (E08 acceptance record).
-- [007-AT-DECR](000-docs/007-AT-DECR-spec-normative-lock-sign-off-2026-06-18.md) — acting-head-of-board sign-off ratifying the SPEC normative lock.
-
 ## [0.1.0] - 2026-06-12
 
 **M5 TypeScript MVP (experimental).** The action graduates from the v0.0.x composite no-op stub to a real Node-runtime action. Runtime language locked to TypeScript by [DR-002](000-docs/004-AT-DECR-runtime-language-typescript-2026-06-10.md) (recording the upstream DR-010 § 13.5 TS-primary lock). **Thin shell by design (Blueprint A):** every line of decision logic is delegated to the published [`@intentsolutions/rollout-gate@2.0.0`](https://www.npmjs.com/package/@intentsolutions/rollout-gate) package (Apache-2.0, sigstore provenance, transparency log 1798629513) — `decide()` / `parsePolicy()`; row validation reuses the kernel `@intentsolutions/core` gate-result/v1 statement schema. Zero gate semantics live in this repo. Released **experimental**: DR-002 § 6 gates the v0.2.0 graduation on the signing preconditions (DNSSEC+CAA / Rekor) and M6 first-adopter criteria — both still open at this release.
+
+> **Architectural bindings:**
+>
+> - [DR-002](000-docs/004-AT-DECR-runtime-language-typescript-2026-06-10.md) — runtime language TypeScript on Node 20+; § 6 acceptance criteria frame the v0.1.0-experimental → v0.2.0 transition (this release is the v0.1.0-experimental step: criteria 1 + 2 land, criterion 4 (Testing SOP gate) is installed here and must stay green, criteria 3 (signing preconditions) + 5 (M6 adoption) gate the future v0.2.0 graduation).
+> - [DR-018 § 9.2](https://github.com/jeremylongshore/intent-eval-lab/blob/main/000-docs/018-AT-DECR-isedc-council-session-5-jrig-reconciliation-2026-05-21.md) — decision-logic delegation to the j-rig-published rollout-gate package; this repo is the thin shell.
 
 ### Added
 
@@ -95,14 +100,20 @@ This release satisfies DR-002 § 6 acceptance criteria **1** (frozen consumption
 - `predicate-uri`, `rekor-url`, `cosign-key` inputs are retained additively (Evidence Bundle SPEC R18) as **reserved**: only the default v1 predicate URI is accepted (anything else blocks), no Rekor push ever happens at v0.1.0, and `cosign-key` warns + no-ops. `signed-decision-row-path` output stays empty until decision-row signing lands. (#21)
 - `.gitignore` rewritten for the locked TS runtime (Go/Python sections removed; `dist/` now tracked). (#21)
 
-### Architectural bindings
-
-- [DR-002](000-docs/004-AT-DECR-runtime-language-typescript-2026-06-10.md) — runtime language TypeScript on Node 20+; § 6 acceptance criteria frame the v0.1.0-experimental → v0.2.0 transition (this release is the v0.1.0-experimental step: criteria 1 + 2 land, criterion 4 (Testing SOP gate) is installed here and must stay green, criteria 3 (signing preconditions) + 5 (M6 adoption) gate the future v0.2.0 graduation).
-- [DR-018 § 9.2](https://github.com/jeremylongshore/intent-eval-lab/blob/main/000-docs/018-AT-DECR-isedc-council-session-5-jrig-reconciliation-2026-05-21.md) — decision-logic delegation to the j-rig-published rollout-gate package; this repo is the thin shell.
-
 ## [0.0.1] - 2026-05-26
 
 **Baseline release.** Establishes the tag + CHANGELOG baseline for this repo. No npm-publish surface yet — this is a GitHub Action distributed via the `action.yml` manifest at the repo root. Tag enables GitHub Marketplace listing.
+
+> **Architectural bindings:**
+>
+> - [Blueprint A](https://github.com/jeremylongshore/intent-eval-lab/blob/main/000-docs/011-AT-ARCH-ecosystem-master-blueprint.md) — 12 binding principles, 5-repo taxonomy (this repo is the GitHub Action shell layer).
+> - [Blueprint B § 7](https://github.com/jeremylongshore/intent-eval-lab/blob/main/000-docs/012-AT-ARCH-platform-runtime-blueprint.md) — `gate-result/v1` NORMATIVE predicate spec (the Action consumes this predicate from Evidence Bundles).
+> - [DR-018 § 9.2](https://github.com/jeremylongshore/intent-eval-lab/blob/main/000-docs/018-AT-DECR-isedc-council-session-5-jrig-reconciliation-2026-05-21.md) — `@j-rig/rollout-gate` decision-logic delegation (M5 consumes; this repo is the thin shell).
+>
+> **Quality posture:**
+>
+> - CI workflow (`.github/workflows/ci.yml`) — `yamllint action.yml` for manifest validation. M5 substantive runtime adds the full TS gate chain.
+> - Scaffolding files present: `AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING.md`, `LICENSE` (Apache 2.0), `NOTICE`, `README.md`, `SECURITY.md`, `CODE_OF_CONDUCT.md` (this release).
 
 ### Added
 
@@ -116,17 +127,6 @@ This release satisfies DR-002 § 6 acceptance criteria **1** (frozen consumption
 ### Changed
 
 - **License relicensed from MIT to Apache 2.0** (#12, commit `295cbe4`) — BREAKING. Mirrors the audit-harness (#32) and `j-rig-skill-binary-eval` (#73) relicenses. Per Blueprint A, the 5-repo IEP taxonomy standardizes on Apache 2.0 for downstream-friendly patent grant.
-
-### Architectural bindings
-
-- [Blueprint A](https://github.com/jeremylongshore/intent-eval-lab/blob/main/000-docs/011-AT-ARCH-ecosystem-master-blueprint.md) — 12 binding principles, 5-repo taxonomy (this repo is the GitHub Action shell layer).
-- [Blueprint B § 7](https://github.com/jeremylongshore/intent-eval-lab/blob/main/000-docs/012-AT-ARCH-platform-runtime-blueprint.md) — `gate-result/v1` NORMATIVE predicate spec (the Action consumes this predicate from Evidence Bundles).
-- [DR-018 § 9.2](https://github.com/jeremylongshore/intent-eval-lab/blob/main/000-docs/018-AT-DECR-isedc-council-session-5-jrig-reconciliation-2026-05-21.md) — `@j-rig/rollout-gate` decision-logic delegation (M5 consumes; this repo is the thin shell).
-
-### Quality posture
-
-- CI workflow (`.github/workflows/ci.yml`) — `yamllint action.yml` for manifest validation. M5 substantive runtime adds the full TS gate chain.
-- Scaffolding files present: `AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING.md`, `LICENSE` (Apache 2.0), `NOTICE`, `README.md`, `SECURITY.md`, `CODE_OF_CONDUCT.md` (this release).
 
 [Unreleased]: https://github.com/jeremylongshore/intent-rollout-gate/compare/v0.3.0...HEAD
 [0.3.0]: https://github.com/jeremylongshore/intent-rollout-gate/compare/v0.2.0...v0.3.0
