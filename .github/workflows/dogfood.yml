@@ -108,8 +108,7 @@ jobs:
           set -euo pipefail
           # The python3 -c one-liners below intentionally use single quotes so
           # the shell does NOT expand their contents (the JSON is read from
-          # stdin, not interpolated). shellcheck SC2016 is a false positive here.
-          # shellcheck disable=SC2016
+          # stdin, not interpolated); SC2016 is disabled per-line on each.
 
           # --- SHIP assertions ---
           [ "$SHIP_DECISION" = "allow" ] || { echo "::error::SHIP expected allow, got '$SHIP_DECISION'"; exit 1; }
@@ -120,9 +119,11 @@ jobs:
 
           # --- NO-SHIP (observe) assertions ---
           [ "$NOSHIP_DECISION" = "block" ] || { echo "::error::NO-SHIP expected block, got '$NOSHIP_DECISION'"; exit 1; }
+          # shellcheck disable=SC2016
           echo "$NOSHIP_REASONS" | python3 -c 'import json,sys; r=json.load(sys.stdin); assert isinstance(r, list) and len(r) > 0, "expected non-empty reasons array"'
           # the block must name THIS repo's real failing gate, proving the
           # decision came from the real bundle, not a default.
+          # shellcheck disable=SC2016
           echo "$NOSHIP_REASONS" | python3 -c 'import json,sys; r=" ".join(json.load(sys.stdin)); assert "intent-rollout-gate:ci:typecheck-and-tests" in r, "block reason must name the real failing gate"'
 
           # --- DECISION-ROW emit assertions (the human-scannable decision row) ---
@@ -133,7 +134,10 @@ jobs:
             echo "$s" | grep -q "## Intent Rollout Gate" || { echo "::error::decision-row summary missing header"; exit 1; }
             echo "$s" | grep -q "intent-rollout-gate:ci:\*" || { echo "::error::decision-row summary missing the real required-gate pattern"; exit 1; }
           done
+          # Single quotes keep the literal grep patterns (incl. backticks) un-expanded.
+          # shellcheck disable=SC2016
           echo "$NOSHIP_SUMMARY" | grep -q '\*\*Decision:\*\* `block`' || { echo "::error::no-ship decision row not marked block"; exit 1; }
+          # shellcheck disable=SC2016
           echo "$SHIP_SUMMARY" | grep -q '\*\*Decision:\*\* `allow`' || { echo "::error::ship decision row not marked allow"; exit 1; }
 
           # NOTE on $GITHUB_STEP_SUMMARY: the Action writes the decision row to the

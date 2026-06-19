@@ -105,7 +105,7 @@ async function conclude(
   decision: string,
   reasons: string[],
   result: DecideResult | null,
-  failOnBlock: boolean
+  failOnBlock: boolean,
 ): Promise<void> {
   const summary = renderSummary(decision, reasons, result);
 
@@ -123,7 +123,7 @@ async function conclude(
       core.setFailed(`Rollout blocked: ${reasons.join("; ")}`);
     } else {
       core.info(
-        `Rollout blocked (non-failing per fail-on-block/dry-run): ${reasons.join("; ")}`
+        `Rollout blocked (non-failing per fail-on-block/dry-run): ${reasons.join("; ")}`,
       );
     }
   } else {
@@ -147,10 +147,11 @@ export async function run(): Promise<void> {
 
     if (policyFileAlias !== "" && policyPathInput === "") {
       core.warning(
-        "input 'policy-file' is deprecated; use 'policy-path' (treated as policy-path for this run)"
+        "input 'policy-file' is deprecated; use 'policy-path' (treated as policy-path for this run)",
       );
     }
-    const policyPath = policyPathInput !== "" ? policyPathInput : policyFileAlias;
+    const policyPath =
+      policyPathInput !== "" ? policyPathInput : policyFileAlias;
 
     // Reserved v0.0.x inputs that have no behavior yet — honest no-ops.
     const predicateUri = core.getInput("predicate-uri").trim();
@@ -161,13 +162,13 @@ export async function run(): Promise<void> {
           `unsupported predicate-uri '${predicateUri}': v0.2.0 evaluates only ${SUPPORTED_PREDICATE_URI}`,
         ],
         null,
-        failOnBlock
+        failOnBlock,
       );
       return;
     }
     if (core.getInput("cosign-key").trim() !== "") {
       core.warning(
-        "input 'cosign-key' is reserved: decision-row signing is not implemented at v0.2.0; no signing performed, signed-decision-row-path stays empty"
+        "input 'cosign-key' is reserved: decision-row signing is not implemented at v0.2.0; no signing performed, signed-decision-row-path stays empty",
       );
     }
 
@@ -183,7 +184,7 @@ export async function run(): Promise<void> {
             : "no policy provided; set exactly one of 'policy-path' or 'policy-json'",
         ],
         null,
-        failOnBlock
+        failOnBlock,
       );
       return;
     }
@@ -195,9 +196,11 @@ export async function run(): Promise<void> {
     } catch (err) {
       await conclude(
         "block",
-        [`unreadable or invalid-JSON Evidence Bundle at '${bundlePath}': ${errMessage(err)}`],
+        [
+          `unreadable or invalid-JSON Evidence Bundle at '${bundlePath}': ${errMessage(err)}`,
+        ],
         null,
-        failOnBlock
+        failOnBlock,
       );
       return;
     }
@@ -215,7 +218,7 @@ export async function run(): Promise<void> {
         "block",
         [`invalid rollout policy: ${errMessage(err)}`],
         null,
-        failOnBlock
+        failOnBlock,
       );
       return;
     }
@@ -229,7 +232,7 @@ export async function run(): Promise<void> {
       core.warning(
         `${kernelInvalid} gate-result/v1 predicate body(ies) failed kernel ` +
           `@intentsolutions/core GateResultV1Schema validation (advisory only; ` +
-          `decision is unaffected)`
+          `decision is unaffected)`,
       );
     }
 
@@ -239,6 +242,11 @@ export async function run(): Promise<void> {
     await conclude(result.decision, result.reasons, result, failOnBlock);
   } catch (err) {
     // Unexpected wiring error → block (fail closed), never a silent pass.
-    await conclude("block", [`unexpected error: ${errMessage(err)}`], null, failOnBlock);
+    await conclude(
+      "block",
+      [`unexpected error: ${errMessage(err)}`],
+      null,
+      failOnBlock,
+    );
   }
 }

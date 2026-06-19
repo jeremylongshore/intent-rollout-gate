@@ -28,7 +28,7 @@ name: Release
 on:
   push:
     tags:
-      - 'v*.*.*'
+      - "v*.*.*"
   # Manual dispatch drives the deliberate, gated signing operation (and can also
   # re-run release bookkeeping against an already-pushed tag). It cannot create
   # a new version. Signing ALWAYS targets PRODUCTION sigstore; the dry-run input
@@ -36,7 +36,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Existing tag to (re)release / sign, e.g. v0.2.0'
+        description: "Existing tag to (re)release / sign, e.g. v0.2.0"
         required: true
         type: string
       dry-run:
@@ -161,7 +161,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
-      contents: write   # create the Release + push the floating-major tag
+      contents: write # create the Release + push the floating-major tag
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -255,8 +255,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
-      contents: write   # attach .sigstore bundle to the Release (real fire only)
-      id-token: write   # cosign keyless (Fulcio OIDC) — no secret needed
+      contents: write # attach .sigstore bundle to the Release (real fire only)
+      id-token: write # cosign keyless (Fulcio OIDC) — no secret needed
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -408,7 +408,7 @@ jobs:
     timeout-minutes: 10
     permissions:
       contents: read
-      id-token: write   # Tailscale OIDC auth
+      id-token: write # Tailscale OIDC auth
     steps:
       - name: Connect to tailnet (Tailscale OIDC)
         uses: tailscale/github-action@v4.1.2

@@ -46882,7 +46882,9 @@ function renderSummary(decision, reasons, result) {
       lines.push("| --- | --- | --- |");
       for (const row of blockingRows) {
         const gateId = row.gate_id === null ? "_(schema-invalid)_" : `\`${esc2(row.gate_id)}\``;
-        lines.push(`| ${row.index} | ${gateId} | ${esc2(row.reasons.join("; "))} |`);
+        lines.push(
+          `| ${row.index} | ${gateId} | ${esc2(row.reasons.join("; "))} |`
+        );
       }
     }
     lines.push("");
@@ -46993,7 +46995,9 @@ async function run() {
     } catch (err) {
       await conclude(
         "block",
-        [`unreadable or invalid-JSON Evidence Bundle at '${bundlePath}': ${errMessage(err)}`],
+        [
+          `unreadable or invalid-JSON Evidence Bundle at '${bundlePath}': ${errMessage(err)}`
+        ],
         null,
         failOnBlock
       );
@@ -47021,7 +47025,12 @@ async function run() {
     const result = decide(bundle, policy);
     await conclude(result.decision, result.reasons, result, failOnBlock);
   } catch (err) {
-    await conclude("block", [`unexpected error: ${errMessage(err)}`], null, failOnBlock);
+    await conclude(
+      "block",
+      [`unexpected error: ${errMessage(err)}`],
+      null,
+      failOnBlock
+    );
   }
 }
 

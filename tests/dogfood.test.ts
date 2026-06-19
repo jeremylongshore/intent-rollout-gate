@@ -67,13 +67,13 @@ beforeAll(() => {
   execFileSync(
     "node",
     [generator, "--out-dir", outDir, "--policy", policyPath],
-    { cwd: repoRoot, stdio: "pipe" }
+    { cwd: repoRoot, stdio: "pipe" },
   );
   shipBundle = JSON.parse(
-    readFileSync(join(outDir, "ship.bundle.json"), "utf8")
+    readFileSync(join(outDir, "ship.bundle.json"), "utf8"),
   ) as Statement[];
   noShipBundle = JSON.parse(
-    readFileSync(join(outDir, "no-ship.bundle.json"), "utf8")
+    readFileSync(join(outDir, "no-ship.bundle.json"), "utf8"),
   ) as Statement[];
   realDistSha = createHash("sha256")
     .update(readFileSync(join(repoRoot, "dist/index.js")))
@@ -112,7 +112,7 @@ describe("dogfood bundle is REAL, not synthetic", () => {
       .toString()
       .trim();
     const pkgVersion = JSON.parse(
-      readFileSync(join(repoRoot, "package.json"), "utf8")
+      readFileSync(join(repoRoot, "package.json"), "utf8"),
     ).version as string;
     for (const stmt of shipBundle) {
       expect(stmt.predicate.commit_sha).toBe(headSha);
@@ -135,7 +135,7 @@ describe("dogfood bundle is REAL, not synthetic", () => {
     for (const stmt of shipBundle) {
       expect(stmt.predicate.policy_hash).toBe(`sha256:${policySha}`);
       expect(stmt.predicate.policy_ref).toBe(
-        `sha256:${policySha}:tests/fixtures/dogfood-policy.json`
+        `sha256:${policySha}:tests/fixtures/dogfood-policy.json`,
       );
     }
   });
@@ -157,7 +157,7 @@ describe("the SAME decide() path the Action runs produces opposite decisions", (
     expect(result.reasons.length).toBeGreaterThan(0);
     // pins the block to THIS real gate, not a generic non-empty check
     expect(result.reasons.join(" ")).toContain(
-      "intent-rollout-gate:ci:typecheck-and-tests"
+      "intent-rollout-gate:ci:typecheck-and-tests",
     );
   });
 

@@ -19,16 +19,16 @@ gaps marked **GAP** below; this file is the spec it implements against.
 This is a **delegating action shell**, not a decision engine. The architectural
 contract (`src/run.ts` header, Blueprint A, DR-002 § 6.1) is:
 
-- The shell owns **wiring only**: input reading + validation, file I/O, output
-  + step-summary rendering, exit-code plumbing, fail-closed behavior.
+- The shell owns **wiring only**: input reading + validation, file I/O,
+  output + step-summary rendering, exit-code plumbing, fail-closed behavior.
 - The shell owns **NO gate semantics**. `decide()` from
   `@intentsolutions/rollout-gate` is the sole source of the ship / no-ship call.
 - The shell owns **NO predicate definition**. `GATE_RESULT_V1_URI` and
   `GateResultV1Schema` come from `@intentsolutions/core` (the SSoT kernel).
 
-The testing strategy must therefore be **fixture-dominant**: an Evidence Bundle
-+ a policy fed through the real `decide()`/`run()` path, asserting the EXACT
-emitted decision string + reasons + exit behavior. Re-testing the decision
+The testing strategy must therefore be **fixture-dominant**: an Evidence
+Bundle + a policy fed through the real `decide()`/`run()` path, asserting the
+EXACT emitted decision string + reasons + exit behavior. Re-testing the decision
 algebra itself is out of scope (it is tested upstream in the package).
 
 ## 7-layer taxonomy mapping

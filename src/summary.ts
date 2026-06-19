@@ -31,7 +31,7 @@ function esc(value: string): string {
 export function renderSummary(
   decision: string,
   reasons: string[],
-  result: DecideResult | null
+  result: DecideResult | null,
 ): string {
   const lines: string[] = [
     "## Intent Rollout Gate",
@@ -68,7 +68,9 @@ export function renderSummary(
           row.gate_id === null
             ? "_(schema-invalid)_"
             : `\`${esc(row.gate_id)}\``;
-        lines.push(`| ${row.index} | ${gateId} | ${esc(row.reasons.join("; "))} |`);
+        lines.push(
+          `| ${row.index} | ${gateId} | ${esc(row.reasons.join("; "))} |`,
+        );
       }
     }
     lines.push("");

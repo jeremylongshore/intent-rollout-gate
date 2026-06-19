@@ -64,7 +64,7 @@ const MALFORMED_BUNDLE = fixture("evidence", "malformed-bundle.json");
 const ADVISORY_BUNDLE = fixture("evidence", "advisory-bundle.json");
 const KERNEL_INVALID_BUNDLE = fixture(
   "evidence",
-  "kernel-invalid-predicate-bundle.json"
+  "kernel-invalid-predicate-bundle.json",
 );
 const POLICY = fixture("policy.json");
 const POLICY_INVALID = fixture("policy-invalid.json");
@@ -98,7 +98,10 @@ describe("allow path", () => {
 
   it("accepts an inline policy via policy-json", async () => {
     inputs.set("bundle-path", ALLOW_BUNDLE);
-    inputs.set("policy-json", JSON.stringify({ required_gates: ["synth-tool:ci:*"] }));
+    inputs.set(
+      "policy-json",
+      JSON.stringify({ required_gates: ["synth-tool:ci:*"] }),
+    );
 
     await run();
 
@@ -128,7 +131,9 @@ describe("block path — bundle contents", () => {
     expect(outputs.get("decision")).toBe("block");
     expect(reasonsOutput().length).toBeGreaterThan(0);
     expect(reasonsOutput().join(" ")).toContain("synth-tool:ci:synth-gate-2");
-    expect(setFailed).toHaveBeenCalledWith(expect.stringContaining("Rollout blocked"));
+    expect(setFailed).toHaveBeenCalledWith(
+      expect.stringContaining("Rollout blocked"),
+    );
   });
 
   it("blocks WITHOUT failing the job when fail-on-block=false", async () => {
@@ -175,7 +180,9 @@ describe("block path — fail-closed input validation", () => {
     await run();
 
     expect(outputs.get("decision")).toBe("block");
-    expect(reasonsOutput()[0]).toContain("unreadable or invalid-JSON Evidence Bundle");
+    expect(reasonsOutput()[0]).toContain(
+      "unreadable or invalid-JSON Evidence Bundle",
+    );
     expect(setFailed).toHaveBeenCalled();
   });
 
@@ -225,7 +232,10 @@ describe("block path — fail-closed input validation", () => {
   it("blocks on a non-default predicate-uri (only gate-result/v1 is supported)", async () => {
     inputs.set("bundle-path", ALLOW_BUNDLE);
     inputs.set("policy-path", POLICY);
-    inputs.set("predicate-uri", "https://evals.intentsolutions.io/gate-result/v2");
+    inputs.set(
+      "predicate-uri",
+      "https://evals.intentsolutions.io/gate-result/v2",
+    );
 
     await run();
 
@@ -289,9 +299,13 @@ describe("renderSummary", () => {
     });
 
     expect(md).toContain("**Decision:** `block`");
-    expect(md).toContain("| `synth-tool:ci:*` | not-passing | `synth-tool:ci:synth-gate-2` |");
+    expect(md).toContain(
+      "| `synth-tool:ci:*` | not-passing | `synth-tool:ci:synth-gate-2` |",
+    );
     // pipes inside table cells are escaped so the table doesn't break
-    expect(md).toContain("| 0 | `synth-tool:ci:synth-gate-2` | forbidden \\| decision |");
+    expect(md).toContain(
+      "| 0 | `synth-tool:ci:synth-gate-2` | forbidden \\| decision |",
+    );
     // the flat bullet list keeps reasons verbatim
     expect(md).toContain("- reason-1 | piped");
   });
@@ -319,7 +333,7 @@ describe("kernel source of truth (cab3)", () => {
 
   it("the kernel URI is the exact value the fixtures + action.yml declare", () => {
     expect(GATE_RESULT_V1_URI).toBe(
-      "https://evals.intentsolutions.io/gate-result/v1"
+      "https://evals.intentsolutions.io/gate-result/v1",
     );
   });
 });
@@ -335,7 +349,10 @@ describe("kernel Zod narrowing of consumed rows (cab3, advisory only)", () => {
           gate_version: "1.0.0",
           gate_decision: "pass",
           gate_reasons: [],
-          coverage: { dimensions_evaluated: ["static"], dimensions_skipped: [] },
+          coverage: {
+            dimensions_evaluated: ["static"],
+            dimensions_skipped: [],
+          },
           policy_ref: `sha256:${"a".repeat(64)}:tests/TESTING.md`,
           policy_hash: `sha256:${"a".repeat(64)}`,
           input_hash: `sha256:${"a".repeat(64)}`,
@@ -359,7 +376,10 @@ describe("kernel Zod narrowing of consumed rows (cab3, advisory only)", () => {
           gate_version: "1.0.0",
           gate_decision: "pass",
           gate_reasons: [],
-          coverage: { dimensions_evaluated: ["static"], dimensions_skipped: [] },
+          coverage: {
+            dimensions_evaluated: ["static"],
+            dimensions_skipped: [],
+          },
           policy_ref: "not-a-sha256-prefixed-ref",
           policy_hash: `sha256:${"a".repeat(64)}`,
           input_hash: `sha256:${"a".repeat(64)}`,
@@ -374,7 +394,10 @@ describe("kernel Zod narrowing of consumed rows (cab3, advisory only)", () => {
 
   it("ignores rows whose predicateType is not gate-result/v1", () => {
     const rows = [
-      { predicateType: "https://example.com/other/v1", predicate: { junk: true } },
+      {
+        predicateType: "https://example.com/other/v1",
+        predicate: { junk: true },
+      },
     ];
     expect(countKernelInvalidPredicates(rows)).toBe(0);
   });
@@ -410,7 +433,7 @@ describe("kernel Zod narrowing of consumed rows (cab3, advisory only)", () => {
     // point of this assertion is that the advisory warning is ADDITIVE — it
     // appears alongside whatever the package decided, and never substitutes for it.
     expect(warning).toHaveBeenCalledWith(
-      expect.stringContaining("failed kernel")
+      expect.stringContaining("failed kernel"),
     );
     // decision is verbatim from the delegated package, not from the kernel pass
     expect(outputs.get("decision")).toBe("block");
@@ -445,7 +468,7 @@ describe("action self-test — exact ship / no-ship / advisory output (4hk3)", (
     // exact gate id, not just "non-empty" — pins the decision to the input
     expect(reasonsOutput().join(" ")).toContain("synth-tool:ci:synth-gate-2");
     expect(setFailed).toHaveBeenCalledWith(
-      expect.stringContaining("Rollout blocked")
+      expect.stringContaining("Rollout blocked"),
     );
   });
 
@@ -458,7 +481,7 @@ describe("action self-test — exact ship / no-ship / advisory output (4hk3)", (
     inputs.set("bundle-path", ADVISORY_BUNDLE);
     inputs.set(
       "policy-json",
-      JSON.stringify({ required_gates: ["synth-tool:ci:synth-gate-1"] })
+      JSON.stringify({ required_gates: ["synth-tool:ci:synth-gate-1"] }),
     );
 
     await run();
@@ -475,7 +498,7 @@ describe("action self-test — exact ship / no-ship / advisory output (4hk3)", (
       JSON.stringify({
         required_gates: ["synth-tool:ci:synth-gate-1"],
         advisory_blocks: true,
-      })
+      }),
     );
 
     await run();
@@ -532,7 +555,7 @@ describe("credential redaction — secrets never reach outputs/logs", () => {
     expect(outputs.get("decision")).toBe("block");
     // the cosign-key warning must mention the INPUT NAME but never the VALUE
     expect(warning).toHaveBeenCalledWith(
-      expect.stringContaining("'cosign-key' is reserved")
+      expect.stringContaining("'cosign-key' is reserved"),
     );
     assertNoSecretAnywhere();
   });
@@ -544,7 +567,10 @@ describe("credential redaction — secrets never reach outputs/logs", () => {
     // reason must not reflect the secret VALUE back into any surface
     inputs.set(
       "policy-json",
-      JSON.stringify({ required_gates: ["synth-tool:ci:*"], _leaked_token: SECRET })
+      JSON.stringify({
+        required_gates: ["synth-tool:ci:*"],
+        _leaked_token: SECRET,
+      }),
     );
     process.env.GITHUB_STEP_SUMMARY = "/tmp/redaction-summary";
 
@@ -559,10 +585,7 @@ describe("credential redaction — secrets never reach outputs/logs", () => {
     inputs.set("bundle-path", ALLOW_BUNDLE);
     // invalid policy (required_gates wrong type) carrying a secret — the
     // resulting "invalid rollout policy" block reason must not echo the secret
-    inputs.set(
-      "policy-json",
-      JSON.stringify({ required_gates: SECRET })
-    );
+    inputs.set("policy-json", JSON.stringify({ required_gates: SECRET }));
 
     await run();
 
