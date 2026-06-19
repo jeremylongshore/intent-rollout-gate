@@ -4,9 +4,10 @@
 
 | Version | Supported |
 | --- | --- |
-| v0.0.x (M4 bootstrap stub) | Yes — but the action is a no-op; security surface is limited to `action.yml` parsing |
-| v0.1.x (M5 implementation, pending) | Will be supported on release |
-| < v0.0.0 | n/a |
+| v0.3.x (current) | Yes — frozen consumption contract; release/provenance pipeline hardened |
+| v0.2.x | Yes — frozen consumption contract; production-Rekor signing of the committed `dist/` enabled |
+| v0.1.x (M5 implementation) | Best-effort only; adopters should upgrade to the current line |
+| v0.0.x (M4 bootstrap stub) | No — superseded; the action was a no-op stub |
 
 ## Reporting a Vulnerability
 
@@ -46,7 +47,7 @@ The Rollout Gate sits in CI as the **deployment-decision tier**. Its security po
 
 - **Adversary inside the consumer repo** — AI agent or contributor attempting to lower thresholds in `tests/TESTING.md`, edit the bundle directory before the gate reads it, or pass a forged decision row downstream. **Mitigation:** the gate verifies every bundle row's signature before consuming it (Evidence Bundle SPEC R13); the policy file is hashed into the decision row so any post-decision threshold change is detectable.
 - **Adversary upstream of the gate** — a tool that emits Evidence Bundle rows with a forged predicate URI (e.g., a row claiming `predicateType: https://evals.intentsolutions.io/gate-result/v1` but with a body that doesn't match the schema). **Mitigation:** Stage 1 verification rejects rows with invalid signatures, missing required predicate fields, or subject-digest mismatches.
-- **Adversary in the supply chain of the action itself** — a compromised release tag or a compromised dependency in the action's runtime. **Mitigation:** the action will be released with cosign-signed tags (planned for v0.1.0); adopters should pin the action by SHA, not by tag, for the highest assurance.
+- **Adversary in the supply chain of the action itself** — a compromised release tag or a compromised dependency in the action's runtime. **Mitigation:** production-Rekor cosign signing of the committed `dist/index.js` artifact is enabled as of v0.2.0 (behind the iah-E06 DNSSEC/CAA pre-flight); adopters should pin the action by SHA, not by tag, for the highest assurance.
 - **Adversary attempting Rekor pollution** — pushing forged decision rows to the public Rekor instance to confuse downstream verifiers. **Mitigation:** the DNSSEC + CAA pre-condition (CISO binding from ISEDC DR-004 § 6.1) prevents the action from pushing to Rekor under any `evals.intentsolutions.io` URI until the namespace is DNSSEC-protected. Pre-condition is checked at runtime before each push; failure is loud, not silent.
 
 ## Platform-wide security posture
