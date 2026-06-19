@@ -26,7 +26,7 @@ taxonomy mapping and the gap-analysis that produced this policy live in
 These keys are read by `audit-harness escape-scan` (an explicit edit that
 lowers any of them below the floor is treated as an escape attempt):
 
-```
+```yaml
 coverage.line: 85
 coverage.branch: 80
 mutation.kill_rate: 70

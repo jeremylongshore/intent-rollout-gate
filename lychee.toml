@@ -11,7 +11,3 @@ exclude = [
 exclude_path = [
   "node_modules",
 ]
-
-[cache]
-enabled = true
-max_cache_age = "7d"

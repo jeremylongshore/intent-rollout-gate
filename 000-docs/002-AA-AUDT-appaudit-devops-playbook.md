@@ -628,7 +628,7 @@ Ordered by likelihood × impact, drawing on actual sharp edges in this codebase 
 
 ### 8.2 CONTRIBUTING.md is still claiming MIT (documentation drift from relicense)
 
-- **Symptom**: A contributor reads CONTRIBUTING.md:55—"By contributing, you agree your contributions will be licensed under the [MIT License](./LICENSE)"—and follows the link to LICENSE, which is Apache 2.0. The license document and the contributor agreement language disagree.
+- **Symptom**: A contributor reads CONTRIBUTING.md:55—"By contributing, you agree your contributions will be licensed under the [MIT License](../LICENSE)"—and follows the link to LICENSE, which is Apache 2.0. The license document and the contributor agreement language disagree.
 - **Cause**: The Apache 2.0 relicense landed in commit f85e9e6 on 2026-05-19 ("chore: relicense from MIT to Apache 2.0 (BREAKING)"). LICENSE, NOTICE, and README.md were updated; CONTRIBUTING.md was not. The license-grant phrasing in CONTRIBUTING.md still references the prior license.
 - **Fix**: Edit CONTRIBUTING.md line 55 to say "Apache License 2.0" and re-link to LICENSE. One-line patch. Track via beads as a low-severity follow-up.
 - **Prevention**: License changes should grep the entire repo for the prior license string before merge. A `grep -rni "mit license" .` against this repo at commit f85e9e6 would have caught the drift.

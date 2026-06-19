@@ -35,6 +35,9 @@ jobs:
       - name: Verify audit-harness integrity
         run: pnpm exec audit-harness verify
 
+      - name: Prettier format check
+        run: pnpm run format:check
+
       - name: Typecheck
         run: pnpm run typecheck
 

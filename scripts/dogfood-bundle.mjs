@@ -50,7 +50,10 @@ const STATEMENT_TYPE = "https://in-toto.io/Statement/v1";
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
 function parseArgs(argv) {
-  const args = { outDir: null, policy: join(repoRoot, "tests/fixtures/policy.json") };
+  const args = {
+    outDir: null,
+    policy: join(repoRoot, "tests/fixtures/policy.json"),
+  };
   for (let i = 0; i < argv.length; i += 1) {
     if (argv[i] === "--out-dir") {
       args.outDir = argv[(i += 1)];
@@ -74,7 +77,7 @@ function readReal(path) {
     return readFileSync(path);
   } catch (err) {
     process.stderr.write(
-      `dogfood-bundle: cannot read real input '${path}': ${err.message}\n`
+      `dogfood-bundle: cannot read real input '${path}': ${err.message}\n`,
     );
     process.exit(2);
   }
@@ -95,9 +98,7 @@ function realCommitSha() {
 }
 
 function realRunnerVersion() {
-  const pkg = JSON.parse(
-    readFileSync(join(repoRoot, "package.json"), "utf8")
-  );
+  const pkg = JSON.parse(readFileSync(join(repoRoot, "package.json"), "utf8"));
   return `intent-rollout-gate@${pkg.version}`;
 }
 
@@ -105,7 +106,16 @@ function realRunnerVersion() {
  * Build a single kernel-valid gate-result/v1 in-toto Statement row bound to the
  * REAL dist-bundle subject. `decision` is the real verdict for this gate.
  */
-function buildRow({ gateName, decision, reasons, inputHashHex, policyHashHex, policyPath, commitSha, runner }) {
+function buildRow({
+  gateName,
+  decision,
+  reasons,
+  inputHashHex,
+  policyHashHex,
+  policyPath,
+  commitSha,
+  runner,
+}) {
   const gateId = `intent-rollout-gate:ci:${gateName}`;
   const predicate = {
     gate_id: gateId,
@@ -131,7 +141,7 @@ function buildRow({ gateName, decision, reasons, inputHashHex, policyHashHex, po
   if (!parsed.success) {
     process.stderr.write(
       `dogfood-bundle: generated '${gateName}' row FAILED kernel ` +
-        `GateResultV1Schema validation:\n${JSON.stringify(parsed.error.issues, null, 2)}\n`
+        `GateResultV1Schema validation:\n${JSON.stringify(parsed.error.issues, null, 2)}\n`,
     );
     process.exit(1);
   }
@@ -209,11 +219,11 @@ function main() {
   mkdirSync(outDir, { recursive: true });
   writeFileSync(
     join(outDir, "ship.bundle.json"),
-    `${JSON.stringify(shipBundle, null, 2)}\n`
+    `${JSON.stringify(shipBundle, null, 2)}\n`,
   );
   writeFileSync(
     join(outDir, "no-ship.bundle.json"),
-    `${JSON.stringify(noShipBundle, null, 2)}\n`
+    `${JSON.stringify(noShipBundle, null, 2)}\n`,
   );
 
   process.stderr.write(
@@ -221,7 +231,7 @@ function main() {
       `  subject (real dist/index.js): sha256:${inputHashHex}\n` +
       `  commit_sha (real HEAD):       ${commitSha}\n` +
       `  policy (real):                ${policyRel} (sha256:${policyHashHex})\n` +
-      `  runner (real):                ${runner}\n`
+      `  runner (real):                ${runner}\n`,
   );
 }
 
