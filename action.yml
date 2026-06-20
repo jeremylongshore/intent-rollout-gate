@@ -54,7 +54,7 @@ inputs:
     default: ''
   predicate-uri:
     description: >-
-      Reserved (v0.0.x input, kept additive). v0.2.0 evaluates only the
+      Reserved (v0.0.x input, kept additive). v0.3.0 evaluates only the
       stable v1 URI https://evals.intentsolutions.io/gate-result/v1; any
       other value blocks (fail closed).
     required: false
@@ -62,7 +62,7 @@ inputs:
   rekor-url:
     description: >-
       Reserved (v0.0.x input, kept additive). Transparency-log anchoring of
-      the rollout-decision row is NOT implemented at v0.2.0; no Rekor push
+      the rollout-decision row is NOT implemented at v0.3.0; no Rekor push
       ever happens (the DNSSEC + CAA pre-condition per DR-004 § 6.1 gates
       that milestone). Input is currently ignored.
     required: false
@@ -70,7 +70,7 @@ inputs:
   cosign-key:
     description: >-
       Reserved (v0.0.x input, kept additive). Decision-row signing is NOT
-      implemented at v0.2.0; setting this emits a warning and performs no
+      implemented at v0.3.0; setting this emits a warning and performs no
       signing.
     required: false
     default: ''
@@ -98,7 +98,7 @@ outputs:
       and the flat reason list. Also written to the job step summary.
   signed-decision-row-path:
     description: >-
-      Reserved — always empty at v0.2.0. Populated once decision-row signing
+      Reserved — always empty at v0.3.0. Populated once decision-row signing
       (predicateType https://evals.intentsolutions.io/rollout-decision/v1)
       lands behind the DNSSEC + CAA pre-condition (DR-002 § 6.3).
 

@@ -2,7 +2,7 @@
 
 Part of the **[Intent Eval Platform](https://github.com/intent-solutions-io/intent-eval-platform)**—the umbrella mapping the six repos that converge via a shared Evidence Bundle schema.
 
-> **Status: v0.1.0 — M5 TypeScript MVP.** The action is a real Node runtime
+> **Status: v0.3.0 — frozen consumption contract & hardened release pipeline.** The action is a real Node runtime
 > that consumes an Evidence Bundle plus a rollout policy and decides
 > **allow / block**, fail closed. Per Blueprint A this repo is a **thin
 > shell**: every line of decision logic lives in the published
@@ -21,7 +21,7 @@ The Rollout Gate is the **fourth repo** in the Intent Eval Platform convergence,
 | [`j-rig-binary-eval`](https://github.com/jeremylongshore/j-rig-skill-binary-eval) | 7-layer behavioral judgment harness—emits and consumes Evidence Bundle rows; home of the `@intentsolutions/rollout-gate` decision library | Apache 2.0 |
 | **`intent-rollout-gate`** *(this repo)* | **Thin GitHub Action shell—delegates the ship/no-ship decision to `@intentsolutions/rollout-gate`** | **Apache 2.0** |
 
-## What it does (v0.1.0)
+## What it does (v0.3.0)
 
 1. **Reads the Evidence Bundle** at `bundle-path` — both wire forms: the v2
    plain array of in-toto Statements (kernel `EvidenceBundlePayload`) and the
@@ -68,7 +68,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: jeremylongshore/intent-rollout-gate@v0.1.0
+      - uses: jeremylongshore/intent-rollout-gate@v0.3.0
         id: gate
         with:
           bundle-path: evidence/bundle.json
@@ -83,7 +83,7 @@ jobs:
 Or keep the policy in a committed file (enforcement travels with the code):
 
 ```yaml
-      - uses: jeremylongshore/intent-rollout-gate@v0.1.0
+      - uses: jeremylongshore/intent-rollout-gate@v0.3.0
         with:
           bundle-path: evidence/bundle.json
           policy-path: tests/rollout-policy.json
@@ -118,8 +118,8 @@ Parsing a policy out of `tests/TESTING.md` directly stays deferred per
 | `fail-on-block` | no | `'true'` | `'true'`: a block decision fails the job. `'false'`: report-only. Anything other than an explicit `'false'` fails on block (fail closed). |
 | `policy-file` | no | `''` | **Deprecated** alias for `policy-path` (v0.0.x name). The old `tests/TESTING.md` default is gone. |
 | `predicate-uri` | no | `gate-result/v1` URI | **Reserved.** Only the stable v1 URI is supported; any other value blocks. |
-| `rekor-url` | no | `https://rekor.sigstore.dev` | **Reserved.** Decision-row Rekor anchoring is not implemented at v0.1.0 (DNSSEC + CAA pre-condition gates it); ignored. |
-| `cosign-key` | no | `''` | **Reserved.** Decision-row signing is not implemented at v0.1.0; setting it warns and performs no signing. |
+| `rekor-url` | no | `https://rekor.sigstore.dev` | **Reserved.** Decision-row Rekor anchoring is not implemented at v0.3.0 (DNSSEC + CAA pre-condition gates it); ignored. |
+| `cosign-key` | no | `''` | **Reserved.** Decision-row signing is not implemented at v0.3.0; setting it warns and performs no signing. |
 | `dry-run` | no | `'false'` | **Deprecated** alias for `fail-on-block: 'false'` (v0.0.x name). |
 
 ## Outputs
@@ -129,7 +129,7 @@ Parsing a policy out of `tests/TESTING.md` directly stays deferred per
 | `decision` | `allow` or `block`, verbatim from `@intentsolutions/rollout-gate` (`allow` ≙ ship, `block` ≙ no-ship in the pre-implementation vocabulary; `not-implemented` is retired). |
 | `reasons` | JSON array string of every blocking reason — empty array exactly when `decision` is `allow`. |
 | `summary` | Markdown decision summary (required-gate table + blocking rows + reasons). Also written to the job step summary. |
-| `signed-decision-row-path` | Reserved — always empty at v0.1.0; populated once decision-row signing lands (DR-002 § 6.3). |
+| `signed-decision-row-path` | Reserved — always empty at v0.3.0; populated once decision-row signing lands (DR-002 § 6.3). |
 
 ## Development
 
@@ -156,7 +156,7 @@ monorepo) and bump the dependency here.
 | Milestone | Status |
 | --- | --- |
 | **M4—Substantive bootstrap** | DONE. Repo, design doc, no-op action stub. |
-| **M5—Implementation** | **DONE (this release).** Runtime locked to TypeScript by [DR-002](./000-docs/004-AT-DECR-runtime-language-typescript-2026-06-10.md); decision logic delegated to `@intentsolutions/rollout-gate@2.0.0`. |
+| **M5—Implementation** | **DONE (v0.1.0).** Runtime locked to TypeScript by [DR-002](./000-docs/004-AT-DECR-runtime-language-typescript-2026-06-10.md); decision logic delegated to `@intentsolutions/rollout-gate@2.0.0`. Consumption contract frozen + production-Rekor signing of the committed `dist/` enabled at v0.2.0; release/provenance pipeline hardened at v0.3.0. |
 | **M6—First adopter** | Pending. `audit-harness` self-adopts as the first downstream—eats its own dog food before any partner repo wires this in. |
 | **Decision-row signing** | Pending. `rollout-decision/v1` signing + Rekor anchoring behind the DNSSEC + CAA pre-condition (DR-004 § 6.1, DR-002 § 6.3). |
 

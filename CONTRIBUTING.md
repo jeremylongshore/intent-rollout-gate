@@ -4,9 +4,7 @@ Thank you for your interest. This repo is the **fourth domino** in the Intent Ev
 
 ## Project status — read this first
 
-This repo is currently at **v0.0.0 substantive bootstrap (M4)**. The action declaration in `action.yml` is intentionally a no-op stub that exits cleanly so adopters can wire it into CI early without blocking their pipelines.
-
-**Substantive implementation lands in M5**, not M4. If you want to contribute implementation work, start by reading:
+This repo is currently at **v0.3.0** — the M5 TypeScript implementation shipped at v0.1.0, the consumption contract was frozen (with production-Rekor signing of the committed `dist/`) at v0.2.0, and the release/provenance pipeline was hardened at v0.3.0. The action is a real Node-runtime action that consumes an Evidence Bundle plus a rollout policy and decides **allow / block** (fail closed). If you want to contribute, start by reading:
 
 | Source | Where |
 | --- | --- |
@@ -15,7 +13,7 @@ This repo is currently at **v0.0.0 substantive bootstrap (M4)**. The action decl
 | Build journey plan (M4 / M5 context) | Local-only at `~/.claude/plans/se-the-council-bubbly-frog.md` (maintainer-side). Public mirror in the convergence umbrella issue [`intent-eval-lab#4`](https://github.com/jeremylongshore/intent-eval-lab/issues/4). |
 | System brief (§ 8 "The Rollout Gate", § 9 "How It All Works Together") | [`intent-eval-lab/000-docs/007-DR-BRIEF-intent-eval-platform-system-brief-2026-05-11.html`](https://github.com/jeremylongshore/intent-eval-lab/blob/main/000-docs/007-DR-BRIEF-intent-eval-platform-system-brief-2026-05-11.html) |
 
-The architecture doc names the **deferred decisions** (notably the language choice — TS / Go / Python). The first M5 PR will lock the language; please don't open PRs in a different runtime ahead of that decision.
+The runtime language is locked to **TypeScript on Node 20+** by [DR-002](./000-docs/004-AT-DECR-runtime-language-typescript-2026-06-10.md); please don't open PRs in a different runtime. Per the thin-shell rule (Blueprint A), decision logic lives upstream in [`@intentsolutions/rollout-gate`](https://www.npmjs.com/package/@intentsolutions/rollout-gate) — change behavior there and bump the dependency here, never re-implement gate semantics in this repo.
 
 ## Reporting Bugs
 
