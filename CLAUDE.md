@@ -4,13 +4,14 @@ Guidance for Claude Code when working in `/home/jeremy/000-projects/intent-eval-
 
 ## What this repo is
 
-A GitHub Action that consumes an [Evidence Bundle](https://github.com/jeremylongshore/intent-eval-lab/tree/main/specs/evidence-bundle) and emits a ship / no-ship / advisory decision for the consuming repository's CI pipeline. **Fourth repo** in the Intent Eval Platform convergence.
+A GitHub Action that consumes an [Evidence Bundle](https://github.com/jeremylongshore/intent-eval-lab/tree/main/specs/evidence-bundle) and emits a ship / no-ship / advisory decision for the consuming repository's CI pipeline. One of the **five** repos in the Intent Eval Platform convergence (the kernel `intent-eval-core` is the source-of-truth the other four consume).
 
 | Sister repo | Role |
 | --- | --- |
+| [`intent-eval-core`](https://github.com/jeremylongshore/intent-eval-core) | Canonical contracts kernel — the 14 canonical entities + `gate-result/v1` predicate schema every repo consumes |
 | [`intent-eval-lab`](https://github.com/jeremylongshore/intent-eval-lab) | Methodology + Evidence Bundle SPEC + Intentional Mapping taxonomy + OTel RFC |
-| [`audit-harness`](https://github.com/jeremylongshore/audit-harness) | Static gates (escape-scan, harness-hash, CRAP, arch, bias, gherkin-lint)—emits Evidence Bundle rows |
-| [`j-rig-binary-eval`](https://github.com/jeremylongshore/j-rig-binary-eval) | 7-layer behavioral judgment harness—emits Evidence Bundle rows |
+| [`intent-audit-harness`](https://github.com/jeremylongshore/intent-audit-harness) | Static gates (escape-scan, harness-hash, CRAP, arch, bias, gherkin-lint)—emits Evidence Bundle rows |
+| [`j-rig-skill-binary-eval`](https://github.com/jeremylongshore/j-rig-skill-binary-eval) | 7-layer behavioral judgment harness—emits Evidence Bundle rows |
 | **`intent-rollout-gate`** *(this)* | **Consumes the Evidence Bundle, decides ship/no-ship** |
 
 The convergence couples at the schema layer (the `gate-result/v1` predicate URI), not via package consolidation. Each repo has its own `.git`, its own license, its own release cycle.

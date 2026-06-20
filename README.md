@@ -2,7 +2,7 @@
 
 Part of the **[Intent Eval Platform](https://github.com/intent-solutions-io/intent-eval-platform)**—the umbrella mapping the six repos that converge via a shared Evidence Bundle schema.
 
-> **Status: v0.3.0 — frozen consumption contract.** The action is a real Node runtime
+> **Status: v0.3.0 — frozen consumption contract & hardened release pipeline.** The action is a real Node runtime
 > that consumes an Evidence Bundle plus a rollout policy and decides
 > **allow / block**, fail closed. Per Blueprint A this repo is a **thin
 > shell**: every line of decision logic lives in the published
