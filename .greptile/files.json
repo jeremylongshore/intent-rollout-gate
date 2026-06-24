@@ -1,0 +1,19 @@
+{
+  "files": [
+    {
+      "path": "CLAUDE.md",
+      "description": "Binding repo contract. Declares the THIN SHELL rule (no decision logic here — it lives in the published @intentsolutions/rollout-gate package), the five non-negotiable CISO bindings carried from ISEDC DR-004 (predicate URI immutability, DNSSEC/CAA Rekor pre-condition, labs.intentsolutions.io reserved-don't-touch, credential redaction, synthetic fixtures / no partner names), and the fail-closed contract. Treat its rules as authoritative when reviewing any change.",
+      "scope": ["src/**", "action.yml", "tests/**", "000-docs/**"]
+    },
+    {
+      "path": "action.yml",
+      "description": "The GitHub Action manifest — the wire contract. Declares inputs (bundle-path, policy-path/policy-json, fail-on-block, plus reserved v0.0.x inputs), outputs (decision/reasons/summary/signed-decision-row-path), runs.using node24 → dist/index.js, and the consumed predicate URI default https://evals.intentsolutions.io/gate-result/v1. Reserved-input descriptions and version notes must stay reconciled with version.txt, package.json, and README.md.",
+      "scope": ["action.yml", "src/**", "README.md", "version.txt"]
+    },
+    {
+      "path": "000-docs/001-DR-DESIGN-rollout-gate-architecture-2026-05-12.md",
+      "description": "Main design doc. The authoritative architecture narrative: what the gate consumes (Evidence Bundle gate-result/v1 rows), the decision tier above the bundle, the verify → evaluate → emit stages, the signed rollout-decision/v1 attestation, and § 5 CISO + compliance bindings (predicate URI immutability, evals-only attestation surface, labs reserved, credential redaction, synthetic fixtures). Use as the source-of-truth design when reviewing decision-flow or predicate-handling changes.",
+      "scope": ["src/**", "action.yml", "000-docs/**"]
+    }
+  ]
+}
