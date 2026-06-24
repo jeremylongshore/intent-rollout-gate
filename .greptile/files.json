@@ -17,12 +17,12 @@
     },
     {
       "path": "000-docs/001-DR-DESIGN-rollout-gate-architecture-2026-05-12.md",
-      "description": "Main architecture design record. The authoritative narrative: what the gate consumes (Evidence Bundle gate-result/v1 rows), the decision tier that sits ABOVE the bundle, the verify → evaluate → emit stages, the signed rollout-decision/v1 attestation, the OTel events fired, and § 5 CISO + compliance bindings (predicate URI immutability, evals-only attestation surface, labs reserved, credential redaction, synthetic fixtures). Source-of-truth design when reviewing any decision-flow or predicate-handling change.",
+      "description": "HISTORICAL M4-bootstrap architecture design record — authoritative for the ENDURING design (the decision tier ABOVE the bundle, verify → evaluate → emit stages, the signed rollout-decision/v1 attestation, OTel events, and § 5 CISO + compliance bindings: predicate URI immutability, evals-only attestation surface, labs reserved, credential redaction, synthetic fixtures). DO NOT treat its pre-MVP language as current: the header ('Implementation begins M5'), the not-implemented / ship / no-ship verdict vocabulary, and the § 3 'tests/TESTING.md policy interface' are all superseded — runtime + decision-delegation are locked by DR-002 (004-AT-DECR) and the action now consumes policy-path / policy-json JSON (TESTING.md parsing is deferred, never shipped, per DR-002 § 5). The action ships v0.3.0 and emits allow / block via @intentsolutions/rollout-gate@2.0.0. § 8 already self-corrects to DR-002. Cite for design intent + CISO bindings; defer to action.yml / README / DR-002 for current behavior + version.",
       "scope": ["src/**", "action.yml", "000-docs/**"]
     },
     {
       "path": "000-docs/005-AT-ARCH-repo-blueprint.md",
-      "description": "NORMATIVE per-repo blueprint (binding_authority iar-E01) — the single source of truth for this repo's identity, architecture, boundaries, and Definition of Done. Inherits Blueprint A principles + anti-goals, declares which Blueprint B canonical entities it touches, pins peer-repo dependency ranges (kernel, decision package, audit-harness), and names the repo-specific non-goals (re-implementing decision logic; making novel code-quality attestations) whose violation triggers an ISEDC re-convene. Read for whether a change respects the repo's locked boundaries.",
+      "description": "NORMATIVE per-repo blueprint (binding_authority iar-E01) — binding for the ENDURING boundaries: inherited Blueprint A principles + anti-goals, the Blueprint B canonical entities touched (EvidenceBundle consumed, RolloutGate produced), the thin-shell rule, and the repo-specific non-goals (re-implementing decision logic; making novel code-quality attestations) whose violation triggers an ISEDC re-convene. CAUTION — its status-bearing fields are STALE relative to shipped reality: it describes Maturity as 'pre-release' / 'no-op composite-shell bootstrap (v0.0.x)' emitting 'decision=not-implemented' and names the decision package as '@j-rig/rollout-gate' with the TS shell 'planned at M5'. The action actually ships v0.3.0 as a real Node runtime delegating to the PUBLISHED @intentsolutions/rollout-gate@2.0.0 (NOT @j-rig/rollout-gate — that workspace name is not the published package). Read for locked boundaries + anti-goals; defer to action.yml / package.json / README / CHANGELOG for current maturity, version, and the decision-package name.",
       "scope": ["src/**", "action.yml", "package.json", "000-docs/**"]
     },
     {
@@ -42,7 +42,7 @@
     },
     {
       "path": "000-docs/008-RL-REPT-v0.2.0-migration-notes-2026-06-18.md",
-      "description": "Release report — migration notes for the v0.1.0-experimental → v0.2.0 transition. Documents that the public uses: interface is forward-compatible (inputs/outputs additive-only per Evidence Bundle SPEC R18) with no breaking change across the transition. Reference when a PR alters the input/output surface — additive-only is the rule.",
+      "description": "Release report — migration notes for the v0.1.0-experimental → v0.2.0 transition. NOTE its own status banner reads 'DRAFT — v0.2.0 not yet released'; that banner is STALE — both v0.2.0 (2026-06-13) and v0.3.0 (2026-06-15) have since shipped (see CHANGELOG). The enduring, still-valid rule it documents: the public uses: interface is forward-compatible — inputs/outputs are additive-only per Evidence Bundle SPEC R18, with no breaking change without a new predicate URI per SPEC R17. Reference for that additive-only rule when a PR alters the input/output surface; defer to CHANGELOG + version.txt for current release state.",
       "scope": ["action.yml", "README.md", "src/**", "000-docs/**"]
     },
     {
