@@ -1,0 +1,40 @@
+{
+  "rules": [
+    {
+      "id": "thin-shell-no-decision-logic",
+      "rule": "This repo is the thin GitHub Action shell ONLY. All ship/no-ship decision logic — decide(), parsePolicy(), gate semantics, predicate evaluation, policy interpretation — is delegated to the published @intentsolutions/rollout-gate package (j-rig monorepo). The Action source (src/run.ts, src/main.ts) may contain ONLY: action-input reading + validation, file I/O for the bundle and policy, output/step-summary rendering, and exit-code wiring (fail-on-block / legacy dry-run). Flag any PR that re-implements gate semantics, a policy parser, a verdict algorithm, or threshold/coverage/pass-rate logic locally — that belongs upstream in @intentsolutions/rollout-gate; change it there and bump the dependency here (Blueprint A; DR-002 § 6.1; DR-018 § 9.2; CLAUDE.md THIN SHELL rule).",
+      "scope": ["src/**", "action.yml"],
+      "severity": "high"
+    },
+    {
+      "id": "decision-package-canonical-scope",
+      "rule": "The published decision package is @intentsolutions/rollout-gate (the consistent Intent Solutions published scope), pinned at 2.0.0. Flag any import, dependency, doc reference, or wiring that names a different package for the decision logic — in particular @j-rig/rollout-gate does NOT exist as a published package (the @j-rig/* workspace packages are private). The package name must read identically across src/, package.json, action.yml, and README.md.",
+      "scope": ["src/**", "package.json", "action.yml", "README.md"],
+      "severity": "high"
+    },
+    {
+      "id": "version-references-reconciled",
+      "rule": "Version references must stay reconciled across the repo. action.yml (uses: pins, reserved-input version notes), version.txt, package.json version, and README.md (status banner, uses: examples, capability notes) must all cite the same current release. Flag any change that bumps one version surface without updating the others, or that leaves an action.yml input note / README claim referencing a stale version string.",
+      "scope": ["action.yml", "version.txt", "package.json", "README.md"],
+      "severity": "medium"
+    },
+    {
+      "id": "predicate-uri-immutability-and-evals-only",
+      "rule": "Signed-artifact / predicate handling must stay consistent with the kernel contract. The consumed predicate URI is https://evals.intentsolutions.io/gate-result/v1 and the (reserved) emitted one is https://evals.intentsolutions.io/rollout-decision/v1 — both are permanent once any signed row references them; breaking changes mint /v2, never reformat or namespace-rename. The supported gate-result URI must come from the kernel constant @intentsolutions/core GATE_RESULT_V1_URI (single source of truth), not a hand-rolled local string. Flag any predicate URI, OTel attribute namespace, or attestation predicate identifier placed under labs.intentsolutions.io — that subdomain is reserved-don't-touch (content surface only); attestation surface lives ONLY under evals.intentsolutions.io (CLAUDE.md CISO bindings 1+3; DR-004 § 6).",
+      "scope": ["src/**", "action.yml", "000-docs/**", "README.md"],
+      "severity": "high"
+    },
+    {
+      "id": "fail-closed-no-silent-pass",
+      "rule": "The action FAILS CLOSED: a block decision fails the job unless fail-on-block is the explicit string 'false' (or legacy dry-run: 'true'). Any wiring failure — missing/unreadable/invalid-JSON bundle, invalid policy, both-or-neither policy source, unsupported predicate-uri, unexpected error — must resolve to a block decision, never a silent allow/exit-0. Flag any change that reintroduces an always-pass / not-implemented stub path or weakens a failure branch to an allow.",
+      "scope": ["src/**"],
+      "severity": "high"
+    },
+    {
+      "id": "credential-redaction-and-synthetic-fixtures",
+      "rule": "Error messages and PR-comment / step-summary output must redact credential-adjacent data (OIDC subjects, Fulcio cert content, signing-key paths). Test fixtures must use synthetic gate IDs only (synth-gate-1, synth-gate-2, …) and never name partner engagements (CLAUDE.md CISO bindings 4+5). Flag any error/summary string that could leak a credential or any fixture carrying a real partner-engagement gate ID or partner name.",
+      "scope": ["src/**", "tests/**"],
+      "severity": "high"
+    }
+  ]
+}
