@@ -7,7 +7,7 @@
 | Record type | RL (Release Report) — migration notes |
 | File | `008-RL-REPT-v0.2.0-migration-notes-2026-06-18.md` |
 | Date | 2026-06-18 |
-| Status | DRAFT — forward-looking migration guidance; v0.2.0 not yet released |
+| Status | RELEASED — v0.2.0 shipped (CHANGELOG `[0.2.0]`); current line is v0.3.0. Authored as forward-looking migration guidance before the v0.2.0 cut; the transition it describes is now live. |
 | Governs | The `v0.1.0` (M5 TypeScript MVP, "experimental" per DR-002 § 6) -> `v0.2.0` (stable consumption contract) transition |
 
 ---

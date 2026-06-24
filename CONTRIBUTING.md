@@ -33,14 +33,14 @@ For new inputs / outputs / decision-algorithm extensions, explain:
 1. Fork the repository.
 2. Create a feature branch from `main`: `git checkout -b feat/your-feature`.
 3. Make focused changes. Avoid scope creep — this action does one thing (consume bundle, decide).
-4. Once M5 lands a runtime, run the corresponding `lint + typecheck + test` invocation locally before pushing.
+4. Run the gate locally before pushing: `pnpm install --frozen-lockfile && pnpm run check` (typecheck + vitest), and `pnpm run build` if you touched `src/` (the committed `dist/` must stay in sync).
 5. Open the PR with: motivation, what changed, testing performed, and a forward-pointer to the related Evidence Bundle SPEC clause if applicable.
 
 ## Coding Conventions
 
-To be ratified in the M5 first PR (the one that locks the runtime). Until then:
+The runtime is locked to TypeScript on Node 20+ (DR-002); the conventions below are in force:
 
-- `action.yml` follows the [GitHub Actions metadata syntax](https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions). Do not break composite-action backwards compatibility once published.
+- `action.yml` follows the [GitHub Actions metadata syntax](https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions). Do not break the `uses:` input/output compatibility once published.
 - Doc files under `000-docs/` follow Doc Filing Standard v4.x: `NNN-CC-CODE-description.md`.
 - Commits: keep messages descriptive; signed-off footer is auto-applied by maintainer tooling.
 

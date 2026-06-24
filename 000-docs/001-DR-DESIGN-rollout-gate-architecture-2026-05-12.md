@@ -1,7 +1,7 @@
 # 001-DR-DESIGN—Rollout Gate Architecture
 
 **Date:** 2026-05-12
-**Status:** Authored at M4 substantive bootstrap. Implementation begins M5.
+**Status:** Authored at M4 substantive bootstrap; implementation was deferred to M5 at the time of writing. [Update: M5 shipped — the TypeScript runtime landed at v0.1.0 (runtime locked by DR-002, doc 004); the action is live at v0.3.0. This architecture record remains authoritative; the milestone framing below reflects the as-authored 2026-05-12 state.]
 **Source narrative:** [`intent-eval-lab/000-docs/007-DR-BRIEF-intent-eval-platform-system-brief-2026-05-11.html`](https://github.com/jeremylongshore/intent-eval-lab/blob/main/000-docs/007-DR-BRIEF-intent-eval-platform-system-brief-2026-05-11.html) § 8 ("The Rollout Gate") and § 9 ("How It All Works Together").
 **Authoritative spec input:** [`intent-eval-lab/specs/evidence-bundle/v0.1.0-draft/SPEC.md`](https://github.com/jeremylongshore/intent-eval-lab/blob/main/specs/evidence-bundle/v0.1.0-draft/SPEC.md).
 

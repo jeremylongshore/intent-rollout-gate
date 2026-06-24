@@ -73,7 +73,7 @@ When contributing to this project:
 
 - Never hardcode credentials or secrets; never commit `.env` files (`.gitignore` covers this)
 - Validate all input at system boundaries — the gate reads bundles + policy from paths the user supplies; symlink traversal + path-escape are real concerns
-- Keep dependencies up to date (dependabot opens weekly PRs once a runtime is locked in M5)
+- Keep dependencies up to date (the runtime is locked to TypeScript on Node 20+; bump pinned deps promptly when upstream security fixes land)
 - Use HTTPS for all external communication (cosign / Rekor / Fulcio)
 - Follow the principle of least privilege — the action should request the narrowest GitHub token permissions that let it post a PR comment + status check
 - Do not log sensitive information — credential redaction is a CISO binding (architecture doc § 5.4)
