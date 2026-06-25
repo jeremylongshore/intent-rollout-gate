@@ -122,7 +122,6 @@ Also keep an eye on the committed `dist/index.js`: it is a built artifact and
 any `src/` change must ship a matching rebuild in the same commit (CI fails a
 stale dist). Adding docs under `.greptile/` does not touch `dist/`.
 
-
 ## Review priorities — what to weight, what to skip
 
 Greptile is **advisory** here. The deterministic merge gate is this repo's own
