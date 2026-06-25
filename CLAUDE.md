@@ -60,6 +60,23 @@ These are **non-negotiable constraints**, not stylistic preferences. Every imple
 
 Per the global Intent Solutions Testing SOP, this repo installs [`@intentsolutions/audit-harness`](https://github.com/jeremylongshore/audit-harness) as a dev dependency (the runtime is locked to TypeScript per DR-002). The harness is invoked from `.github/workflows/ci.yml` and from any `.husky/pre-commit` hook. Enforcement travels with the code—never reference `~/.claude/` paths.
 
+## AI code review (Greptile + Gemini)
+
+Two AI reviewers run on PRs here, **both advisory** — neither is a branch-protection
+required check. The deterministic merge gate is this repo's own CI (typecheck + vitest + the dist-sync job) plus CodeQL.
+
+- **Gemini Code Assist** (`.gemini/config.yaml` + `.gemini/styleguide.md`) is the
+  **active** reviewer. Re-instated 2026-06-24 as the fallback after the Greptile
+  review quota was exhausted. Workhorse for design / logic / correctness /
+  cross-artifact consistency; CodeQL owns security.
+- **Greptile** (`.greptile/config.json` + `rules.md` + `files.json`) is configured to
+  the platform-unified schema (`strictness: 3`, `commentTypes: ["logic","syntax"]`,
+  `statusCheck: false`, a universal `no-gate-weakening` rule, plus this repo's scoped
+  invariant rules). It stays in place and resumes when the Greptile quota resets.
+
+Read either review when present; the required gate is CI. Re-installing/uninstalling
+the GitHub Apps is an admin (UI) action — the in-repo config here does not install them.
+
 ## Beads workflow
 
 This repo owns its own `.beads/` directory (initialized at M4 with prefix `IRG`). Convergence-level meta-beads continue to live in the home `~/.beads/` (prefix `OPS`).

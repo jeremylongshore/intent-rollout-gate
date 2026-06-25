@@ -1,5 +1,18 @@
 {
+  "strictness": 3,
+  "commentTypes": ["logic", "syntax"],
+  "triggerOnUpdates": true,
+  "fixWithAI": true,
+  "statusCheck": false,
+  "ignorePatterns": "node_modules/\ndist/\ncoverage/\npnpm-lock.yaml\n.audit-harness/",
+  "confidenceScoreSection": { "included": true },
+  "sequenceDiagramSection": { "included": true },
   "rules": [
+    {
+      "id": "no-gate-weakening",
+      "rule": "Never suggest lowering a CI threshold, deleting/skipping/weakening a test, relaxing an assertion, bypassing type checks, disabling a security/policy/audit check, or reducing coverage/mutation/audit requirements — unless the same PR replaces it with a stronger equivalent.",
+      "severity": "high"
+    },
     {
       "id": "thin-shell-no-decision-logic",
       "rule": "This repo is the thin GitHub Action shell ONLY. All ship/no-ship decision logic — decide(), parsePolicy(), gate semantics, predicate evaluation, policy interpretation — is delegated to the published @intentsolutions/rollout-gate package (j-rig monorepo). The Action source (src/run.ts, src/main.ts) may contain ONLY: action-input reading + validation, file I/O for the bundle and policy, output/step-summary rendering, and exit-code wiring (fail-on-block / legacy dry-run). Flag any PR that re-implements gate semantics, a policy parser, a verdict algorithm, or threshold/coverage/pass-rate logic locally — that belongs upstream in @intentsolutions/rollout-gate; change it there and bump the dependency here (Blueprint A; DR-002 § 6.1; DR-018 § 9.2; CLAUDE.md THIN SHELL rule).",

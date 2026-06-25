@@ -121,3 +121,22 @@ are breaking and should be challenged.
 Also keep an eye on the committed `dist/index.js`: it is a built artifact and
 any `src/` change must ship a matching rebuild in the same commit (CI fails a
 stale dist). Adding docs under `.greptile/` does not touch `dist/`.
+
+
+## Review priorities — what to weight, what to skip
+
+Greptile is **advisory** here. The deterministic merge gate is this repo's own
+required CI (typecheck, lint, tests, coverage/mutation where applicable, the
+audit-harness self-check, and CodeQL). Greptile's job is the semantic layer those
+gates structurally cannot see — weight findings accordingly.
+
+**Prioritize** (worth a comment): correctness and logic errors; security and
+supply-chain / credential exposure; data-integrity and signed-evidence invariants;
+concurrency and ordering hazards; input validation; auth / authorization
+boundaries; secret handling; and regressions against the scoped invariants in
+`config.json`.
+
+**Deprioritize** (do not spend a comment here): style and naming; formatting;
+churn in generated or build artifacts; and anything the L1 linters or CodeQL
+already report. Never restate a deterministic gate — state the problem, the
+`file:line`, and the concrete fix.
