@@ -46964,7 +46964,7 @@ async function run() {
       await conclude(
         "block",
         [
-          `unsupported predicate-uri '${predicateUri}': v0.2.0 evaluates only ${SUPPORTED_PREDICATE_URI}`
+          `unsupported predicate-uri '${predicateUri}': v0.3.0 evaluates only ${SUPPORTED_PREDICATE_URI}`
         ],
         null,
         failOnBlock
@@ -46973,7 +46973,7 @@ async function run() {
     }
     if (core.getInput("cosign-key").trim() !== "") {
       core.warning(
-        "input 'cosign-key' is reserved: decision-row signing is not implemented at v0.2.0; no signing performed, signed-decision-row-path stays empty"
+        "input 'cosign-key' is reserved: decision-row signing is not implemented at v0.3.0; no signing performed, signed-decision-row-path stays empty"
       );
     }
     const hasPath = policyPath !== "";

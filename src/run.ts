@@ -98,7 +98,7 @@ export function countKernelInvalidPredicates(bundle: unknown): number {
 
 /**
  * Set every declared output, write the step summary, and wire the exit code.
- * `signed-decision-row-path` is reserved (always empty at v0.2.0 — decision-row
+ * `signed-decision-row-path` is reserved (always empty at v0.3.0 — decision-row
  * signing lands with the DNSSEC + CAA pre-condition work per DR-002 § 6.3).
  */
 async function conclude(
@@ -159,7 +159,7 @@ export async function run(): Promise<void> {
       await conclude(
         "block",
         [
-          `unsupported predicate-uri '${predicateUri}': v0.2.0 evaluates only ${SUPPORTED_PREDICATE_URI}`,
+          `unsupported predicate-uri '${predicateUri}': v0.3.0 evaluates only ${SUPPORTED_PREDICATE_URI}`,
         ],
         null,
         failOnBlock,
@@ -168,7 +168,7 @@ export async function run(): Promise<void> {
     }
     if (core.getInput("cosign-key").trim() !== "") {
       core.warning(
-        "input 'cosign-key' is reserved: decision-row signing is not implemented at v0.2.0; no signing performed, signed-decision-row-path stays empty",
+        "input 'cosign-key' is reserved: decision-row signing is not implemented at v0.3.0; no signing performed, signed-decision-row-path stays empty",
       );
     }
 
