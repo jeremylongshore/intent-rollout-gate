@@ -1,6 +1,6 @@
 # intent-rollout-gate
 
-Part of the **[Intent Eval Platform](https://github.com/intent-solutions-io/intent-eval-platform)**—the umbrella mapping the six repos that converge via a shared Evidence Bundle schema.
+Part of the **[Intent Eval Platform](https://github.com/intent-solutions-io/intent-eval-platform)** — the umbrella grouping the platform's six repos: five converge via a shared Evidence Bundle schema (`intent-eval-core`, `intent-eval-lab`, `audit-harness`, `j-rig-skill-binary-eval`, `intent-rollout-gate`), plus `intent-eval-dashboard` as a satellite consumer (not part of the convergence taxonomy).
 
 > **Status: v0.3.0 — frozen consumption contract & hardened release pipeline.** The action is a real Node runtime
 > that consumes an Evidence Bundle plus a rollout policy and decides
@@ -135,7 +135,7 @@ Parsing a policy out of `tests/TESTING.md` directly stays deferred per
 
 ```bash
 pnpm install --frozen-lockfile
-pnpm run check        # typecheck + vitest unit tests
+pnpm run check        # format:check (prettier) + typecheck + vitest unit tests
 pnpm run build        # esbuild bundle src/main.ts → dist/index.js (node20 target)
 pnpm run dist:check   # rebuild + git diff --exit-code dist/
 ```
