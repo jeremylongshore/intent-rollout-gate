@@ -29,29 +29,31 @@ The convergence couples at the schema layer (the `gate-result/v1` predicate URI)
 | Milestone | Status |
 | --- | --- |
 | **M4**—substantive bootstrap | DONE. Repo exists; design doc landed. |
-| **M5**—implementation | **DONE (v0.1.0).** Runtime locked to TypeScript by DR-002 (`000-docs/004-AT-DECR-runtime-language-typescript-2026-06-10.md`); decision logic delegated to the published `@intentsolutions/rollout-gate@2.0.0`. |
+| **M5**—implementation | **DONE (current line v0.3.0; v0.1.0 was the experimental MVP, v0.2.0 froze the consumption contract).** Runtime locked to TypeScript by DR-002 (`000-docs/004-AT-DECR-runtime-language-typescript-2026-06-10.md`); decision logic delegated to the published `@intentsolutions/rollout-gate@2.0.0`. |
 | **M6**—first downstream adopter | NOT STARTED. `audit-harness` self-adopts before any partner repo wires this in. |
 | **Decision-row signing** | NOT STARTED. `rollout-decision/v1` emit + sign + Rekor anchor behind the DNSSEC + CAA pre-condition (DR-004 § 6.1). |
 
 **THIN SHELL rule (Blueprint A, DR-018 § 9.2):** this repo must never contain decision logic. `decide()` / `parsePolicy()` and all gate semantics live in the published `@intentsolutions/rollout-gate` package (j-rig monorepo). If decision behavior must change, change it upstream and bump the dependency here. PRs re-implementing gate semantics locally are out of order.
 
+**One exception to "no logic":** the shell runs each consumed `gate-result/v1` predicate body through the kernel's `GateResultV1Schema` (`@intentsolutions/core`) as an ADVISORY check (`countKernelInvalidPredicates`) — a malformed body surfaces a `core.warning` but never blocks; the decision stays 100% delegated.
+
 ## Build & test commands
 
 ```bash
 pnpm install --frozen-lockfile
-pnpm run check        # typecheck + vitest unit tests
+pnpm run check        # prettier --check + tsc --noEmit typecheck + vitest unit tests
 pnpm run build        # esbuild bundle src/main.ts → dist/index.js (node20 target)
 pnpm run dist:check   # rebuild + git diff --exit-code dist/
 ```
 
-`dist/index.js` is **committed** (GitHub Actions convention). Any change to `src/` or the dependency lockfile requires re-running `pnpm run build` and committing the updated `dist/` in the same commit — the CI dist-sync job fails stale bundles. `action.yml` declares `runs.using: node24`; the esbuild transpile target stays node20-compatible per the DR-002 "Node 20+" lock.
+`dist/index.js` is **committed** (GitHub Actions convention). Any change to `src/` or the dependency lockfile requires re-running `pnpm run build` and committing the updated `dist/` in the same commit — the CI dist-sync job fails stale bundles. `action.yml` declares `runs.using: node24`; the esbuild transpile target stays node20-compatible per the DR-002 "Node 20+" lock. CI additionally runs `pnpm exec audit-harness verify` (hash-pinned harness integrity) before the format/typecheck/test steps — edits under harness scope must be followed by `pnpm exec audit-harness init` and a committed `.harness-hash`.
 
 ## CISO + compliance bindings (carried from ISEDC DR-004)
 
 These are **non-negotiable constraints**, not stylistic preferences. Every implementation PR must respect them.
 
 1. **Predicate URI immutability.** This action emits a *new* in-toto row at `https://evals.intentsolutions.io/rollout-decision/v1` to attest the rollout decision itself. The exact URI string is permanent once any row referencing it is signed and pushed to Rekor. Never reformat, never namespace-rename, never shorten. Breaking changes mint `/v2`.
-2. **DNSSEC pre-condition for Rekor push.** Per ISEDC CISO binding (DR-004 § 6.1), no signed attestation referencing a `evals.intentsolutions.io` URI may be pushed to Rekor until the namespace is DNSSEC-enabled and CAA records are pinned to a single CA. This action **must** check the DNSSEC + CAA state at runtime before pushing to Rekor and refuse with a clear error if the pre-condition isn't met. The pre-flight check is implemented and live — production-Rekor signing of the committed `dist/` was enabled at v0.2.0 behind the iah-E06 DNSSEC/CAA pre-flight; decision-row (`rollout-decision/v1`) signing inherits the same gate and remains pending.
+2. **DNSSEC pre-condition for Rekor push.** Per ISEDC CISO binding (DR-004 § 6.1), no signed attestation referencing a `evals.intentsolutions.io` URI may be pushed to Rekor until the namespace is DNSSEC-enabled and CAA records are pinned to a single CA. This action **must** check the DNSSEC + CAA state at runtime before pushing to Rekor and refuse with a clear error if the pre-condition isn't met. Scope at v0.3.0: the action's *runtime* does NOT push to Rekor (`action.yml` `rekor-url`/`cosign-key` are honest no-ops) — decision-row (`rollout-decision/v1`) emit+sign+push stays deferred behind this gate. What IS live is release-pipeline provenance: production-Rekor cosign signing of the committed `dist/index.js` (enabled at v0.2.0, dispatch-only, dry-run-default) behind the iah-E06 DNSSEC/CAA pre-flight in `release.yml`.
 3. **`labs.intentsolutions.io` is reserved-don't-touch.** Predicate URIs and OTel attribute namespaces live at `evals.intentsolutions.io` only. `labs.` may host blog content, methodology pages, RFC published-version pages—but NEVER an in-toto predicate URI, OTel attribute namespace, or attestation predicate identifier. Once the first signed attestation lands in Rekor referencing an `evals.` URI, that namespace is permanent; `labs.` must stay clear of attestation surface to preserve DNS / brand-surface isolation.
 4. **No partner-name leakage.** Per the partner-consent discipline in `intent-eval-lab/CLAUDE.md` § "Brand-name policy", do not name partner engagements (Kobiton, Polygon, Nixtla, Lit Protocol, Mudit Gupta) in any specs, READMEs, GitHub issues, or test fixtures absent written consent. `grep -ri "Kobiton\|Polygon\|Nixtla\|Lit Protocol\|Mudit Gupta" .` must return zero hits at all times.
 5. **Credential redaction in error messages.** When the action surfaces a verification failure, the error must redact any path / OIDC subject / Fulcio cert content that could leak into a public PR-comment surface. The credential-redaction test ships in `tests/run.test.ts` (carried from ISEDC PASS/FAIL gate for j-rig provider adapters; the same posture applies here) and must stay green.
@@ -89,6 +91,8 @@ bd update <id> --status in_progress    # claim work
 bd close <id> --reason "evidence"      # close with substantive evidence (commit SHA, test output, decision-doc link)
 bd sync                                # push to remote
 ```
+
+> The auto-injected "Beads Issue Tracker / Session Completion" block below is generic boilerplate. For IEP, state changes mirror via `bd-sync close`/`bd-sync note` (three-layer bead↔GH↔Plane), NOT raw `bd close` or `bd dolt push`. See the umbrella `~/000-projects/intent-eval-platform/CLAUDE.md` § "Three-layer mirror".
 
 ## Conventions
 
