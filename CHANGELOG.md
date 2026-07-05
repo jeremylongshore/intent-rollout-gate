@@ -14,6 +14,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 > - **`tests/TESTING.md` policy parsing** — deferred per DR-002 § 5; the action continues to consume JSON policy documents only.
 > - **M6 first adopter** — `audit-harness` self-adopts the gate end-to-end before any partner repo (DR-002 § 6 criterion 5).
 
+## [0.3.1] - 2026-07-05
+
+### Changed
+
+- Bump `@intentsolutions/core` `^0.7.0` → `^0.9.0`. The committed `dist/index.js` is rebuilt with the current kernel validators, so the action's advisory `GateResultV1Schema` check (`countKernelInvalidPredicates`) runs against the 0.9.0 predicate schema. No change to the action's public `uses:` interface (inputs/outputs byte-identical to v0.3.0); adopters upgrade the pin, no rewiring required. (#50)
+
 ## [0.3.0] - 2026-06-15
 
 **Release-pipeline hardening + provenance correctness.** No change to the action's public `uses:` interface (inputs/outputs are byte-identical to v0.2.0) — this release hardens the release/signing pipeline itself and fixes a provenance-correctness bug in the dispatch re-release path. Adopters upgrade the pin; no workflow rewiring is required.
