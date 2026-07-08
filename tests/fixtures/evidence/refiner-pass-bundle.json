@@ -1,0 +1,124 @@
+[
+  {
+    "_type": "https://in-toto.io/Statement/v1",
+    "subject": [
+      {
+        "name": "synth-tool:ci:synth-gate-1",
+        "digest": {
+          "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        }
+      }
+    ],
+    "predicateType": "https://evals.intentsolutions.io/gate-result/v1",
+    "predicate": {
+      "gate_id": "synth-tool:ci:synth-gate-1",
+      "gate_name": "synth-gate-1",
+      "gate_version": "1.0.0",
+      "gate_decision": "pass",
+      "gate_reasons": [],
+      "coverage": {
+        "dimensions_evaluated": ["static"],
+        "dimensions_skipped": []
+      },
+      "policy_ref": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa:tests/TESTING.md",
+      "policy_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "input_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "evaluated_at": "2026-06-10T12:00:00Z",
+      "runner": "github-actions@1.0.0",
+      "commit_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    }
+  },
+  {
+    "_type": "https://in-toto.io/Statement/v1",
+    "subject": [
+      {
+        "name": "skill-refiner:synth-skill-v3",
+        "digest": {
+          "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+        }
+      }
+    ],
+    "predicateType": "https://evals.intentsolutions.io/skill-refiner-pass/v1",
+    "predicate": {
+      "verdict": "accept",
+      "reason": ["pareto-dominant-behavioral", "non-regressing-others"],
+      "refiner_strategy_id": "naive-in-context",
+      "skill_version_id": "018f6b1e-7c00-7aaa-8bbb-000000000001",
+      "parent_version_id": null,
+      "source_snapshot_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "result_snapshot_hash": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "eval_set_ref": {
+        "hash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "version": "eval-set-1.0.0",
+        "lineage_id": "018f6b1e-7c00-7aaa-8bbb-000000000002"
+      },
+      "edit_proposal_hash": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "behavioral_delta": 0.12,
+      "named_dimension_deltas": [
+        { "id": "safety", "delta": 0.01, "non_regressed": true }
+      ],
+      "alpha": 0.05,
+      "test_statistic_kind": "one-sided-z"
+    }
+  },
+  {
+    "_type": "https://in-toto.io/Statement/v1",
+    "subject": [
+      {
+        "name": "skill-refiner:synth-skill-v4",
+        "digest": {
+          "sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+        }
+      }
+    ],
+    "predicateType": "https://evals.intentsolutions.io/skill-refiner-pass/v1",
+    "predicate": {
+      "verdict": "reject",
+      "reason": ["behavioral-delta-not-significant"],
+      "refiner_strategy_id": "skill-opt-style",
+      "skill_version_id": "018f6b1e-7c00-7aaa-8bbb-000000000003",
+      "parent_version_id": "018f6b1e-7c00-7aaa-8bbb-000000000001",
+      "source_snapshot_hash": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "result_snapshot_hash": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "eval_set_ref": {
+        "hash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "version": "eval-set-1.0.0",
+        "lineage_id": "018f6b1e-7c00-7aaa-8bbb-000000000002"
+      },
+      "edit_proposal_hash": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "behavioral_delta": 0.004,
+      "named_dimension_deltas": [],
+      "alpha": 0.05,
+      "test_statistic_kind": "one-sided-z"
+    }
+  },
+  {
+    "_type": "https://in-toto.io/Statement/v1",
+    "subject": [
+      {
+        "name": "synth-tool:ci:synth-gate-2",
+        "digest": {
+          "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        }
+      }
+    ],
+    "predicateType": "https://evals.intentsolutions.io/gate-result/v1",
+    "predicate": {
+      "gate_id": "synth-tool:ci:synth-gate-2",
+      "gate_name": "synth-gate-2",
+      "gate_version": "1.0.0",
+      "gate_decision": "pass",
+      "gate_reasons": [],
+      "coverage": {
+        "dimensions_evaluated": ["static"],
+        "dimensions_skipped": []
+      },
+      "policy_ref": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa:tests/TESTING.md",
+      "policy_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "input_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "evaluated_at": "2026-06-10T12:00:00Z",
+      "runner": "github-actions@1.0.0",
+      "commit_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    }
+  }
+]
