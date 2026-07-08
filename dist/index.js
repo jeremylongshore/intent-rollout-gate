@@ -45404,6 +45404,9 @@ function patternToRegex(pattern) {
 // node_modules/.pnpm/@intentsolutions+core@0.9.0/node_modules/@intentsolutions/core/dist/predicates/human-review-v1.js
 var HUMAN_REVIEW_V1_URI = "https://evals.intentsolutions.io/human-review/v1";
 
+// node_modules/.pnpm/@intentsolutions+core@0.9.0/node_modules/@intentsolutions/core/dist/predicates/skill-refiner-pass-v1.js
+var SKILL_REFINER_PASS_V1_URI = "https://evals.intentsolutions.io/skill-refiner-pass/v1";
+
 // node_modules/.pnpm/@intentsolutions+core@0.9.0/node_modules/@intentsolutions/core/dist/predicates/gate-result-v1.js
 var GATE_RESULT_V1_URI2 = "https://evals.intentsolutions.io/gate-result/v1";
 
@@ -47150,7 +47153,7 @@ var MarketplaceCatalogSchema = attach(marketplaceCatalogIssues);
 function esc2(value) {
   return value.replace(/\|/g, "\\|");
 }
-function renderSummary(decision, reasons, result) {
+function renderSummary(decision, reasons, result, refinerRows = []) {
   const lines = [
     "## Intent Rollout Gate",
     "",
@@ -47185,6 +47188,25 @@ function renderSummary(decision, reasons, result) {
     }
     lines.push("");
   }
+  if (refinerRows.length > 0) {
+    const accepted = refinerRows.filter(
+      (row) => row.verdict === "accept"
+    ).length;
+    lines.push(
+      "### Skill Refiner (advisory)",
+      "",
+      `**${accepted}** accepted refinement${accepted === 1 ? "" : "s"} attested (does not affect the ship/no-ship decision).`,
+      ""
+    );
+    lines.push("| Verdict | SkillVersion | Behavioral \u0394 | Rekor |");
+    lines.push("| --- | --- | --- | --- |");
+    for (const row of refinerRows) {
+      lines.push(
+        `| ${esc2(row.verdict)} | \`${esc2(row.skillVersionId)}\` | ${row.behavioralDelta} | ${row.rekorRef === null ? "staging" : `\`${esc2(row.rekorRef)}\``} |`
+      );
+    }
+    lines.push("");
+  }
   if (reasons.length > 0) {
     lines.push("### Blocking reasons", "");
     for (const reason of reasons) {
@@ -47197,21 +47219,30 @@ function renderSummary(decision, reasons, result) {
 
 // src/run.ts
 var SUPPORTED_PREDICATE_URI = GATE_RESULT_V1_URI2;
+var ADVISORY_REFINER_PASS_URI = SKILL_REFINER_PASS_V1_URI;
 function errMessage(err) {
   return err instanceof Error ? err.message : String(err);
 }
-function countKernelInvalidPredicates(bundle) {
-  let rows;
+function bundleRows(bundle) {
   if (Array.isArray(bundle)) {
-    rows = bundle;
-  } else if (bundle !== null && typeof bundle === "object" && Array.isArray(bundle.rows)) {
-    rows = bundle.rows;
-  } else {
+    return bundle;
+  }
+  if (bundle !== null && typeof bundle === "object" && Array.isArray(bundle.rows)) {
+    return bundle.rows;
+  }
+  return null;
+}
+function isRowOfType(row, uri) {
+  return row !== null && typeof row === "object" && row.predicateType === uri;
+}
+function countKernelInvalidPredicates(bundle) {
+  const rows = bundleRows(bundle);
+  if (rows === null) {
     return 0;
   }
   let invalid = 0;
   for (const row of rows) {
-    if (row === null || typeof row !== "object" || row.predicateType !== SUPPORTED_PREDICATE_URI) {
+    if (!isRowOfType(row, SUPPORTED_PREDICATE_URI)) {
       continue;
     }
     const predicate = row.predicate;
@@ -47221,8 +47252,50 @@ function countKernelInvalidPredicates(bundle) {
   }
   return invalid;
 }
-async function conclude(decision, reasons, result, failOnBlock) {
-  const summary2 = renderSummary(decision, reasons, result);
+function extractRefinerPassRows(bundle) {
+  const rows = bundleRows(bundle);
+  if (rows === null) {
+    return [];
+  }
+  const out = [];
+  for (const row of rows) {
+    if (!isRowOfType(row, ADVISORY_REFINER_PASS_URI)) {
+      continue;
+    }
+    const predicate = row.predicate;
+    const parsed = SkillRefinerPassV1Schema.safeParse(predicate);
+    if (!parsed.success) {
+      continue;
+    }
+    const body = parsed.data;
+    const stmtRekor = row.rekor_log_index;
+    const rekorRef = typeof stmtRekor === "number" && Number.isFinite(stmtRekor) ? String(stmtRekor) : null;
+    out.push({
+      verdict: body.verdict,
+      skillVersionId: body.skill_version_id,
+      behavioralDelta: body.behavioral_delta,
+      rekorRef
+    });
+  }
+  return out;
+}
+function stripRefinerPassRows(bundle) {
+  if (Array.isArray(bundle)) {
+    return bundle.filter((row) => !isRowOfType(row, ADVISORY_REFINER_PASS_URI));
+  }
+  if (bundle !== null && typeof bundle === "object" && Array.isArray(bundle.rows)) {
+    const container = bundle;
+    return {
+      ...container,
+      rows: container.rows.filter(
+        (row) => !isRowOfType(row, ADVISORY_REFINER_PASS_URI)
+      )
+    };
+  }
+  return bundle;
+}
+async function conclude(decision, reasons, result, failOnBlock, refinerRows = []) {
+  const summary2 = renderSummary(decision, reasons, result, refinerRows);
   core.setOutput("decision", decision);
   core.setOutput("reasons", JSON.stringify(reasons));
   core.setOutput("summary", summary2);
@@ -47318,8 +47391,24 @@ async function run() {
         `${kernelInvalid} gate-result/v1 predicate body(ies) failed kernel @intentsolutions/core GateResultV1Schema validation (advisory only; decision is unaffected)`
       );
     }
-    const result = decide(bundle, policy);
-    await conclude(result.decision, result.reasons, result, failOnBlock);
+    const refinerRows = extractRefinerPassRows(bundle);
+    if (refinerRows.length > 0) {
+      const acceptedCount = refinerRows.filter(
+        (row) => row.verdict === "accept"
+      ).length;
+      core.info(
+        `Skill Refiner: ${acceptedCount} accepted refinement(s) attested (advisory only; ship/no-ship decision is unaffected)`
+      );
+    }
+    const decisionBundle = stripRefinerPassRows(bundle);
+    const result = decide(decisionBundle, policy);
+    await conclude(
+      result.decision,
+      result.reasons,
+      result,
+      failOnBlock,
+      refinerRows
+    );
   } catch (err) {
     await conclude(
       "block",

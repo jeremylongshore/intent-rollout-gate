@@ -5,6 +5,7 @@
  * file handling, output plumbing, summary rendering, and exit behavior.
  */
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
 // ---------------------------------------------------------------------------
@@ -47,11 +48,17 @@ vi.mock("@actions/core", () => {
   };
 });
 
-import { GATE_RESULT_V1_URI } from "@intentsolutions/core";
 import {
+  GATE_RESULT_V1_URI,
+  SKILL_REFINER_PASS_V1_URI,
+} from "@intentsolutions/core";
+import {
+  ADVISORY_REFINER_PASS_URI,
   countKernelInvalidPredicates,
+  extractRefinerPassRows,
   renderSummary,
   run,
+  stripRefinerPassRows,
   SUPPORTED_PREDICATE_URI,
 } from "../src/run";
 
@@ -65,6 +72,11 @@ const ADVISORY_BUNDLE = fixture("evidence", "advisory-bundle.json");
 const KERNEL_INVALID_BUNDLE = fixture(
   "evidence",
   "kernel-invalid-predicate-bundle.json",
+);
+const REFINER_PASS_BUNDLE = fixture("evidence", "refiner-pass-bundle.json");
+const REFINER_PASS_MALFORMED_BUNDLE = fixture(
+  "evidence",
+  "refiner-pass-malformed-bundle.json",
 );
 const POLICY = fixture("policy.json");
 const POLICY_INVALID = fixture("policy-invalid.json");
@@ -592,5 +604,248 @@ describe("credential redaction — secrets never reach outputs/logs", () => {
     expect(outputs.get("decision")).toBe("block");
     expect(reasonsOutput()[0]).toContain("invalid rollout policy");
     assertNoSecretAnywhere();
+  });
+});
+
+// ===========================================================================
+// r8ir.1 — ADVISORY skill-refiner-pass/v1 enrichment. When the incoming bundle
+// carries skill-refiner-pass/v1 rows, the action surfaces them in the step
+// summary as a read-only "Skill Refiner" section AND strips them before the
+// decision engine sees the bundle — so the ship/no-ship verdict is IDENTICAL
+// with or without the refiner rows present (verdict-invariant by construction).
+// ===========================================================================
+describe("skill-refiner-pass advisory — kernel source of truth (r8ir.1)", () => {
+  it("re-exports the advisory URI verbatim from @intentsolutions/core (no local copy)", () => {
+    // Identity, not a hard-coded string: if the kernel changes the URI, this
+    // shell's constant changes with it, proving no local duplicate survives.
+    expect(ADVISORY_REFINER_PASS_URI).toBe(SKILL_REFINER_PASS_V1_URI);
+  });
+
+  it("the kernel URI is the exact value the fixtures declare", () => {
+    expect(SKILL_REFINER_PASS_V1_URI).toBe(
+      "https://evals.intentsolutions.io/skill-refiner-pass/v1",
+    );
+  });
+});
+
+describe("extractRefinerPassRows — validate-and-project (r8ir.1)", () => {
+  it("returns only the kernel-VALID skill-refiner-pass rows, projected to display fields", () => {
+    const bundle = JSON.parse(
+      readFileSync(REFINER_PASS_BUNDLE, "utf8"),
+    ) as unknown;
+    const rows = extractRefinerPassRows(bundle);
+
+    // fixture has one accept + one reject refiner row (both kernel-valid)
+    expect(rows).toHaveLength(2);
+    expect(rows.map((r) => r.verdict).sort()).toEqual(["accept", "reject"]);
+
+    const accept = rows.find((r) => r.verdict === "accept");
+    expect(accept?.skillVersionId).toBe("018f6b1e-7c00-7aaa-8bbb-000000000001");
+    expect(accept?.behavioralDelta).toBe(0.12);
+    // staging-first predicate → no rekor_log_index on the fixture body → null
+    expect(accept?.rekorRef).toBeNull();
+  });
+
+  it("DROPS a malformed skill-refiner-pass row (advisory, never surfaced, never a fail)", () => {
+    const bundle = JSON.parse(
+      readFileSync(REFINER_PASS_MALFORMED_BUNDLE, "utf8"),
+    ) as unknown;
+    // the fixture's lone refiner row has a bad verdict/skill_version_id/delta
+    expect(extractRefinerPassRows(bundle)).toEqual([]);
+  });
+
+  it("ignores gate-result rows and returns [] when no refiner rows are present", () => {
+    const bundle = JSON.parse(readFileSync(ALLOW_BUNDLE, "utf8")) as unknown;
+    expect(extractRefinerPassRows(bundle)).toEqual([]);
+  });
+
+  it("handles the v1 legacy container form ({rows:[...]})", () => {
+    const arr = JSON.parse(
+      readFileSync(REFINER_PASS_BUNDLE, "utf8"),
+    ) as unknown[];
+    const container = { bundle_format: "json-array", rows: arr };
+    expect(extractRefinerPassRows(container)).toHaveLength(2);
+  });
+
+  it("never throws on a non-bundle shape (returns [])", () => {
+    expect(extractRefinerPassRows(null)).toEqual([]);
+    expect(extractRefinerPassRows(42)).toEqual([]);
+    expect(extractRefinerPassRows({ no: "rows" })).toEqual([]);
+  });
+
+  it("surfaces the Rekor index as a string when the STATEMENT carries rekor_log_index (envelope-time metadata, not the body)", () => {
+    const rows = extractRefinerPassRows([
+      {
+        _type: "https://in-toto.io/Statement/v1",
+        subject: [
+          { name: "skill-refiner:x", digest: { sha256: "b".repeat(64) } },
+        ],
+        predicateType: SKILL_REFINER_PASS_V1_URI,
+        // rekor_log_index lives on the STATEMENT (sibling to predicate) — the
+        // signed body schema is .strict() and rejects it; the Rekor reference is
+        // envelope-time verification metadata, not a determinant of the body.
+        rekor_log_index: 1809941980,
+        predicate: {
+          verdict: "accept",
+          reason: ["ok"],
+          refiner_strategy_id: "naive-in-context",
+          skill_version_id: "018f6b1e-7c00-7aaa-8bbb-000000000009",
+          parent_version_id: null,
+          source_snapshot_hash: `sha256:${"a".repeat(64)}`,
+          result_snapshot_hash: `sha256:${"b".repeat(64)}`,
+          eval_set_ref: {
+            hash: `sha256:${"c".repeat(64)}`,
+            version: "1.0.0",
+            lineage_id: "018f6b1e-7c00-7aaa-8bbb-00000000000a",
+          },
+          edit_proposal_hash: `sha256:${"d".repeat(64)}`,
+          behavioral_delta: 0.2,
+          named_dimension_deltas: [],
+          alpha: 0.05,
+          test_statistic_kind: "one-sided-z",
+        },
+      },
+    ]);
+    expect(rows).toHaveLength(1);
+    expect(rows[0]?.rekorRef).toBe("1809941980");
+  });
+});
+
+describe("stripRefinerPassRows — decision-path isolation (r8ir.1)", () => {
+  it("removes skill-refiner-pass rows from the v2 array while keeping gate-result rows", () => {
+    const bundle = JSON.parse(
+      readFileSync(REFINER_PASS_BUNDLE, "utf8"),
+    ) as unknown[];
+    const stripped = stripRefinerPassRows(bundle) as unknown[];
+
+    expect(Array.isArray(stripped)).toBe(true);
+    // 4 rows in (2 gate-result + 2 refiner) → 2 gate-result rows out
+    expect(stripped).toHaveLength(2);
+    for (const row of stripped) {
+      expect((row as { predicateType: string }).predicateType).toBe(
+        GATE_RESULT_V1_URI,
+      );
+    }
+  });
+
+  it("removes refiner rows from the v1 container form, preserving sibling keys", () => {
+    const arr = JSON.parse(
+      readFileSync(REFINER_PASS_BUNDLE, "utf8"),
+    ) as unknown[];
+    const container = { bundle_format: "json-array", rows: arr };
+    const stripped = stripRefinerPassRows(container) as {
+      bundle_format: string;
+      rows: unknown[];
+    };
+
+    expect(stripped.bundle_format).toBe("json-array");
+    expect(stripped.rows).toHaveLength(2);
+  });
+
+  it("returns a non-bundle shape unchanged (leaves it for the fail-closed path)", () => {
+    expect(stripRefinerPassRows(null)).toBeNull();
+    expect(stripRefinerPassRows({ not: "a bundle" })).toEqual({
+      not: "a bundle",
+    });
+  });
+});
+
+describe("renderSummary — advisory Skill Refiner section (r8ir.1)", () => {
+  it("renders the advisory section with accepted count + per-row detail", () => {
+    const md = renderSummary("allow", [], null, [
+      {
+        verdict: "accept",
+        skillVersionId: "018f6b1e-7c00-7aaa-8bbb-000000000001",
+        behavioralDelta: 0.12,
+        rekorRef: null,
+      },
+      {
+        verdict: "reject",
+        skillVersionId: "018f6b1e-7c00-7aaa-8bbb-000000000003",
+        behavioralDelta: 0.004,
+        rekorRef: "1809941980",
+      },
+    ]);
+
+    expect(md).toContain("### Skill Refiner (advisory)");
+    // 1 accept of the 2 rows; explicitly states it does not affect the decision
+    expect(md).toContain("**1** accepted refinement attested");
+    expect(md).toContain("does not affect the ship/no-ship decision");
+    expect(md).toContain("| Verdict | SkillVersion | Behavioral Δ | Rekor |");
+    expect(md).toContain(
+      "| accept | `018f6b1e-7c00-7aaa-8bbb-000000000001` | 0.12 | staging |",
+    );
+    expect(md).toContain(
+      "| reject | `018f6b1e-7c00-7aaa-8bbb-000000000003` | 0.004 | `1809941980` |",
+    );
+  });
+
+  it("omits the advisory section entirely when there are no refiner rows (back-compat)", () => {
+    const md = renderSummary("allow", [], null);
+    expect(md).not.toContain("### Skill Refiner");
+  });
+});
+
+describe("action self-test — skill-refiner-pass is VERDICT-INVARIANT (r8ir.1)", () => {
+  it("SHIP: a bundle carrying refiner-pass rows still yields decision=allow and surfaces the advisory section", async () => {
+    process.env.GITHUB_STEP_SUMMARY = "/tmp/refiner-summary";
+    inputs.set("bundle-path", REFINER_PASS_BUNDLE);
+    inputs.set("policy-path", POLICY);
+
+    await run();
+
+    expect(outputs.get("decision")).toBe("allow");
+    expect(reasonsOutput()).toEqual([]);
+    expect(setFailed).not.toHaveBeenCalled();
+    // advisory info log + summary section both fired
+    expect(info).toHaveBeenCalledWith(
+      expect.stringContaining("Skill Refiner: 1 accepted refinement(s)"),
+    );
+    expect(summaryRaw.join("\n")).toContain("### Skill Refiner (advisory)");
+  });
+
+  it("VERDICT-INVARIANCE: the SAME gate-result rows decide identically with vs without refiner-pass rows present", async () => {
+    // Bundle A: gate-result rows ONLY (allow-bundle = synth-gate-1 + -2, both pass)
+    inputs.set("bundle-path", ALLOW_BUNDLE);
+    inputs.set("policy-path", POLICY);
+    await run();
+    const decisionWithout = outputs.get("decision");
+    const reasonsWithout = reasonsOutput();
+
+    // reset harness state between the two runs
+    inputs.clear();
+    outputs.clear();
+    summaryRaw.length = 0;
+    vi.clearAllMocks();
+
+    // Bundle B: the EXACT same two gate-result rows + 2 refiner-pass rows
+    inputs.set("bundle-path", REFINER_PASS_BUNDLE);
+    inputs.set("policy-path", POLICY);
+    await run();
+    const decisionWith = outputs.get("decision");
+    const reasonsWith = reasonsOutput();
+
+    // decision + reasons are byte-identical: the refiner rows never touched the verdict
+    expect(decisionWith).toBe(decisionWithout);
+    expect(decisionWith).toBe("allow");
+    expect(reasonsWith).toEqual(reasonsWithout);
+    expect(reasonsWith).toEqual([]);
+  });
+
+  it("MALFORMED refiner row NEVER hard-fails: a bad refiner body is ignored and the gate-result decision stands", async () => {
+    inputs.set("bundle-path", REFINER_PASS_MALFORMED_BUNDLE);
+    inputs.set("policy-path", POLICY);
+
+    await run();
+
+    // the two gate-result rows both pass → allow; the malformed refiner row was
+    // silently dropped (not surfaced, not a block, no advisory info log)
+    expect(outputs.get("decision")).toBe("allow");
+    expect(reasonsOutput()).toEqual([]);
+    expect(setFailed).not.toHaveBeenCalled();
+    expect(info).not.toHaveBeenCalledWith(
+      expect.stringContaining("Skill Refiner:"),
+    );
+    expect(outputs.get("summary")).not.toContain("### Skill Refiner");
   });
 });
