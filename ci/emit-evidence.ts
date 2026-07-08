@@ -381,7 +381,13 @@ function firstLines(s: string, n: number): string {
 
 function gitSha(): string {
   const r = run("git", ["rev-parse", "HEAD"]);
-  return r.ok ? r.out.trim() : "0".repeat(40);
+  if (!r.ok) {
+    // Fail closed: a signed EvidenceBundle must never carry a dummy commit SHA.
+    throw new Error(
+      `emit-evidence: git rev-parse HEAD failed — refusing to emit without a real commit SHA (${r.out.slice(0, 200)})`,
+    );
+  }
+  return r.out.trim();
 }
 
 function harnessPolicyHash(): string {
@@ -390,8 +396,12 @@ function harnessPolicyHash(): string {
     // (byte-exact — no trim; see the iah emitter's trailing-newline lesson).
     const raw = readFileSync(join(process.cwd(), ".harness-hash"));
     return `sha256:${createHash("sha256").update(raw).digest("hex")}`;
-  } catch {
-    return `sha256:${sha256Hex("no-policy")}`;
+  } catch (err) {
+    // Fail closed: the policy hash is embedded in signed rows — a placeholder
+    // would attest a policy surface that was never read.
+    throw new Error(
+      `emit-evidence: cannot read .harness-hash — refusing to emit a placeholder policy hash (${String(err).slice(0, 200)})`,
+    );
   }
 }
 
@@ -464,9 +474,19 @@ function packageVersion(): string {
     ) as {
       version?: string;
     };
-    return pkg.version ?? "0.0.0";
-  } catch {
-    return "0.0.0";
+    if (typeof pkg.version !== "string" || pkg.version.trim() === "") {
+      throw new Error(
+        "emit-evidence: package.json has no version — refusing to emit a dummy runner version",
+      );
+    }
+    return pkg.version;
+  } catch (err) {
+    if (err instanceof Error && err.message.startsWith("emit-evidence:"))
+      throw err;
+    // Fail closed: the runner version is embedded in signed gate-result rows.
+    throw new Error(
+      `emit-evidence: cannot read package.json version (${String(err).slice(0, 200)})`,
+    );
   }
 }
 

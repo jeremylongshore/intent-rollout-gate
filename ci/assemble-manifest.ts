@@ -61,7 +61,8 @@ function isReportManifestShape(value: unknown): value is ReportManifest {
     return (
       "bundle" in row &&
       "sigstoreBundle" in row &&
-      typeof row["sourceSha"] === "string"
+      typeof row["sourceSha"] === "string" &&
+      Array.isArray(row["gateResults"])
     );
   });
 }
@@ -70,12 +71,43 @@ function readJson(path: string): unknown {
   return JSON.parse(readFileSync(path, "utf8"));
 }
 
+/** Fail-closed structural validation of the emitter's skeleton document. */
+function parseSkeleton(value: unknown, path: string): Skeleton {
+  const fail = (why: string): never => {
+    throw new Error(`malformed ${path}: ${why} — re-run ci/emit-evidence.ts`);
+  };
+  if (typeof value !== "object" || value === null) fail("not an object");
+  const v = value as Record<string, unknown>;
+  if (typeof v["repo"] !== "string") fail('"repo" must be a string');
+  const signing = v["signing"];
+  if (typeof signing !== "object" || signing === null)
+    fail('"signing" missing');
+  const s = signing as Record<string, unknown>;
+  for (const k of ["issuer", "subject", "workflowRef"]) {
+    if (typeof s[k] !== "string") fail(`"signing.${k}" must be a string`);
+  }
+  if (!Array.isArray(v["rows"]) || v["rows"].length === 0) {
+    fail('"rows" must be a non-empty array');
+  }
+  for (const r of v["rows"] as unknown[]) {
+    if (typeof r !== "object" || r === null) fail("row is not an object");
+    const row = r as Record<string, unknown>;
+    if (typeof row["bundleFile"] !== "string")
+      fail('row "bundleFile" must be a string');
+    if (typeof row["sourceSha"] !== "string")
+      fail('row "sourceSha" must be a string');
+    if (!Array.isArray(row["gateResults"]))
+      fail('row "gateResults" must be an array');
+  }
+  return value as Skeleton;
+}
+
 export function assemble(dir: string): ReportManifest {
   const skeletonPath = join(dir, "manifest-skeleton.json");
   if (!existsSync(skeletonPath)) {
     throw new Error(`missing ${skeletonPath} — run ci/emit-evidence.ts first`);
   }
-  const skeleton = readJson(skeletonPath) as Skeleton;
+  const skeleton = parseSkeleton(readJson(skeletonPath), skeletonPath);
   const rows: ManifestRow[] = skeleton.rows.map((row) => {
     const bundlePath = join(dir, row.bundleFile);
     const sigPath = join(
