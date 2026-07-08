@@ -1,6 +1,6 @@
 {
   "name": "intent-rollout-gate-action",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "private": true,
   "description": "GitHub Action shell for the Intent Rollout Gate. All decision logic is delegated to @intentsolutions/rollout-gate (thin shell per Blueprint A).",
   "license": "Apache-2.0",
