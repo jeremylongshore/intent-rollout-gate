@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 > - **`tests/TESTING.md` policy parsing** — deferred per DR-002 § 5; the action continues to consume JSON policy documents only.
 > - **M6 first adopter** — `audit-harness` self-adopts the gate end-to-end before any partner repo (DR-002 § 6 criterion 5).
 
+### Added
+
+- **Signed-evidence emit for the intent-eval-dashboard (repo key `iar`).** New `emit-evidence` job in `release.yml` (tag-push only — structurally impossible on `workflow_dispatch`, whose `refs/heads/main` OIDC subject the dashboard rejects and which would `--clobber` a good manifest) runs the repo's two REAL release-state self-gates (`harness-hash` via `audit-harness verify`, `reproducible-dist` via rebuild-and-diff of the committed `dist/`), shapes them into kernel `gate-result/v1` rows + `EvidenceBundle`s (`ci/emit-evidence.ts`, fail-closed against the lockfile-pinned `@intentsolutions/core@0.9.0` — the dashboard's verify pin, asserted in CI), keyless-signs the canonical bytes with cosign (Fulcio OIDC + production Rekor), assembles `report-manifest.json` (`ci/assemble-manifest.ts`), and uploads it onto the tag's Release for the dashboard's `releases/latest/download` fetcher. Coverage/mutation deliberately NOT emitted (declared in `tests/TESTING.md` but not measured — no fake evidence). Activates on the next tag release; the dashboard's `iar` pinned-subjects entry is already operatorConfirmed.
+
 ## [0.3.1] - 2026-07-05
 
 ### Changed

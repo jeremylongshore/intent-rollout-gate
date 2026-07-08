@@ -207,6 +207,138 @@ jobs:
           echo "Floating alias $MAJOR now points at $released_sha (from $TAG)"
 
   # ─────────────────────────────────────────────────────────────────────────
+  # 2b. Emit this repo's own signed testing evidence for the dashboard (iar).
+  # ─────────────────────────────────────────────────────────────────────────
+  #
+  # Mirrors the audit-harness (iah) emit job. Runs this repo's two REAL
+  # release-state self-gates (harness-hash via `audit-harness verify` +
+  # reproducible-dist via rebuild-and-diff) → kernel gate-result/v1 rows →
+  # kernel EvidenceBundles (ci/emit-evidence.ts, fail-closed against the
+  # @intentsolutions/core schemas — the lockfile-pinned 0.9.0 kernel, the same
+  # version family the dashboard verifies with), keyless-signs the canonical
+  # bytes with cosign (Fulcio OIDC + production Rekor — the established pattern
+  # for the live emit repos), assembles report-manifest.json, and uploads it
+  # onto this tag's Release. The dashboard re-verifies OIDC subject + Rekor
+  # inclusion + kernel schema at ingest; its pinned-subjects entry for `iar`
+  # (subject repo:...:ref:refs/tags/*, workflowRef
+  # .../release.yml@refs/tags/*) is operatorConfirmed.
+  #
+  # CRITICAL SAFETY GATE — `if: github.event_name == 'push'`. This workflow
+  # ALSO fires on workflow_dispatch (the deliberate re-release/sign path),
+  # where GITHUB_REF is refs/heads/main. An emit from a dispatch run would
+  # carry an OIDC subject the dashboard REJECTS (its pin allows only
+  # refs/tags/*) AND would --clobber a good manifest on the Release with an
+  # unverifiable one. Gating on the event name makes this job structurally
+  # impossible to run on dispatch — on a push event GITHUB_REF is always the
+  # pushed v*.*.* tag (the only push trigger this workflow has).
+  emit-evidence:
+    name: Emit signed gate-result evidence for the dashboard
+    needs: [build, release]
+    # SAFETY GATE — tag-push only, NEVER workflow_dispatch (see block comment).
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write # upload the manifest onto the Release
+      id-token: write # cosign keyless (Fulcio OIDC)
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          # ISEDC E09 DR / CISO reproducible-from-tag invariant: this job signs
+          # the EvidenceBundle, so the canonical bytes it hashes + cosign-signs
+          # MUST come from the pushed tag, not a moving branch head. This job
+          # only runs on a tag push (if: github.event_name == 'push'), so
+          # github.ref is always the tag here.
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          # Node >= 22.6 — the emit scripts run under
+          # `--experimental-strip-types` (TS without a build step), which
+          # Node 20 does NOT support (exit 9).
+          node-version: "22"
+          cache: pnpm
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3
+
+      - name: Install (frozen lockfile)
+        run: pnpm install --frozen-lockfile
+
+      # Kernel pin is LOAD-BEARING: the dashboard validates ingest rows with
+      # @intentsolutions/core@^0.9.0 EvidenceBundleSchema, so emit-time
+      # validation must use the same kernel. Unlike audit-harness (zero-dep,
+      # CI-only `npm i --no-save`), this repo already carries the kernel as a
+      # lockfile-pinned runtime dependency — assert the resolved version is
+      # EXACTLY 0.9.0 so a future lockfile regeneration cannot silently move
+      # the emit-time validator off the dashboard's verify pin.
+      - name: Verify kernel pin (@intentsolutions/core must be exactly 0.9.0)
+        run: |
+          set -euo pipefail
+          installed="$(node -e "console.log(JSON.parse(require('fs').readFileSync('node_modules/@intentsolutions/core/package.json','utf8')).version)")"
+          if [ "$installed" != "0.9.0" ]; then
+            echo "::error::@intentsolutions/core resolved to $installed, expected exactly 0.9.0 (the dashboard's verify pin) — refusing to emit"
+            exit 1
+          fi
+          echo "✓ @intentsolutions/core pinned at $installed"
+
+      - name: Emit-evidence self-check (kernel-valid + canonical-stable)
+        run: node --experimental-strip-types ci/emit-evidence.ts --self-check
+
+      - name: Emit gate-result/v1 EvidenceBundles (runs the two real gates)
+        run: node --experimental-strip-types ci/emit-evidence.ts --out build/evidence --ref "${GITHUB_REF}"
+
+      - name: Sign each EvidenceBundle (cosign keyless → production Rekor)
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          signed=0
+          for bundle in build/evidence/bundle-*.json; do
+            case "$bundle" in *.sigstore.json) continue;; esac
+            sig="${bundle%.json}.sigstore.json"
+            echo "::group::cosign sign-blob $bundle"
+            # --new-bundle-format emits the sigstore protobuf Bundle
+            # (mediaType + verificationMaterial + messageSignature) that the
+            # dashboard's sigstore-js verify() consumes; the legacy shape is
+            # unparseable there.
+            cosign sign-blob --yes --new-bundle-format --bundle "$sig" "$bundle"
+            echo "::endgroup::"
+            signed=$((signed + 1))
+          done
+          if [ "$signed" -eq 0 ]; then
+            echo "::error::no EvidenceBundles were produced to sign"
+            exit 1
+          fi
+          echo "✓ signed $signed bundle(s)"
+
+      - name: Assemble report-manifest.json (fail-closed on shape mismatch)
+        run: node --experimental-strip-types ci/assemble-manifest.ts --dir build/evidence --out build/evidence/report-manifest.json
+
+      - name: Publish report-manifest.json onto the Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ needs.build.outputs.tag }}
+        run: |
+          set -euo pipefail
+          # The release job already created the Release for this tag;
+          # create-or-upload is idempotent either way. --clobber lets a re-run
+          # of THIS tag-push workflow replace its own asset.
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" build/evidence/report-manifest.json --clobber
+          else
+            gh release create "$TAG" build/evidence/report-manifest.json \
+              --title "$TAG" --generate-notes --verify-tag
+          fi
+          echo "✓ report-manifest.json published to release $TAG"
+
+  # ─────────────────────────────────────────────────────────────────────────
   # 3. Sign dist/index.js with cosign keyless against the PRODUCTION sigstore
   #    trust root. DISPATCH-ONLY, iah-E06-gated, dry-run by default.
   # ─────────────────────────────────────────────────────────────────────────
@@ -402,7 +534,9 @@ jobs:
   # ntfy `prod-deploys` topic, reachable only from inside the tailnet.
   alert-on-failure:
     name: alert-on-failure
-    needs: [build, release]
+    # emit-evidence is skipped (not failed) on workflow_dispatch runs, so
+    # including it here only adds alerting for a failed tag-push emit.
+    needs: [build, release, emit-evidence]
     if: failure()
     runs-on: ubuntu-latest
     timeout-minutes: 10
