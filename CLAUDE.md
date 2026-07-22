@@ -6,13 +6,13 @@ Guidance for Claude Code when working in `/home/jeremy/000-projects/intent-eval-
 
 A GitHub Action that consumes an [Evidence Bundle](https://github.com/jeremylongshore/intent-eval-lab/tree/main/specs/evidence-bundle) and emits a ship / no-ship / advisory decision for the consuming repository's CI pipeline. One of the **five** repos in the Intent Eval Platform convergence (the kernel `intent-eval-core` is the source-of-truth the other four consume).
 
-| Sister repo | Role |
-| --- | --- |
-| [`intent-eval-core`](https://github.com/jeremylongshore/intent-eval-core) | Canonical contracts kernel — the 14 canonical entities + `gate-result/v1` predicate schema every repo consumes |
-| [`intent-eval-lab`](https://github.com/jeremylongshore/intent-eval-lab) | Methodology + Evidence Bundle SPEC + Intentional Mapping taxonomy + OTel RFC |
-| [`intent-audit-harness`](https://github.com/jeremylongshore/intent-audit-harness) | Static gates (escape-scan, harness-hash, CRAP, arch, bias, gherkin-lint)—emits Evidence Bundle rows |
-| [`j-rig-skill-binary-eval`](https://github.com/jeremylongshore/j-rig-skill-binary-eval) | 7-layer behavioral judgment harness—emits Evidence Bundle rows |
-| **`intent-rollout-gate`** *(this)* | **Consumes the Evidence Bundle, decides ship/no-ship** |
+| Sister repo                                                                             | Role                                                                                                           |
+| --------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| [`intent-eval-core`](https://github.com/jeremylongshore/intent-eval-core)               | Canonical contracts kernel — the 14 canonical entities + `gate-result/v1` predicate schema every repo consumes |
+| [`intent-eval-lab`](https://github.com/jeremylongshore/intent-eval-lab)                 | Methodology + Evidence Bundle SPEC + Intentional Mapping taxonomy + OTel RFC                                   |
+| [`intent-audit-harness`](https://github.com/jeremylongshore/intent-audit-harness)       | Static gates (escape-scan, harness-hash, CRAP, arch, bias, gherkin-lint)—emits Evidence Bundle rows            |
+| [`j-rig-skill-binary-eval`](https://github.com/jeremylongshore/j-rig-skill-binary-eval) | 7-layer behavioral judgment harness—emits Evidence Bundle rows                                                 |
+| **`intent-rollout-gate`** _(this)_                                                      | **Consumes the Evidence Bundle, decides ship/no-ship**                                                         |
 
 The convergence couples at the schema layer (the `gate-result/v1` predicate URI), not via package consolidation. Each repo has its own `.git`, its own license, its own release cycle.
 
@@ -26,12 +26,12 @@ The convergence couples at the schema layer (the `gate-result/v1` predicate URI)
 
 ## Project status—milestone gates
 
-| Milestone | Status |
-| --- | --- |
-| **M4**—substantive bootstrap | DONE. Repo exists; design doc landed. |
-| **M5**—implementation | **DONE (current line v0.3.0; v0.1.0 was the experimental MVP, v0.2.0 froze the consumption contract).** Runtime locked to TypeScript by DR-002 (`000-docs/004-AT-DECR-runtime-language-typescript-2026-06-10.md`); decision logic delegated to the published `@intentsolutions/rollout-gate@2.0.0`. |
-| **M6**—first downstream adopter | NOT STARTED. `audit-harness` self-adopts before any partner repo wires this in. |
-| **Decision-row signing** | NOT STARTED. `rollout-decision/v1` emit + sign + Rekor anchor behind the DNSSEC + CAA pre-condition (DR-004 § 6.1). |
+| Milestone                       | Status                                                                                                                                                                                                                                                                                              |
+| ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **M4**—substantive bootstrap    | DONE. Repo exists; design doc landed.                                                                                                                                                                                                                                                               |
+| **M5**—implementation           | **DONE (current line v0.3.0; v0.1.0 was the experimental MVP, v0.2.0 froze the consumption contract).** Runtime locked to TypeScript by DR-002 (`000-docs/004-AT-DECR-runtime-language-typescript-2026-06-10.md`); decision logic delegated to the published `@intentsolutions/rollout-gate@2.0.0`. |
+| **M6**—first downstream adopter | NOT STARTED. `audit-harness` self-adopts before any partner repo wires this in.                                                                                                                                                                                                                     |
+| **Decision-row signing**        | NOT STARTED. `rollout-decision/v1` emit + sign + Rekor anchor behind the DNSSEC + CAA pre-condition (DR-004 § 6.1).                                                                                                                                                                                 |
 
 **THIN SHELL rule (Blueprint A, DR-018 § 9.2):** this repo must never contain decision logic. `decide()` / `parsePolicy()` and all gate semantics live in the published `@intentsolutions/rollout-gate` package (j-rig monorepo). If decision behavior must change, change it upstream and bump the dependency here. PRs re-implementing gate semantics locally are out of order.
 
@@ -52,8 +52,8 @@ pnpm run dist:check   # rebuild + git diff --exit-code dist/
 
 These are **non-negotiable constraints**, not stylistic preferences. Every implementation PR must respect them.
 
-1. **Predicate URI immutability.** This action emits a *new* in-toto row at `https://evals.intentsolutions.io/rollout-decision/v1` to attest the rollout decision itself. The exact URI string is permanent once any row referencing it is signed and pushed to Rekor. Never reformat, never namespace-rename, never shorten. Breaking changes mint `/v2`.
-2. **DNSSEC pre-condition for Rekor push.** Per ISEDC CISO binding (DR-004 § 6.1), no signed attestation referencing a `evals.intentsolutions.io` URI may be pushed to Rekor until the namespace is DNSSEC-enabled and CAA records are pinned to a single CA. This action **must** check the DNSSEC + CAA state at runtime before pushing to Rekor and refuse with a clear error if the pre-condition isn't met. Scope at v0.3.0: the action's *runtime* does NOT push to Rekor (`action.yml` `rekor-url`/`cosign-key` are honest no-ops) — decision-row (`rollout-decision/v1`) emit+sign+push stays deferred behind this gate. What IS live is release-pipeline provenance: production-Rekor cosign signing of the committed `dist/index.js` (enabled at v0.2.0, dispatch-only, dry-run-default) behind the iah-E06 DNSSEC/CAA pre-flight in `release.yml`.
+1. **Predicate URI immutability.** This action emits a _new_ in-toto row at `https://evals.intentsolutions.io/rollout-decision/v1` to attest the rollout decision itself. The exact URI string is permanent once any row referencing it is signed and pushed to Rekor. Never reformat, never namespace-rename, never shorten. Breaking changes mint `/v2`.
+2. **DNSSEC pre-condition for Rekor push.** Per ISEDC CISO binding (DR-004 § 6.1), no signed attestation referencing a `evals.intentsolutions.io` URI may be pushed to Rekor until the namespace is DNSSEC-enabled and CAA records are pinned to a single CA. This action **must** check the DNSSEC + CAA state at runtime before pushing to Rekor and refuse with a clear error if the pre-condition isn't met. Scope at v0.3.0: the action's _runtime_ does NOT push to Rekor (`action.yml` `rekor-url`/`cosign-key` are honest no-ops) — decision-row (`rollout-decision/v1`) emit+sign+push stays deferred behind this gate. What IS live is release-pipeline provenance: production-Rekor cosign signing of the committed `dist/index.js` (enabled at v0.2.0, dispatch-only, dry-run-default) behind the iah-E06 DNSSEC/CAA pre-flight in `release.yml`.
 3. **`labs.intentsolutions.io` is reserved-don't-touch.** Predicate URIs and OTel attribute namespaces live at `evals.intentsolutions.io` only. `labs.` may host blog content, methodology pages, RFC published-version pages—but NEVER an in-toto predicate URI, OTel attribute namespace, or attestation predicate identifier. Once the first signed attestation lands in Rekor referencing an `evals.` URI, that namespace is permanent; `labs.` must stay clear of attestation surface to preserve DNS / brand-surface isolation.
 4. **No partner-name leakage.** Per the partner-consent discipline in `intent-eval-lab/CLAUDE.md` § "Brand-name policy", do not name partner engagements (Kobiton, Polygon, Nixtla, Lit Protocol, Mudit Gupta) in any specs, READMEs, GitHub issues, or test fixtures absent written consent. `grep -ri "Kobiton\|Polygon\|Nixtla\|Lit Protocol\|Mudit Gupta" .` must return zero hits at all times.
 5. **Credential redaction in error messages.** When the action surfaces a verification failure, the error must redact any path / OIDC subject / Fulcio cert content that could leak into a public PR-comment surface. The credential-redaction test ships in `tests/run.test.ts` (carried from ISEDC PASS/FAIL gate for j-rig provider adapters; the same posture applies here) and must stay green.
@@ -62,22 +62,47 @@ These are **non-negotiable constraints**, not stylistic preferences. Every imple
 
 Per the global Intent Solutions Testing SOP, this repo installs [`@intentsolutions/audit-harness`](https://github.com/jeremylongshore/audit-harness) as a dev dependency (the runtime is locked to TypeScript per DR-002). The harness is invoked from `.github/workflows/ci.yml` and from any `.husky/pre-commit` hook. Enforcement travels with the code—never reference `~/.claude/` paths.
 
-## AI code review (Greptile + Gemini)
+## AI code review — BOTH REVIEWERS ARE DARK (do not wait for one)
 
-Two AI reviewers run on PRs here, **both advisory** — neither is a branch-protection
-required check. The deterministic merge gate is this repo's own CI (typecheck + vitest + the dist-sync job) plus CodeQL.
+**As of 2026-07-22 no AI reviewer runs on this repo.** Verified by surveying the
+last four PRs across all six Intent Eval Platform repos: `gemini-code-assist`
+now posts only a sunset notice, and `greptile` has zero activity anywhere.
 
-- **Gemini Code Assist** (`.gemini/config.yaml` + `.gemini/styleguide.md`) is the
-  **active** reviewer. Re-instated 2026-06-24 as the fallback after the Greptile
-  review quota was exhausted. Workhorse for design / logic / correctness /
-  cross-artifact consistency; CodeQL owns security.
-- **Greptile** (`.greptile/config.json` + `rules.md` + `files.json`) is configured to
-  the platform-unified schema (`strictness: 3`, `commentTypes: ["logic","syntax"]`,
-  `statusCheck: false`, a universal `no-gate-weakening` rule, plus this repo's scoped
-  invariant rules). It stays in place and resumes when the Greptile quota resets.
+- **Gemini Code Assist** — **SUNSET, permanently.** The consumer version on
+  GitHub has ceased all review activity; the bot says so verbatim on live PRs.
+  `.gemini/config.yaml` + `.gemini/styleguide.md` are retained but INERT. This
+  is a vendor decision — it is not a quota that resets and it is not coming back.
+- **Greptile** (`.greptile/config.json` + `rules.md` + `files.json`) — configured
+  to the platform-unified schema (`strictness: 3`, `commentTypes:
+["logic","syntax"]`, `statusCheck: false`, a universal `no-gate-weakening`
+  rule, plus this repo's scoped invariant rules) but **not observed reviewing
+  any PR**. The config stays so the App works if it is reinstalled; do not treat
+  it as an expected reviewer today.
 
-Read either review when present; the required gate is CI. Re-installing/uninstalling
-the GitHub Apps is an admin (UI) action — the in-repo config here does not install them.
+**Operationally: never block a merge waiting for an AI review.** Check whether
+one arrived, read it if so, and otherwise proceed on CI. The deterministic merge gate is this repo's own CI (typecheck + vitest + the dist-sync job) plus CodeQL. That was
+always the required gate; it is now the only one. Installing or uninstalling the
+GitHub Apps is an admin (UI) action — the in-repo config here does not do it.
+
+**Replacement (decided 2026-07-22, not yet activated):** stand up the advisory
+lane we already run on the marketplace repo —
+`claude-code-plugins/.github/workflows/minimax-review.yml`. The action is
+[`tarmojussila/minimax-code-review`](https://github.com/tarmojussila/minimax-code-review)
+(the upstream mechanism), consumed via our own fork
+`jeremylongshore/minimax-code-review` **pinned to an immutable SHA** — the right
+supply-chain posture for a small single-maintainer action: we do not auto-track
+upstream. It is fork-safe by construction (`pull_request`, not
+`pull_request_target`, plus a same-repo guard, so a forked PR never receives the
+API key) and kill-switched by repo variable.
+
+**Do not copy CCPI's prompts.** The mechanism is generic; the value is prompts
+grounded in the consuming repo's own invariants — CCPI's three lanes are written
+against its validators and its A-grade bar and would be noise here. For this
+repo the reviewer should be pointed at decision-logic integrity — that the Action stays a thin shell delegating to `@intentsolutions/rollout-gate`, plus committed-`dist/` sync.
+
+Activation needs owner secret actions: repo secret `MINIMAX_API_KEY` + repo
+variable `ENABLE_MINIMAX_REVIEW=true` (+ `MINIMAX_MODEL`). Until then this repo
+is CI-only, deliberately.
 
 ## Beads workflow
 
@@ -98,8 +123,8 @@ bd sync                                # push to remote
 
 - **Doc filing**: `000-docs/NNN-CC-CODE-description.md` per Doc Filing Standard v4.x. Sibling repos use this; we conform.
 - **Branches**: `feat/<short-description>`, `fix/<short-description>`, `docs/<short-description>`. M5 implementation branches: `feat/m5-<runtime>-<scope>`.
-- **Commits**: descriptive subject; body explains *why*; signed-off footer is auto-applied via the maintainer's `attribution.commit` setting.
-- **PRs**: include link to the related Evidence Bundle SPEC clause and / or the architecture doc section being implemented. PR body explains *what* changed and *what tests prove it*.
+- **Commits**: descriptive subject; body explains _why_; signed-off footer is auto-applied via the maintainer's `attribution.commit` setting.
+- **PRs**: include link to the related Evidence Bundle SPEC clause and / or the architecture doc section being implemented. PR body explains _what_ changed and _what tests prove it_.
 - **No Anthropic / Claude / Co-Authored-By lines anywhere.** Per global CLAUDE.md.
 
 ## Operational rules
@@ -110,6 +135,7 @@ bd sync                                # push to remote
 4. **The action FAILS CLOSED as of v0.1.0**—a `block` decision fails the job unless `fail-on-block: 'false'` (or legacy `dry-run: 'true'`). The v0.0.x always-exit-0 stub contract is retired; do not reintroduce silent passes.
 
 <!-- BEGIN BEADS INTEGRATION v:1 profile:minimal hash:ca08a54f -->
+
 ## Beads Issue Tracker
 
 This project uses **bd (beads)** for issue tracking. Run `bd prime` to see full workflow context and commands.
