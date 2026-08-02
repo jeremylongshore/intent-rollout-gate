@@ -5,8 +5,10 @@
  * file handling, output plumbing, summary rendering, and exit behavior.
  */
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { readFileSync } from "node:fs";
+import { createHash } from "node:crypto";
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import { tmpdir } from "node:os";
 
 // ---------------------------------------------------------------------------
 // @actions/core mock (state hoisted so the vi.mock factory can reference it)
@@ -80,6 +82,17 @@ const REFINER_PASS_MALFORMED_BUNDLE = fixture(
 );
 const POLICY = fixture("policy.json");
 const POLICY_INVALID = fixture("policy-invalid.json");
+const PROMOTION_BUNDLE = fixture(
+  "evidence",
+  "generic-report-promotion-bundle.json",
+);
+const PROMOTION_ADVISORY_BUNDLE = fixture(
+  "evidence",
+  "generic-report-promotion-advisory.json",
+);
+const PROMOTION_POLICY = fixture("promotion-policy.json");
+const GENERIC_REPORT = fixture("reports", "generic-unified-report.json");
+const MALFORMED_REPORT = fixture("reports", "malformed.json");
 
 function reasonsOutput(): string[] {
   return JSON.parse(outputs.get("reasons") ?? "null") as string[];
@@ -130,6 +143,271 @@ describe("allow path", () => {
     expect(outputs.get("decision")).toBe("allow");
     expect(warning).toHaveBeenCalledWith(expect.stringContaining("deprecated"));
     expect(setFailed).not.toHaveBeenCalled();
+  });
+});
+
+describe("generic report promotion binding", () => {
+  it("allows a report whose exact bytes are bound to clean lineage and skill rows", async () => {
+    inputs.set("bundle-path", PROMOTION_BUNDLE);
+    inputs.set("policy-path", PROMOTION_POLICY);
+    inputs.set("report-path", GENERIC_REPORT);
+
+    await run();
+
+    expect(outputs.get("decision")).toBe("allow");
+    expect(reasonsOutput()).toEqual([]);
+    expect(setFailed).not.toHaveBeenCalled();
+  });
+
+  it("binds suite report promotion to report plus audit-manifest bytes", async () => {
+    const temp = mkdtempSync(join(tmpdir(), "iar-suite-binding-"));
+    try {
+      const unifiedReport = JSON.parse(
+        readFileSync(GENERIC_REPORT, "utf8"),
+      ) as Record<string, unknown>;
+      const suiteReport = {
+        schema: "j-rig/suite-report/v1",
+        suite_id: "fixture-suite",
+        suite_version: "1.0.0",
+        manifest_path: "audit-manifest.json",
+        generated_at: "2026-08-02T00:00:00.000Z",
+        raw_run_ids: ["generic-run-001"],
+        report: unifiedReport,
+      };
+      const manifest = {
+        schema: "j-rig/eval-suite/v1",
+        suite_id: "fixture-suite",
+        suite_version: "1.0.0",
+        manifest_path: "audit-manifest.json",
+        jobs: [
+          {
+            raw_run_id: "generic-run-001",
+            task_id: "answer-task",
+            task_version: "1",
+            config_id: "fixture-config",
+            config_version: "1",
+            model: "fixture-model",
+            status: "completed",
+          },
+        ],
+      };
+      const suitePath = join(temp, "suite-report.json");
+      const manifestPath = join(temp, "audit-manifest.json");
+      writeFileSync(suitePath, JSON.stringify(suiteReport), "utf8");
+      writeFileSync(manifestPath, JSON.stringify(manifest), "utf8");
+
+      const reportBytes = readFileSync(suitePath);
+      const manifestBytes = readFileSync(manifestPath);
+      const inputHash = createHash("sha256")
+        .update(Buffer.concat([reportBytes, Buffer.from("\0"), manifestBytes]))
+        .digest("hex");
+      const bundle = JSON.parse(
+        readFileSync(PROMOTION_BUNDLE, "utf8"),
+      ) as Array<{
+        subject: Array<{ digest: Record<string, unknown> }>;
+        predicate: Record<string, unknown>;
+      }>;
+      bundle[0]!.subject[0]!.digest.sha256 = inputHash;
+      bundle[0]!.predicate.input_hash = `sha256:${inputHash}`;
+      const metadata = bundle[0]!.predicate.metadata as Record<string, unknown>;
+      metadata.report_schema = "j-rig/suite-report/v1";
+      metadata.source_manifest_path = "audit-manifest.json";
+      metadata.source_verified = true;
+      const bundlePath = join(temp, "suite-promotion-bundle.json");
+      writeFileSync(bundlePath, JSON.stringify(bundle), "utf8");
+
+      inputs.set("bundle-path", bundlePath);
+      inputs.set("policy-path", PROMOTION_POLICY);
+      inputs.set("report-path", suitePath);
+      inputs.set("audit-manifest-path", manifestPath);
+
+      await run();
+
+      expect(outputs.get("decision")).toBe("allow");
+      expect(reasonsOutput()).toEqual([]);
+      expect(setFailed).not.toHaveBeenCalled();
+    } finally {
+      rmSync(temp, { recursive: true, force: true });
+    }
+  });
+
+  it("preserves the explicit real-skill-only path when report binding is omitted", async () => {
+    inputs.set("bundle-path", PROMOTION_BUNDLE);
+    inputs.set(
+      "policy-json",
+      JSON.stringify({
+        required_gates: ["j-rig:server:skill-rollout"],
+        allow_unknown_gates: true,
+      }),
+    );
+
+    await run();
+
+    expect(outputs.get("decision")).toBe("allow");
+    expect(reasonsOutput()).toEqual([]);
+    expect(setFailed).not.toHaveBeenCalled();
+  });
+
+  it("blocks an audit manifest supplied without a report path", async () => {
+    inputs.set("bundle-path", PROMOTION_BUNDLE);
+    inputs.set("policy-path", PROMOTION_POLICY);
+    inputs.set(
+      "audit-manifest-path",
+      "tests/fixtures/reports/audit-manifest.json",
+    );
+
+    await run();
+
+    expect(outputs.get("decision")).toBe("block");
+    expect(reasonsOutput()[0]).toContain(
+      "audit-manifest-path requires report-path",
+    );
+    expect(setFailed).toHaveBeenCalled();
+  });
+
+  it("blocks a suite report that omits its audit manifest binding", async () => {
+    const temp = mkdtempSync(join(tmpdir(), "iar-suite-binding-"));
+    try {
+      const suitePath = join(temp, "suite-report.json");
+      writeFileSync(
+        suitePath,
+        JSON.stringify({ schema: "j-rig/suite-report/v1" }),
+        "utf8",
+      );
+      inputs.set("bundle-path", PROMOTION_BUNDLE);
+      inputs.set("policy-path", PROMOTION_POLICY);
+      inputs.set("report-path", suitePath);
+
+      await run();
+
+      expect(outputs.get("decision")).toBe("block");
+      expect(reasonsOutput()[0]).toContain(
+        "suite report promotion requires audit-manifest-path",
+      );
+      expect(setFailed).toHaveBeenCalled();
+    } finally {
+      rmSync(temp, { recursive: true, force: true });
+    }
+  });
+
+  it("blocks when the required skill rollout row is missing", async () => {
+    const temp = mkdtempSync(join(tmpdir(), "iar-report-binding-"));
+    try {
+      const bundle = JSON.parse(
+        readFileSync(PROMOTION_BUNDLE, "utf8"),
+      ) as unknown[];
+      bundle.splice(1, 1);
+      const lineageOnlyBundle = join(temp, "lineage-only-bundle.json");
+      writeFileSync(lineageOnlyBundle, JSON.stringify(bundle), "utf8");
+
+      inputs.set("bundle-path", lineageOnlyBundle);
+      inputs.set("policy-path", PROMOTION_POLICY);
+      inputs.set("report-path", GENERIC_REPORT);
+
+      await run();
+
+      expect(outputs.get("decision")).toBe("block");
+      expect(reasonsOutput().join(" ")).toContain("j-rig:server:skill-rollout");
+      expect(setFailed).toHaveBeenCalled();
+    } finally {
+      rmSync(temp, { recursive: true, force: true });
+    }
+  });
+
+  it("blocks when report-path is supplied but the lineage row is missing", async () => {
+    inputs.set("bundle-path", ALLOW_BUNDLE);
+    inputs.set("policy-path", PROMOTION_POLICY);
+    inputs.set("report-path", GENERIC_REPORT);
+
+    await run();
+
+    expect(outputs.get("decision")).toBe("block");
+    expect(reasonsOutput().join(" ")).toContain(
+      "requires exactly one audit-harness:ci:report-lineage",
+    );
+    expect(setFailed).toHaveBeenCalled();
+  });
+
+  it("blocks advisory lineage even when the skill rollout row passes", async () => {
+    inputs.set("bundle-path", PROMOTION_ADVISORY_BUNDLE);
+    inputs.set("policy-path", PROMOTION_POLICY);
+    inputs.set("report-path", GENERIC_REPORT);
+
+    await run();
+
+    expect(outputs.get("decision")).toBe("block");
+    expect(reasonsOutput().join(" ")).toContain(
+      "report-lineage gate must pass",
+    );
+    expect(setFailed).toHaveBeenCalled();
+  });
+
+  it("blocks malformed lineage metadata even when the skill rollout row passes", async () => {
+    const temp = mkdtempSync(join(tmpdir(), "iar-report-binding-"));
+    try {
+      const bundle = JSON.parse(
+        readFileSync(PROMOTION_BUNDLE, "utf8"),
+      ) as Array<{
+        predicate: { metadata?: Record<string, unknown> };
+      }>;
+      delete bundle[0]!.predicate.metadata!.selected_grader;
+      const malformedBundle = join(temp, "malformed-lineage-bundle.json");
+      writeFileSync(malformedBundle, JSON.stringify(bundle), "utf8");
+
+      inputs.set("bundle-path", malformedBundle);
+      inputs.set("policy-path", PROMOTION_POLICY);
+      inputs.set("report-path", GENERIC_REPORT);
+
+      await run();
+
+      expect(outputs.get("decision")).toBe("block");
+      expect(reasonsOutput()[0]).toContain(
+        "missing the selected Grader identity",
+      );
+      expect(setFailed).toHaveBeenCalled();
+    } finally {
+      rmSync(temp, { recursive: true, force: true });
+    }
+  });
+
+  it("blocks a stale report-lineage input hash before delegated decision", async () => {
+    const temp = mkdtempSync(join(tmpdir(), "iar-report-binding-"));
+    try {
+      const bundle = JSON.parse(
+        readFileSync(PROMOTION_BUNDLE, "utf8"),
+      ) as Array<{
+        predicate: Record<string, unknown>;
+      }>;
+      bundle[0]!.predicate.input_hash = `sha256:${"1".repeat(64)}`;
+      const staleBundle = join(temp, "stale-bundle.json");
+      writeFileSync(staleBundle, JSON.stringify(bundle), "utf8");
+
+      inputs.set("bundle-path", staleBundle);
+      inputs.set("policy-path", PROMOTION_POLICY);
+      inputs.set("report-path", GENERIC_REPORT);
+
+      await run();
+
+      expect(outputs.get("decision")).toBe("block");
+      expect(reasonsOutput().join(" ")).toContain(
+        "input_hash does not match report-path bytes",
+      );
+      expect(setFailed).toHaveBeenCalled();
+    } finally {
+      rmSync(temp, { recursive: true, force: true });
+    }
+  });
+
+  it("blocks an unreadable or malformed report before promotion", async () => {
+    inputs.set("bundle-path", PROMOTION_BUNDLE);
+    inputs.set("policy-path", PROMOTION_POLICY);
+    inputs.set("report-path", MALFORMED_REPORT);
+
+    await run();
+
+    expect(outputs.get("decision")).toBe("block");
+    expect(reasonsOutput()[0]).toContain("readable, valid JSON report");
+    expect(setFailed).toHaveBeenCalled();
   });
 });
 

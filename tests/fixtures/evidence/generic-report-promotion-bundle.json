@@ -1,0 +1,107 @@
+[
+  {
+    "_type": "https://in-toto.io/Statement/v1",
+    "subject": [
+      {
+        "name": "audit-harness:ci:report-lineage",
+        "digest": {
+          "sha256": "01efdfc16ec7646274dcd6b501f21981a188e737e7fcd423d1e1965b592e627e"
+        }
+      }
+    ],
+    "predicateType": "https://evals.intentsolutions.io/gate-result/v1",
+    "predicate": {
+      "gate_id": "audit-harness:ci:report-lineage",
+      "gate_name": "report-lineage",
+      "gate_version": "1.0.0",
+      "gate_decision": "pass",
+      "gate_reasons": [],
+      "coverage": {
+        "dimensions_evaluated": ["run-grade-lineage", "sample-balance"],
+        "dimensions_skipped": []
+      },
+      "policy_ref": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb:report-lineage/v1",
+      "policy_hash": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "input_hash": "sha256:01efdfc16ec7646274dcd6b501f21981a188e737e7fcd423d1e1965b592e627e",
+      "evaluated_at": "2026-08-02T00:01:00Z",
+      "runner": "audit-harness@1.3.1",
+      "commit_sha": "cccccccccccccccccccccccccccccccccccccccc",
+      "metadata": {
+        "validator": "audit-harness-report-lineage-v1",
+        "report_path": "tests/fixtures/reports/generic-unified-report.json",
+        "report_schema": "j-rig/unified-report/v1",
+        "selected_grader": {
+          "grader_id": "answer-checker",
+          "grader_version": "1.0.0",
+          "grader_snapshot_sha256": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "run_counts": {
+          "cell_count": 1,
+          "attempted_runs": 1,
+          "completed_runs": 1,
+          "active_runs": 0,
+          "harness_failure_count": 0,
+          "graded_runs": 1,
+          "ungraded_completed_runs": 0,
+          "pass_count": 1,
+          "fail_count": 0
+        },
+        "source_manifest_path": null,
+        "source_verified": false,
+        "sample_balance": {
+          "sampling_cell_count": 1,
+          "unique_sample_slot_count": 1,
+          "duplicate_sample_index_count": 0,
+          "target_n_verified": false
+        },
+        "errors": []
+      }
+    }
+  },
+  {
+    "_type": "https://in-toto.io/Statement/v1",
+    "subject": [
+      {
+        "name": "j-rig:server:skill-rollout",
+        "digest": {
+          "sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+        }
+      }
+    ],
+    "predicateType": "https://evals.intentsolutions.io/gate-result/v1",
+    "predicate": {
+      "gate_id": "j-rig:server:skill-rollout",
+      "gate_name": "rollout",
+      "gate_version": "2.0.0",
+      "gate_decision": "pass",
+      "gate_reasons": [],
+      "coverage": {
+        "dimensions_evaluated": ["trigger", "functional", "behavioral", "regression"],
+        "dimensions_skipped": ["baseline"]
+      },
+      "policy_ref": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee:eval-spec.yaml",
+      "policy_hash": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "input_hash": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "evaluated_at": "2026-08-02T00:02:00Z",
+      "runner": "j-rig@2.0.0",
+      "commit_sha": "ffffffffffffffffffffffffffffffffffffffff",
+      "metadata": {
+        "eval_spec_id": "skill-eval-spec:commit-writer:1",
+        "skill_version_id": "commit-writer@1.0.0",
+        "run_ids": ["generic-run-001"],
+        "grader_id": "answer-checker",
+        "grader_version": "1.0.0",
+        "grader_snapshot_sha256": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "regression": {
+          "enabled": true,
+          "baseline": "commit-writer-baseline@1",
+          "result": "no-regression"
+        },
+        "thresholds": {
+          "min_pass_rate": 1,
+          "max_harness_failure_count": 0
+        }
+      }
+    }
+  }
+]

@@ -19813,6 +19813,7 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
 });
 
 // src/run.ts
+var import_node_crypto = require("node:crypto");
 var import_node_fs = require("node:fs");
 var core = __toESM(require_core());
 
@@ -47255,6 +47256,47 @@ function renderSummary(decision, reasons, result, refinerRows = []) {
 // src/run.ts
 var SUPPORTED_PREDICATE_URI = GATE_RESULT_V1_URI2;
 var ADVISORY_REFINER_PASS_URI = SKILL_REFINER_PASS_V1_URI;
+var REPORT_LINEAGE_GATE_ID = "audit-harness:ci:report-lineage";
+var REPORT_SCHEMAS = /* @__PURE__ */ new Set([
+  "j-rig/unified-report/v1",
+  "j-rig/suite-report/v1"
+]);
+var REPORT_COUNT_KEYS = [
+  "cell_count",
+  "attempted_runs",
+  "completed_runs",
+  "active_runs",
+  "harness_failure_count",
+  "graded_runs",
+  "ungraded_completed_runs",
+  "pass_count",
+  "fail_count"
+];
+function readGraderIdentity(value) {
+  if (value === null || typeof value !== "object") return null;
+  const candidate = value;
+  if (typeof candidate.grader_id !== "string" || typeof candidate.grader_version !== "string" || typeof candidate.grader_snapshot_sha256 !== "string") {
+    return null;
+  }
+  return {
+    grader_id: candidate.grader_id,
+    grader_version: candidate.grader_version,
+    grader_snapshot_sha256: candidate.grader_snapshot_sha256
+  };
+}
+function readReportCounts(value) {
+  if (value === null || typeof value !== "object") return null;
+  const candidate = value;
+  const counts = {};
+  for (const key of REPORT_COUNT_KEYS) {
+    const count = candidate[key];
+    if (typeof count !== "number" || !Number.isInteger(count) || count < 0) {
+      return null;
+    }
+    counts[key] = count;
+  }
+  return counts;
+}
 function errMessage(err) {
   return err instanceof Error ? err.message : String(err);
 }
@@ -47266,6 +47308,132 @@ function bundleRows(bundle) {
     return bundle.rows;
   }
   return null;
+}
+function validateReportBinding(bundle, reportPath, auditManifestPath = "") {
+  if (reportPath === "") {
+    return auditManifestPath === "" ? [] : ["audit-manifest-path requires report-path"];
+  }
+  let reportBytes;
+  let report;
+  try {
+    reportBytes = (0, import_node_fs.readFileSync)(reportPath);
+    report = JSON.parse(reportBytes.toString("utf8"));
+  } catch {
+    return ["report-path must be a readable, valid JSON report"];
+  }
+  if (report === null || typeof report !== "object" || !REPORT_SCHEMAS.has(String(report.schema))) {
+    return [
+      "report-path must contain a supported j-rig unified or suite report"
+    ];
+  }
+  const reportSchema = report.schema;
+  if (reportSchema === "j-rig/suite-report/v1" && auditManifestPath === "") {
+    return [
+      "suite report promotion requires audit-manifest-path to bind the verified source"
+    ];
+  }
+  if (reportSchema === "j-rig/unified-report/v1" && auditManifestPath !== "") {
+    return ["audit-manifest-path is only valid with j-rig/suite-report/v1"];
+  }
+  const reportProjection = reportSchema === "j-rig/suite-report/v1" ? report.report : report;
+  if (reportProjection === null || typeof reportProjection !== "object" || !Array.isArray(reportProjection.runs) || reportProjection.runs.length === 0) {
+    return [
+      "report-path must contain at least one projected Run before promotion"
+    ];
+  }
+  const reportGrader = readGraderIdentity(
+    reportProjection.grader
+  );
+  if (reportGrader === null) {
+    return ["report-path is missing the selected Grader identity"];
+  }
+  const reportCounts = readReportCounts(
+    reportProjection.summary
+  );
+  if (reportCounts === null) {
+    return ["report-path is missing deterministic Run counts in summary"];
+  }
+  let inputBytes = reportBytes;
+  if (auditManifestPath !== "") {
+    let manifestBytes;
+    try {
+      manifestBytes = (0, import_node_fs.readFileSync)(auditManifestPath);
+      JSON.parse(manifestBytes.toString("utf8"));
+    } catch {
+      return ["audit-manifest-path must be a readable JSON audit manifest"];
+    }
+    inputBytes = Buffer.concat([reportBytes, Buffer.from("\0"), manifestBytes]);
+  }
+  const expectedInputHash = `sha256:${(0, import_node_crypto.createHash)("sha256").update(inputBytes).digest("hex")}`;
+  const rows = bundleRows(bundle);
+  if (rows === null) {
+    return ["report-path requires a valid Evidence Bundle"];
+  }
+  const lineageRows = rows.filter((row) => {
+    if (row === null || typeof row !== "object") return false;
+    const predicate2 = row.predicate;
+    return row.predicateType === SUPPORTED_PREDICATE_URI && predicate2 !== null && typeof predicate2 === "object" && predicate2.gate_id === REPORT_LINEAGE_GATE_ID;
+  });
+  if (lineageRows.length !== 1) {
+    return [
+      `report-path requires exactly one ${REPORT_LINEAGE_GATE_ID} Evidence Bundle row (found ${lineageRows.length})`
+    ];
+  }
+  const predicate = lineageRows[0].predicate;
+  if (predicate.gate_decision !== "pass") {
+    return [
+      `report-lineage gate must pass before report promotion (got ${String(predicate.gate_decision ?? "missing")})`
+    ];
+  }
+  if (predicate.input_hash !== expectedInputHash) {
+    return ["report-lineage input_hash does not match report-path bytes"];
+  }
+  const subjects = lineageRows[0].subject;
+  const expectedSubjectDigest = expectedInputHash.slice("sha256:".length);
+  if (!Array.isArray(subjects) || !subjects.some((subject) => {
+    if (subject === null || typeof subject !== "object") return false;
+    const digest = subject.digest;
+    return digest !== null && typeof digest === "object" && digest.sha256 === expectedSubjectDigest;
+  })) {
+    return ["report-lineage subject digest does not match report-path bytes"];
+  }
+  const metadata = predicate.metadata;
+  if (metadata === null || typeof metadata !== "object") {
+    return ["report-lineage row is missing deterministic validator metadata"];
+  }
+  const metadataRecord = metadata;
+  if (metadataRecord.validator !== "audit-harness-report-lineage-v1") {
+    return [
+      "report-lineage row was not produced by audit-harness-report-lineage-v1"
+    ];
+  }
+  if (metadataRecord.report_schema !== reportSchema) {
+    return ["report-lineage report_schema does not match report-path"];
+  }
+  const lineageGrader = readGraderIdentity(metadataRecord.selected_grader);
+  if (lineageGrader === null) {
+    return ["report-lineage row is missing the selected Grader identity"];
+  }
+  if (lineageGrader.grader_id !== reportGrader.grader_id || lineageGrader.grader_version !== reportGrader.grader_version || lineageGrader.grader_snapshot_sha256 !== reportGrader.grader_snapshot_sha256) {
+    return ["report-lineage Grader identity does not match report-path"];
+  }
+  const lineageCounts = readReportCounts(metadataRecord.run_counts);
+  if (lineageCounts === null) {
+    return ["report-lineage row is missing deterministic Run counts"];
+  }
+  for (const key of REPORT_COUNT_KEYS) {
+    if (lineageCounts[key] !== reportCounts[key]) {
+      return [`report-lineage ${key} does not match report-path summary`];
+    }
+  }
+  const sampleBalance = metadataRecord.sample_balance;
+  if (sampleBalance === null || typeof sampleBalance !== "object" || sampleBalance.duplicate_sample_index_count !== 0) {
+    return ["report-lineage sample-balance metadata is not clean"];
+  }
+  if (reportSchema === "j-rig/suite-report/v1" && metadataRecord.source_verified !== true) {
+    return ["suite report promotion requires a verified audit-manifest source"];
+  }
+  return [];
 }
 function isRowOfType(row, uri) {
   return row !== null && typeof row === "object" && row.predicateType === uri;
@@ -47425,6 +47593,15 @@ async function run() {
       core.warning(
         `${kernelInvalid} gate-result/v1 predicate body(ies) failed kernel @intentsolutions/core GateResultV1Schema validation (advisory only; decision is unaffected)`
       );
+    }
+    const reportBindingReasons = validateReportBinding(
+      bundle,
+      core.getInput("report-path").trim(),
+      core.getInput("audit-manifest-path").trim()
+    );
+    if (reportBindingReasons.length > 0) {
+      await conclude("block", reportBindingReasons, null, failOnBlock);
+      return;
     }
     const refinerRows = extractRefinerPassRows(bundle);
     if (refinerRows.length > 0) {

@@ -1,0 +1,68 @@
+{
+  "schema": "j-rig/unified-report/v1",
+  "generated_at": "2026-08-02T00:00:00.000Z",
+  "grader": {
+    "grader_id": "answer-checker",
+    "grader_version": "1.0.0",
+    "grader_snapshot_sha256": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  "summary": {
+    "cell_count": 1,
+    "attempted_runs": 1,
+    "completed_runs": 1,
+    "active_runs": 0,
+    "harness_failure_count": 0,
+    "graded_runs": 1,
+    "ungraded_completed_runs": 0,
+    "pass_count": 1,
+    "fail_count": 0
+  },
+  "cells": [
+    {
+      "task_id": "answer-task",
+      "task_version": "1",
+      "config_id": "fixture-config",
+      "config_version": "1",
+      "model": "fixture-model",
+      "grader_id": "answer-checker",
+      "grader_version": "1.0.0",
+      "grader_snapshot_sha256": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "attempted_runs": 1,
+      "completed_runs": 1,
+      "active_runs": 0,
+      "harness_failure_count": 0,
+      "graded_runs": 1,
+      "ungraded_completed_runs": 0,
+      "pass_count": 1,
+      "fail_count": 0,
+      "pass_rate": 1,
+      "standard_error": 0,
+      "confidence_interval_95": {
+        "lower": 0.20654329147389294,
+        "upper": 1,
+        "confidence_level": 0.95
+      },
+      "mean_score": 1,
+      "score_standard_error": 0
+    }
+  ],
+  "runs": [
+    {
+      "raw_run_id": "generic-run-001",
+      "task_id": "answer-task",
+      "task_version": "1",
+      "config_id": "fixture-config",
+      "config_version": "1",
+      "model": "fixture-model",
+      "sample_index": 0,
+      "status": "completed",
+      "grade": {
+        "grader_id": "answer-checker",
+        "grader_version": "1.0.0",
+        "grader_snapshot_sha256": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "verdict": "pass",
+        "score": 1
+      }
+    }
+  ]
+}

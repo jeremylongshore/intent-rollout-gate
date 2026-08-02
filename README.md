@@ -28,11 +28,19 @@ The Rollout Gate is the **fourth repo** in the Intent Eval Platform convergence,
    v1 legacy container `{"bundle_format":"json-array","rows":[...]}`.
 2. **Resolves the rollout policy** from exactly one of `policy-path` (a JSON
    file) or `policy-json` (an inline JSON string). Both or neither → block.
-3. **Delegates the decision** to `decide(bundle, policy)` from
+3. **Optionally binds a generic report** supplied through `report-path` to the
+   exact report bytes. Promotion then requires one passing
+   `audit-harness:ci:report-lineage` row with the matching input hash and subject
+   digest, selected Grader identity, Run counts, clean sample-balance metadata,
+   and matching report schema. Suite reports additionally require
+   `audit-manifest-path`, because the producer hashes the report, a NUL
+   separator, and the verified audit manifest together. This is a provenance
+   preflight; it does not re-implement rollout algebra.
+4. **Delegates the decision** to `decide(bundle, policy)` from
    [`@intentsolutions/rollout-gate@2.0.0`](https://www.npmjs.com/package/@intentsolutions/rollout-gate).
    Row validation reuses the kernel `@intentsolutions/core` gate-result/v1
    statement schema — no schema is re-declared anywhere in this repo.
-4. **Reports**: `decision` + `reasons` outputs, a markdown step summary with
+5. **Reports**: `decision` + `reasons` outputs, a markdown step summary with
    the required-gate table and every blocking row, and a failing exit on
    `block` (unless `fail-on-block: 'false'`).
 
@@ -90,6 +98,26 @@ Or keep the policy in a committed file (enforcement travels with the code):
           fail-on-block: "true"   # default; 'false' = report-only mode
 ```
 
+For generic report promotion, make the report and its lineage evidence one
+explicit hand-off. The report file is kept unsigned and local; the Evidence
+Bundle row is the attested statement about those exact bytes:
+
+```yaml
+      - uses: jeremylongshore/intent-rollout-gate@v0.3.0
+        id: promotion
+        with:
+          bundle-path: evidence/promotion-bundle.json
+          policy-path: tests/promotion-policy.json
+          report-path: evidence/generic-report.json
+          # Required only for j-rig/suite-report/v1:
+          # audit-manifest-path: evidence/eval-suite-audit.json
+```
+
+The promotion policy should require both `audit-harness:ci:report-lineage` and
+the `j-rig:server:skill-rollout` gate. A skill-only caller can omit `report-path`
+and keep a policy that explicitly requires only its skill gate; omitting the
+input must never weaken a policy that requires the lineage gate.
+
 ### Policy document shape
 
 ```json
@@ -113,6 +141,8 @@ Parsing a policy out of `tests/TESTING.md` directly stays deferred per
 | Input | Required | Default | Purpose |
 | --- | --- | --- | --- |
 | `bundle-path` | yes | — | Path to the Evidence Bundle JSON file (v2 plain array or v1 container form). Missing/unreadable/invalid JSON → block. |
+| `report-path` | no | `''` | Optional exact J-Rig `unified-report/v1` or `suite-report/v1` JSON projection. When set, one passing `audit-harness:ci:report-lineage` row must match its bytes, subject digest, Grader identity, Run counts, sample-balance metadata, and schema. |
+| `audit-manifest-path` | no | `''` | Required with `suite-report/v1` when `report-path` is set; binds the exact J-Rig audit-manifest bytes used by `report-lineage`. Invalid without `report-path` or with `unified-report/v1`. |
 | `policy-path` | one of | `''` | Path to the rollout policy JSON document. Exactly one of `policy-path` / `policy-json` is required. |
 | `policy-json` | one of | `''` | Inline rollout policy JSON string. Exactly one of `policy-path` / `policy-json` is required. |
 | `fail-on-block` | no | `'true'` | `'true'`: a block decision fails the job. `'false'`: report-only. Anything other than an explicit `'false'` fails on block (fail closed). |
