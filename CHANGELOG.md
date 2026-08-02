@@ -16,6 +16,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Fail-closed real-skill promotion provenance.** Required `j-rig:local:*`
+  rows now need the producer's `j-rig/skill-promotion/v1` metadata with bound
+  run/skill/profile/Grader identity, clean thresholds, and an executed
+  no-regression comparison. Missing, legacy, advisory, stale, or inconsistent
+  evidence blocks before the delegated rollout decision. Generic report
+  lineage remains additive and supported. See
+  `000-docs/011-AT-SPEC-skill-promotion-consumer-compatibility-2026-08-02.md`.
+
 - Align the action and signed-evidence release verification with the canonical
   `@intentsolutions/core@0.10.0` contract. The release workflow now refuses to
   emit evidence unless the lockfile resolves exactly to that kernel version.

@@ -30,7 +30,10 @@ same byte sequence before accepting the statement.
 
 The rollout decision remains delegated to `@intentsolutions/rollout-gate`.
 The preflight only binds provenance and fails closed on missing or malformed
-evidence. It does not interpret thresholds, regression algebra, or gate policy.
+evidence. When the policy requires a `j-rig:local:*` row, the companion
+skill-promotion preflight also requires the producer's versioned
+`j-rig/skill-promotion/v1` identity and clean regression evidence. Neither
+preflight replaces the delegated rollout algebra.
 
 ## 2. Generic report promotion path
 
@@ -52,8 +55,11 @@ evidence of a passing evaluation.
 
 ## 3. Adopter migration
 
-Existing skill-only callers require no change. They omit `report-path` and may
-continue using a policy that explicitly requires their skill gate.
+Existing skill-only callers can still omit `report-path` and may continue using
+a policy that explicitly requires their skill gate, but the producer row must
+now carry valid `j-rig/skill-promotion/v1` metadata. Legacy hand-authored or
+pre-contract rows fail closed when a required policy pattern matches them; this
+prevents an old bundle from being mistaken for a verified promotion.
 
 To adopt report promotion:
 
@@ -64,7 +70,9 @@ To adopt report promotion:
 3. Require both lineage and skill gate IDs in the policy.
 4. Emit the lineage row from the audit-harness producer and keep the generated
    bundle tied to the same report bytes.
-5. Verify the promotion fixture and end-to-end smoke lane before enforcement.
+5. Upgrade the j-rig producer so its local row carries the promotion contract,
+   including an executed no-regression baseline for a clean `pass`.
+6. Verify the promotion fixture and end-to-end smoke lane before enforcement.
 
 This is additive under Evidence Bundle SPEC R18. No predicate URI or existing
 output changes. A report-binding failure returns `decision=block` and an
@@ -73,15 +81,18 @@ actionable reason; `fail-on-block: 'false'` remains available for observation.
 ## 4. Rollback and compatibility
 
 If a consumer is not ready to promote generic reports, remove `report-path`
-and use its explicit skill-only policy. Do not remove the lineage requirement
-from a policy while continuing to pass `report-path`: the action intentionally
-blocks that incomplete configuration. Re-pin to the prior action tag if the
-consumer cannot deploy the additive input yet; no state migration is needed.
+and use its explicit skill-only policy with current producer evidence. Do not
+remove the lineage requirement from a policy while continuing to pass
+`report-path`: the action intentionally blocks that incomplete configuration.
+Re-pin to the prior action tag if the consumer cannot deploy the additive
+preflight yet; no state migration is needed.
 
 ## Cross-references
 
 - `README.md` — generic report promotion quickstart and input contract
 - `tests/TESTING.md` — promotion provenance test property and CI lanes
 - `CHANGELOG.md` — unreleased change entry
+- `011-AT-SPEC-skill-promotion-consumer-compatibility-2026-08-02.md` — required
+  real-skill producer contract and compatibility matrix
 - Evidence Bundle SPEC R17/R18 — predicate identity and additive input rules
 - `bd_000-projects-htjt.13.1` — implementation and acceptance record

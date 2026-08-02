@@ -15,9 +15,9 @@ taxonomy mapping and the gap-analysis that produced this policy live in
   `@intentsolutions/rollout-gate`; the predicate URI + `gate-result/v1` body
   schema come from `@intentsolutions/core` (the SSoT kernel). This repo owns
   wiring (input validation, file I/O, output + step-summary rendering,
-  optional report-byte/lineage preflight, and fail-closed exit plumbing) and
-  nothing else. The report preflight verifies provenance fields but never
-  interprets thresholds or changes delegated decision algebra.
+  optional report-byte/lineage and j-rig skill-promotion provenance preflights,
+  and fail-closed exit plumbing) and nothing else. The preflights verify
+  producer evidence but never replace delegated rollout algebra.
 - **Consequence for testing:** the suite is **fixture-dominant**. We assert the
   EXACT emitted decision for a given Evidence Bundle + policy; we do NOT
   re-test the decision algebra (owned + tested upstream in the package) or the
@@ -34,10 +34,11 @@ coverage.branch: 80
 mutation.kill_rate: 70
 ```
 
-Rationale: `src/run.ts` is small (~290 LOC) and entirely branch-driven
-(fail-closed wiring), so a high line + branch floor is realistic. Mutation
-testing is not yet wired in CI; the `mutation.kill_rate` floor is declared so
-the policy is complete and any future Stryker config inherits a real target.
+Rationale: the Action shell and its isolated provenance preflights are entirely
+branch-driven (fail-closed wiring), so a high line + branch floor is realistic.
+Mutation testing is not yet wired in CI; the `mutation.kill_rate` floor is
+declared so the policy is complete and any future Stryker config inherits a real
+target.
 The decision-logic mutation budget lives upstream in `@intentsolutions/rollout-gate`.
 
 ## Layers that apply (and how they are enforced)
@@ -76,10 +77,12 @@ The decision-logic mutation budget lives upstream in `@intentsolutions/rollout-g
    that the same promotion policy allows only a clean
    `audit-harness:ci:report-lineage` row plus a passing
    `j-rig:local:*` row, and blocks missing, advisory, malformed,
-   stale-hash, or non-passing lineage evidence. Suite promotion must also cover
-   the report-plus-audit-manifest hash boundary. A skill-only policy remains supported only
-   when it explicitly omits the lineage requirement and the caller omits
-   `report-path`.
+   stale-hash, or non-passing lineage evidence. The required local row must
+   also carry valid `j-rig/skill-promotion/v1` identity, threshold, and
+   executed no-regression evidence. Suite promotion must cover the
+   report-plus-audit-manifest hash boundary. A skill-only policy remains
+   supported when it explicitly requires a local row and the caller omits
+   `report-path`; optional unknown rows retain delegated compatibility.
 
 ## CI gates (`.github/workflows/ci.yml`)
 

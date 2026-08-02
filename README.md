@@ -36,11 +36,17 @@ The Rollout Gate is the **fourth repo** in the Intent Eval Platform convergence,
    `audit-manifest-path`, because the producer hashes the report, a NUL
    separator, and the verified audit manifest together. This is a provenance
    preflight; it does not re-implement rollout algebra.
-4. **Delegates the decision** to `decide(bundle, policy)` from
+4. **Verifies required real-skill promotion evidence.** A policy pattern that
+   matches `j-rig:local:*` activates the additive
+   `j-rig/skill-promotion/v1` preflight. It binds run, skill, profile, Grader,
+   threshold, and executed no-regression evidence; missing, stale, advisory,
+   or inconsistent producer metadata blocks before delegation. Optional
+   unknown local rows retain the delegated package's compatibility behavior.
+5. **Delegates the decision** to `decide(bundle, policy)` from
    [`@intentsolutions/rollout-gate@2.0.0`](https://www.npmjs.com/package/@intentsolutions/rollout-gate).
    Row validation reuses the kernel `@intentsolutions/core` gate-result/v1
    statement schema — no schema is re-declared anywhere in this repo.
-5. **Reports**: `decision` + `reasons` outputs, a markdown step summary with
+6. **Reports**: `decision` + `reasons` outputs, a markdown step summary with
    the required-gate table and every blocking row, and a failing exit on
    `block` (unless `fail-on-block: 'false'`).
 
@@ -114,9 +120,12 @@ Bundle row is the attested statement about those exact bytes:
 ```
 
 The promotion policy should require both `audit-harness:ci:report-lineage` and
-the actual J-Rig skill row pattern `j-rig:local:*`. A skill-only caller can omit `report-path`
-and keep a policy that explicitly requires only its skill gate; omitting the
-input must never weaken a policy that requires the lineage gate.
+the actual J-Rig skill row pattern `j-rig:local:*`. The J-Rig row must carry
+`j-rig/skill-promotion/v1` metadata with an executed clean regression
+comparison; a legacy row is rejected once the policy requires it. A skill-only
+caller can omit `report-path` while keeping a policy that explicitly requires
+only its skill gate. Omitting the input must never weaken a policy that
+requires the lineage gate.
 
 ### Policy document shape
 

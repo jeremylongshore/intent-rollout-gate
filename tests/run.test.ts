@@ -62,6 +62,7 @@ import {
   run,
   stripRefinerPassRows,
   SUPPORTED_PREDICATE_URI,
+  validateSkillPromotionBinding,
 } from "../src/run";
 
 const fixture = (...parts: string[]): string =>
@@ -96,6 +97,19 @@ const MALFORMED_REPORT = fixture("reports", "malformed.json");
 
 function reasonsOutput(): string[] {
   return JSON.parse(outputs.get("reasons") ?? "null") as string[];
+}
+
+function writePromotionBundleVariant(
+  directory: string,
+  mutate: (predicate: Record<string, unknown>) => void,
+): string {
+  const bundle = JSON.parse(readFileSync(PROMOTION_BUNDLE, "utf8")) as Array<{
+    predicate: Record<string, unknown>;
+  }>;
+  mutate(bundle[1]!.predicate);
+  const bundlePath = join(directory, "promotion-variant.json");
+  writeFileSync(bundlePath, JSON.stringify(bundle), "utf8");
+  return bundlePath;
 }
 
 beforeEach(() => {
@@ -246,6 +260,161 @@ describe("generic report promotion binding", () => {
     expect(outputs.get("decision")).toBe("allow");
     expect(reasonsOutput()).toEqual([]);
     expect(setFailed).not.toHaveBeenCalled();
+  });
+
+  it("blocks a required real-skill row without promotion metadata", async () => {
+    const temp = mkdtempSync(join(tmpdir(), "iar-skill-promotion-"));
+    try {
+      const bundlePath = writePromotionBundleVariant(temp, (predicate) => {
+        delete predicate.metadata;
+      });
+      inputs.set("bundle-path", bundlePath);
+      inputs.set(
+        "policy-json",
+        JSON.stringify({
+          required_gates: ["j-rig:local:*"],
+          allow_unknown_gates: true,
+        }),
+      );
+
+      await run();
+
+      expect(outputs.get("decision")).toBe("block");
+      expect(reasonsOutput().join(" ")).toContain("metadata is missing");
+      expect(setFailed).toHaveBeenCalled();
+    } finally {
+      rmSync(temp, { recursive: true, force: true });
+    }
+  });
+
+  it("blocks a real-skill row that claims a pass while regression evidence was skipped", async () => {
+    const temp = mkdtempSync(join(tmpdir(), "iar-skill-promotion-"));
+    try {
+      const bundlePath = writePromotionBundleVariant(temp, (predicate) => {
+        const metadata = predicate.metadata as Record<string, unknown>;
+        metadata.regression = {
+          required: true,
+          enabled: false,
+          baseline_sha256: null,
+          result: "not-run",
+          count: 0,
+          sacred_count: 0,
+        };
+        metadata.promotion_eligible = false;
+        metadata.promotion_reasons = [
+          "thresholds passed",
+          "regression comparison was not run",
+        ];
+        metadata.gate_decision = "advisory";
+        predicate.gate_decision = "advisory";
+      });
+      inputs.set("bundle-path", bundlePath);
+      inputs.set(
+        "policy-json",
+        JSON.stringify({
+          required_gates: ["j-rig:local:*"],
+          allow_unknown_gates: true,
+        }),
+      );
+
+      await run();
+
+      expect(outputs.get("decision")).toBe("block");
+      expect(reasonsOutput().join(" ")).toContain(
+        "predicate gate_decision must be pass",
+      );
+      expect(setFailed).toHaveBeenCalled();
+    } finally {
+      rmSync(temp, { recursive: true, force: true });
+    }
+  });
+
+  it("blocks stale skill snapshot evidence before delegated promotion", async () => {
+    const temp = mkdtempSync(join(tmpdir(), "iar-skill-promotion-"));
+    try {
+      const bundlePath = writePromotionBundleVariant(temp, (predicate) => {
+        const metadata = predicate.metadata as Record<string, unknown>;
+        const skill = metadata.skill as Record<string, unknown>;
+        skill.snapshot_sha256 = `sha256:${"1".repeat(64)}`;
+      });
+      inputs.set("bundle-path", bundlePath);
+      inputs.set(
+        "policy-json",
+        JSON.stringify({
+          required_gates: ["j-rig:local:*"],
+          allow_unknown_gates: true,
+        }),
+      );
+
+      await run();
+
+      expect(outputs.get("decision")).toBe("block");
+      expect(reasonsOutput().join(" ")).toContain(
+        "snapshot_sha256 does not match input_hash",
+      );
+      expect(setFailed).toHaveBeenCalled();
+    } finally {
+      rmSync(temp, { recursive: true, force: true });
+    }
+  });
+
+  it("keeps sacred regression evidence blocking even when the policy asks for a skill row", async () => {
+    const temp = mkdtempSync(join(tmpdir(), "iar-skill-promotion-"));
+    try {
+      const bundlePath = writePromotionBundleVariant(temp, (predicate) => {
+        const metadata = predicate.metadata as Record<string, unknown>;
+        metadata.regression = {
+          required: true,
+          enabled: true,
+          baseline_sha256:
+            "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          result: "regressions-found",
+          count: 1,
+          sacred_count: 1,
+        };
+        metadata.rollout_decision = "block";
+        metadata.promotion_eligible = false;
+        metadata.promotion_reasons = ["1 regression(s) detected"];
+        metadata.gate_decision = "fail";
+        predicate.gate_decision = "fail";
+      });
+      inputs.set("bundle-path", bundlePath);
+      inputs.set(
+        "policy-json",
+        JSON.stringify({
+          required_gates: ["j-rig:local:*"],
+          allow_unknown_gates: true,
+        }),
+      );
+
+      await run();
+
+      expect(outputs.get("decision")).toBe("block");
+      expect(reasonsOutput().join(" ")).toContain(
+        "predicate gate_decision must be pass",
+      );
+      expect(setFailed).toHaveBeenCalled();
+    } finally {
+      rmSync(temp, { recursive: true, force: true });
+    }
+  });
+
+  it("does not impose the skill contract on an optional, non-required local row", () => {
+    const bundle = JSON.parse(
+      readFileSync(PROMOTION_BUNDLE, "utf8"),
+    ) as unknown[];
+    const predicate = (bundle[1] as { predicate: Record<string, unknown> })
+      .predicate;
+    delete predicate.metadata;
+
+    expect(
+      validateSkillPromotionBinding(bundle, {
+        required_gates: ["audit-harness:ci:report-lineage"],
+        forbid_decisions: ["fail", "error"],
+        advisory_blocks: false,
+        allow_unknown_gates: true,
+      }),
+    ).toEqual([]);
   });
 
   it("blocks an audit manifest supplied without a report path", async () => {

@@ -14,6 +14,7 @@ Per Doc Filing Standard v4.x. Files follow `NNN-CC-CODE-description.md`.
 | 007 | AT (Decision Record) | DECR | [SPEC normative-lock sign-off — acting-head-of-board (2026-06-18)](./007-AT-DECR-spec-normative-lock-sign-off-2026-06-18.md) |
 | 008 | RL (Release Report) | REPT | [Migration notes — v0.1.0-experimental -> v0.2.0 (2026-06-18)](./008-RL-REPT-v0.2.0-migration-notes-2026-06-18.md) |
 | 010 | RL (Release Report) | REPT | [Migration notes — generic report promotion binding (2026-08-01)](./010-RL-REPT-generic-report-promotion-migration-notes-2026-08-01.md) |
+| 011 | AT (Specification) | SPEC | [Skill-promotion consumer compatibility (2026-08-02)](./011-AT-SPEC-skill-promotion-consumer-compatibility-2026-08-02.md) |
 
 ## Type codes used in this repo
 

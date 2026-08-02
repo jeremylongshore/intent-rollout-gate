@@ -44,6 +44,13 @@ and subject-digest metadata before delegation. Suite reports additionally bind
 the exact audit-manifest bytes through `audit-manifest-path`. It must never interpret
 thresholds or regression algebra locally.
 
+When a required policy pattern matches a `j-rig:local:*` row, the shell also
+checks the additive `j-rig/skill-promotion/v1` producer contract: run and
+snapshot identity, selected Grader, clean thresholds, and an executed
+no-regression comparison. Missing, legacy, advisory, stale, or inconsistent
+promotion evidence blocks before delegation. A local row that is not required
+by policy remains under the published package's existing unknown-row behavior.
+
 ## Build & test commands
 
 ```bash
