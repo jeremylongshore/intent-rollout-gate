@@ -43,7 +43,8 @@ The producer/consumer hand-off is:
 3. `audit-harness emit-evidence` places that row beside the real-skill J-Rig
    rollout row in an Evidence Bundle.
 4. The consumer passes `bundle-path`, `report-path`, and a policy requiring
-   both `audit-harness:ci:report-lineage` and `j-rig:server:skill-rollout`.
+   both `audit-harness:ci:report-lineage` and the actual J-Rig
+   `j-rig:local:*` skill-row pattern.
 
 The report remains a local unsigned projection. The attested Evidence Bundle
 is the provenance boundary; the action never treats a report path by itself as

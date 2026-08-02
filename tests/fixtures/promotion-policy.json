@@ -1,7 +1,7 @@
 {
   "required_gates": [
     "audit-harness:ci:report-lineage",
-    "j-rig:server:skill-rollout"
+    "j-rig:local:*"
   ],
   "forbid_decisions": ["fail", "error"],
   "advisory_blocks": true,

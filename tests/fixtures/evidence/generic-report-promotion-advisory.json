@@ -26,10 +26,10 @@
   },
   {
     "_type": "https://in-toto.io/Statement/v1",
-    "subject": [{"name": "j-rig:server:skill-rollout", "digest": {"sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"}}],
+    "subject": [{"name": "j-rig:local:generic-skill.fixture-model", "digest": {"sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"}}],
     "predicateType": "https://evals.intentsolutions.io/gate-result/v1",
     "predicate": {
-      "gate_id": "j-rig:server:skill-rollout",
+      "gate_id": "j-rig:local:generic-skill.fixture-model",
       "gate_name": "rollout",
       "gate_version": "2.0.0",
       "gate_decision": "pass",

@@ -114,7 +114,7 @@ Bundle row is the attested statement about those exact bytes:
 ```
 
 The promotion policy should require both `audit-harness:ci:report-lineage` and
-the `j-rig:server:skill-rollout` gate. A skill-only caller can omit `report-path`
+the actual J-Rig skill row pattern `j-rig:local:*`. A skill-only caller can omit `report-path`
 and keep a policy that explicitly requires only its skill gate; omitting the
 input must never weaken a policy that requires the lineage gate.
 

@@ -236,7 +236,7 @@ describe("generic report promotion binding", () => {
     inputs.set(
       "policy-json",
       JSON.stringify({
-        required_gates: ["j-rig:server:skill-rollout"],
+        required_gates: ["j-rig:local:*"],
         allow_unknown_gates: true,
       }),
     );
@@ -307,7 +307,7 @@ describe("generic report promotion binding", () => {
       await run();
 
       expect(outputs.get("decision")).toBe("block");
-      expect(reasonsOutput().join(" ")).toContain("j-rig:server:skill-rollout");
+      expect(reasonsOutput().join(" ")).toContain("j-rig:local:*");
       expect(setFailed).toHaveBeenCalled();
     } finally {
       rmSync(temp, { recursive: true, force: true });

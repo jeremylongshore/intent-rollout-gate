@@ -75,7 +75,7 @@ The decision-logic mutation budget lives upstream in `@intentsolutions/rollout-g
 6. **Promotion provenance.** When `report-path` is supplied, tests MUST prove
    that the same promotion policy allows only a clean
    `audit-harness:ci:report-lineage` row plus a passing
-   `j-rig:server:skill-rollout` row, and blocks missing, advisory, malformed,
+   `j-rig:local:*` row, and blocks missing, advisory, malformed,
    stale-hash, or non-passing lineage evidence. Suite promotion must also cover
    the report-plus-audit-manifest hash boundary. A skill-only policy remains supported only
    when it explicitly omits the lineage requirement and the caller omits
