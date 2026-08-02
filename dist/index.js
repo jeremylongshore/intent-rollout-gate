@@ -45401,16 +45401,16 @@ function patternToRegex(pattern) {
   return new RegExp(`^${escaped}$`);
 }
 
-// node_modules/.pnpm/@intentsolutions+core@0.9.0/node_modules/@intentsolutions/core/dist/predicates/human-review-v1.js
+// node_modules/.pnpm/@intentsolutions+core@0.10.0/node_modules/@intentsolutions/core/dist/predicates/human-review-v1.js
 var HUMAN_REVIEW_V1_URI = "https://evals.intentsolutions.io/human-review/v1";
 
-// node_modules/.pnpm/@intentsolutions+core@0.9.0/node_modules/@intentsolutions/core/dist/predicates/skill-refiner-pass-v1.js
+// node_modules/.pnpm/@intentsolutions+core@0.10.0/node_modules/@intentsolutions/core/dist/predicates/skill-refiner-pass-v1.js
 var SKILL_REFINER_PASS_V1_URI = "https://evals.intentsolutions.io/skill-refiner-pass/v1";
 
-// node_modules/.pnpm/@intentsolutions+core@0.9.0/node_modules/@intentsolutions/core/dist/predicates/gate-result-v1.js
+// node_modules/.pnpm/@intentsolutions+core@0.10.0/node_modules/@intentsolutions/core/dist/predicates/gate-result-v1.js
 var GATE_RESULT_V1_URI2 = "https://evals.intentsolutions.io/gate-result/v1";
 
-// node_modules/.pnpm/@intentsolutions+core@0.9.0/node_modules/@intentsolutions/core/dist/validators/v1/_primitives.js
+// node_modules/.pnpm/@intentsolutions+core@0.10.0/node_modules/@intentsolutions/core/dist/validators/v1/_primitives.js
 var Uuidv7Schema2 = external_exports.string().regex(/^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/, "Must be a UUIDv7 (RFC 9562) \u2014 version nibble = 7, variant = 10xx").brand();
 var Sha256Schema2 = external_exports.string().regex(/^[a-f0-9]{64}$/, "Must be 64 lowercase hex chars").brand();
 var Sha256PrefixedSchema2 = external_exports.string().regex(/^sha256:[a-f0-9]{64}$/, "Must be sha256: + 64 lowercase hex chars per Blueprint B \xA7 7.4").brand();
@@ -45431,7 +45431,7 @@ var CoverageSchema2 = external_exports.object({
   dimensions_skipped: external_exports.array(external_exports.string())
 }).strict();
 
-// node_modules/.pnpm/@intentsolutions+core@0.9.0/node_modules/@intentsolutions/core/dist/validators/v1/eval-spec.js
+// node_modules/.pnpm/@intentsolutions+core@0.10.0/node_modules/@intentsolutions/core/dist/validators/v1/eval-spec.js
 var ScoringAggregationRuleSchema = external_exports.enum(["majority", "unanimous", "weighted"]);
 var ScoringWeightDimensionSchema = external_exports.enum(["matcher", "mm-class", "judge"]);
 var ScoringWeightSchema = external_exports.object({
@@ -45508,7 +45508,7 @@ var EvalSpecSchema2 = external_exports.object({
   tenant_id: Uuidv7Schema2.optional()
 }).strict();
 
-// node_modules/.pnpm/@intentsolutions+core@0.9.0/node_modules/@intentsolutions/core/dist/validators/v1/eval-run.js
+// node_modules/.pnpm/@intentsolutions+core@0.10.0/node_modules/@intentsolutions/core/dist/validators/v1/eval-run.js
 var EvalRunStateSchema = external_exports.enum([
   "queued",
   "running",
@@ -45553,7 +45553,7 @@ var EvalRunSchema = external_exports.object({
   tenant_id: Uuidv7Schema2.optional()
 }).strict();
 
-// node_modules/.pnpm/@intentsolutions+core@0.9.0/node_modules/@intentsolutions/core/dist/validators/v1/matcher-map.js
+// node_modules/.pnpm/@intentsolutions+core@0.10.0/node_modules/@intentsolutions/core/dist/validators/v1/matcher-map.js
 var StructuralOpSchema = external_exports.enum([
   "exists",
   "absent",
@@ -45622,7 +45622,7 @@ var MatcherMapSchema = external_exports.object({
   created_by: ActorIdentitySchema2
 }).strict();
 
-// node_modules/.pnpm/@intentsolutions+core@0.9.0/node_modules/@intentsolutions/core/dist/validators/v1/evidence-bundle.js
+// node_modules/.pnpm/@intentsolutions+core@0.10.0/node_modules/@intentsolutions/core/dist/validators/v1/evidence-bundle.js
 var SigningModeSchema2 = external_exports.enum([
   "sigstore_staging",
   "rekor_production",
@@ -45653,7 +45653,7 @@ var EvidenceBundleSchema2 = external_exports.object({
   pre_registration_hash: Sha256PrefixedSchema2.nullable().optional()
 }).strict();
 
-// node_modules/.pnpm/@intentsolutions+core@0.9.0/node_modules/@intentsolutions/core/dist/validators/v1/gate-result-v1.js
+// node_modules/.pnpm/@intentsolutions+core@0.10.0/node_modules/@intentsolutions/core/dist/validators/v1/gate-result-v1.js
 var GateDecisionSchema2 = external_exports.enum(["pass", "fail", "advisory", "error"]);
 var AdvisorySeveritySchema2 = external_exports.enum(["info", "warn", "error"]);
 var ReplayFidelityLevelSchema2 = external_exports.enum(["RF-0", "RF-1", "RF-2", "RF-3", "RF-4"]);
@@ -45717,7 +45717,7 @@ var GateResultV1Schema2 = external_exports.object({
 });
 var GATE_RESULT_V1_URI3 = "https://evals.intentsolutions.io/gate-result/v1";
 
-// node_modules/.pnpm/@intentsolutions+core@0.9.0/node_modules/@intentsolutions/core/dist/validators/v1/evidence-statement.js
+// node_modules/.pnpm/@intentsolutions+core@0.10.0/node_modules/@intentsolutions/core/dist/validators/v1/evidence-statement.js
 var IN_TOTO_STATEMENT_V1_TYPE2 = "https://in-toto.io/Statement/v1";
 var SHA256_PREFIX_LEN2 = "sha256:".length;
 var EvidenceStatementSchema3 = external_exports.object({
@@ -45748,7 +45748,7 @@ var EvidenceStatementSchema3 = external_exports.object({
 });
 var EvidenceBundlePayloadSchema2 = external_exports.array(EvidenceStatementSchema3);
 
-// node_modules/.pnpm/@intentsolutions+core@0.9.0/node_modules/@intentsolutions/core/dist/validators/v1/judge-decision.js
+// node_modules/.pnpm/@intentsolutions+core@0.10.0/node_modules/@intentsolutions/core/dist/validators/v1/judge-decision.js
 var JudgeVerdictSchema = external_exports.enum(["PASS", "FAIL", "ADVISORY", "NOT_APPLICABLE", "ERROR"]);
 var VerdictSourceSchema = external_exports.enum([
   "deterministic",
@@ -45775,7 +45775,7 @@ var JudgeDecisionSchema = external_exports.object({
   cost_record_ref: Uuidv7Schema2
 }).strict();
 
-// node_modules/.pnpm/@intentsolutions+core@0.9.0/node_modules/@intentsolutions/core/dist/validators/v1/runtime-receipt.js
+// node_modules/.pnpm/@intentsolutions+core@0.10.0/node_modules/@intentsolutions/core/dist/validators/v1/runtime-receipt.js
 var EvalRunTerminalStateSchema = external_exports.enum([
   "archived",
   "skipped_due_to_gate",
@@ -45805,7 +45805,7 @@ var RuntimeReceiptSchema = external_exports.object({
   cost_record_id: Uuidv7Schema2
 }).strict();
 
-// node_modules/.pnpm/@intentsolutions+core@0.9.0/node_modules/@intentsolutions/core/dist/validators/v1/regression-pack.js
+// node_modules/.pnpm/@intentsolutions+core@0.10.0/node_modules/@intentsolutions/core/dist/validators/v1/regression-pack.js
 var RegressionPackStateSchema = external_exports.enum(["draft", "committed", "superseded"]);
 var MatcherOutcomeRowSchema = external_exports.object({
   pass: external_exports.number().int().nonnegative(),
@@ -45837,7 +45837,7 @@ var RegressionPackSchema = external_exports.object({
   content_hash: Sha256Schema2
 }).strict();
 
-// node_modules/.pnpm/@intentsolutions+core@0.9.0/node_modules/@intentsolutions/core/dist/validators/v1/rollout-gate.js
+// node_modules/.pnpm/@intentsolutions+core@0.10.0/node_modules/@intentsolutions/core/dist/validators/v1/rollout-gate.js
 var RolloutGateDecisionSchema = external_exports.enum(["ship", "no_ship", "advisory", "error"]);
 var RolloutGateSchema = external_exports.object({
   id: Uuidv7Schema2,
@@ -45854,7 +45854,7 @@ var RolloutGateSchema = external_exports.object({
   rekor_log_index: external_exports.number().int().nonnegative().nullable()
 }).strict();
 
-// node_modules/.pnpm/@intentsolutions+core@0.9.0/node_modules/@intentsolutions/core/dist/validators/v1/skill-snapshot.js
+// node_modules/.pnpm/@intentsolutions+core@0.10.0/node_modules/@intentsolutions/core/dist/validators/v1/skill-snapshot.js
 var SkillSnapshotSchema = external_exports.object({
   id: Uuidv7Schema2,
   skill_id: KebabSlugSchema2,
@@ -45871,8 +45871,14 @@ var SkillSnapshotSchema = external_exports.object({
   tenant_id: Uuidv7Schema2.optional()
 }).strict();
 
-// node_modules/.pnpm/@intentsolutions+core@0.9.0/node_modules/@intentsolutions/core/dist/validators/v1/skill-version.js
+// node_modules/.pnpm/@intentsolutions+core@0.10.0/node_modules/@intentsolutions/core/dist/validators/v1/skill-version.js
 var SkillVersionKindSchema = external_exports.enum(["edit", "revert", "restore"]);
+var SkillVersionSigningStatusSchema = external_exports.enum([
+  "sigstore_staging",
+  "pending_production",
+  "active",
+  "signing_failed"
+]);
 var SkillVersionSchema = external_exports.object({
   id: Uuidv7Schema2,
   skill_id: KebabSlugSchema2,
@@ -45906,7 +45912,20 @@ var SkillVersionSchema = external_exports.object({
   created_at: Rfc3339Schema2,
   created_by: ActorIdentitySchema2,
   /** RESERVED multi-tenancy slot (deferral-G, bd_000-projects-k0fj). */
-  tenant_id: Uuidv7Schema2.optional()
+  tenant_id: Uuidv7Schema2.optional(),
+  // ── Signing state machine (AT-DECR 011). All six OPTIONAL + additive. ──
+  /** Signing-lifecycle position; absent ≡ staging-first `sigstore_staging`. */
+  status: SkillVersionSigningStatusSchema.optional(),
+  /** Signing posture — same enum as EvidenceBundle.signing_mode; absent ≡ staging. */
+  signing_mode: SigningModeSchema2.optional(),
+  /** Rekor log index — cross-field invariant enforced in superRefine below. */
+  rekor_log_index: external_exports.number().int().min(0).nullable().optional(),
+  /** Backoff floor the reconciler must not retry a pending row before. */
+  retry_after: Rfc3339Schema2.optional(),
+  /** Attempts so far; absent ≡ 0. Bounded by SKILL_VERSION_MAX_SIGNING_RETRIES. */
+  retry_count: external_exports.number().int().min(0).optional(),
+  /** Structured reason recorded only on a signing downgrade. */
+  signing_downgrade_reason: external_exports.string().optional()
 }).strict().superRefine((sv, ctx) => {
   if (sv.parent_version_id === null && sv.parent_content_hash !== null) {
     ctx.addIssue({
@@ -45929,9 +45948,25 @@ var SkillVersionSchema = external_exports.object({
       message: `DR-085 D5: version_kind "${sv.version_kind}" requires a non-null parent_version_id (a revert/restore must point at a prior version)`
     });
   }
+  const rekorPresent = sv.rekor_log_index !== void 0 && sv.rekor_log_index !== null;
+  const isActiveProduction = sv.signing_mode === "rekor_production" && sv.status === "active";
+  if (isActiveProduction && !rekorPresent) {
+    ctx.addIssue({
+      code: external_exports.ZodIssueCode.custom,
+      path: ["rekor_log_index"],
+      message: "AT-DECR 011 \xA7 D3: an active + rekor_production SkillVersion MUST carry a non-null rekor_log_index (an active production row without a transparency-log index is an unverifiable production claim)"
+    });
+  }
+  if (rekorPresent && !isActiveProduction) {
+    ctx.addIssue({
+      code: external_exports.ZodIssueCode.custom,
+      path: ["rekor_log_index"],
+      message: "AT-DECR 011 \xA7 D3: rekor_log_index may be non-null ONLY when signing_mode='rekor_production' AND status='active' (a rekor index on a non-active/non-production row is forged provenance)"
+    });
+  }
 });
 
-// node_modules/.pnpm/@intentsolutions+core@0.9.0/node_modules/@intentsolutions/core/dist/validators/v1/human-review.js
+// node_modules/.pnpm/@intentsolutions+core@0.10.0/node_modules/@intentsolutions/core/dist/validators/v1/human-review.js
 var HumanReviewSchema = external_exports.object({
   id: Uuidv7Schema2,
   /** FK → EvalRun.id (required). */
@@ -45987,7 +46022,7 @@ var HumanReviewSchema = external_exports.object({
   }
 });
 
-// node_modules/.pnpm/@intentsolutions+core@0.9.0/node_modules/@intentsolutions/core/dist/validators/v1/session-trace.js
+// node_modules/.pnpm/@intentsolutions+core@0.10.0/node_modules/@intentsolutions/core/dist/validators/v1/session-trace.js
 var SessionTraceSchema = external_exports.object({
   id: Uuidv7Schema2,
   eval_run_id: Uuidv7Schema2,
@@ -46001,7 +46036,7 @@ var SessionTraceSchema = external_exports.object({
   trace_blob_storage_key: StorageKeySchema2
 }).strict();
 
-// node_modules/.pnpm/@intentsolutions+core@0.9.0/node_modules/@intentsolutions/core/dist/validators/v1/tool-invocation.js
+// node_modules/.pnpm/@intentsolutions+core@0.10.0/node_modules/@intentsolutions/core/dist/validators/v1/tool-invocation.js
 var ErrorClassSchema = external_exports.string().regex(/^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)+$/, "Must be a <domain>.<condition> error class");
 var ToolInvocationErrorSchema = external_exports.object({
   enum_class: ErrorClassSchema,
@@ -46025,7 +46060,7 @@ var ToolInvocationSchema = external_exports.object({
   retry_attempt: external_exports.number().int().nonnegative()
 }).strict();
 
-// node_modules/.pnpm/@intentsolutions+core@0.9.0/node_modules/@intentsolutions/core/dist/validators/v1/cost-record.js
+// node_modules/.pnpm/@intentsolutions+core@0.10.0/node_modules/@intentsolutions/core/dist/validators/v1/cost-record.js
 var CostAttributionClassSchema = external_exports.enum([
   "run",
   "provider",
@@ -46051,7 +46086,7 @@ var CostRecordSchema = external_exports.object({
   cost_basis_version: external_exports.string().min(1)
 }).strict();
 
-// node_modules/.pnpm/@intentsolutions+core@0.9.0/node_modules/@intentsolutions/core/dist/validators/v1/usage-event.js
+// node_modules/.pnpm/@intentsolutions+core@0.10.0/node_modules/@intentsolutions/core/dist/validators/v1/usage-event.js
 var UsageMeterSchema = external_exports.enum([
   "api_call",
   "eval_run",
@@ -46123,7 +46158,7 @@ var UsageEventSchema = external_exports.object({
   }
 });
 
-// node_modules/.pnpm/@intentsolutions+core@0.9.0/node_modules/@intentsolutions/core/dist/validators/v1/failure-taxonomy.js
+// node_modules/.pnpm/@intentsolutions+core@0.10.0/node_modules/@intentsolutions/core/dist/validators/v1/failure-taxonomy.js
 var FailureTaxonomyStatusSchema = external_exports.enum(["proposed", "canonical", "deprecated"]);
 var FailureTaxonomyExampleSchema = external_exports.object({
   ref: external_exports.string(),
@@ -46142,7 +46177,7 @@ var FailureTaxonomySchema = external_exports.object({
   created_by: ActorIdentitySchema2
 }).strict();
 
-// node_modules/.pnpm/@intentsolutions+core@0.9.0/node_modules/@intentsolutions/core/dist/validators/v1/retraction-v1.js
+// node_modules/.pnpm/@intentsolutions+core@0.10.0/node_modules/@intentsolutions/core/dist/validators/v1/retraction-v1.js
 var RetractionReasonClassSchema = external_exports.enum([
   "partner-request",
   "methodology-error",
@@ -46166,7 +46201,7 @@ var RetractionV1Schema = external_exports.object({
   retracted_by: ActorIdentitySchema2.optional()
 }).strict();
 
-// node_modules/.pnpm/@intentsolutions+core@0.9.0/node_modules/@intentsolutions/core/dist/validators/v1/dashboard-render-v1.js
+// node_modules/.pnpm/@intentsolutions+core@0.10.0/node_modules/@intentsolutions/core/dist/validators/v1/dashboard-render-v1.js
 var RenderedArtifactSchema = external_exports.object({
   uri: external_exports.string().min(1).optional(),
   content_hash: Sha256PrefixedSchema2,
@@ -46186,7 +46221,7 @@ var DashboardRenderV1Schema = external_exports.object({
   renderer_config_hash: Sha256PrefixedSchema2.optional()
 }).strict();
 
-// node_modules/.pnpm/@intentsolutions+core@0.9.0/node_modules/@intentsolutions/core/dist/validators/v1/skill-refiner-pass-v1.js
+// node_modules/.pnpm/@intentsolutions+core@0.10.0/node_modules/@intentsolutions/core/dist/validators/v1/skill-refiner-pass-v1.js
 var SkillRefinerVerdictSchema = external_exports.enum(["accept", "reject"]);
 var SkillRefinerTestStatisticKindSchema = external_exports.literal("one-sided-z");
 var SkillRefinerReplayFidelityLevelSchema = external_exports.enum([
@@ -46247,7 +46282,7 @@ var SkillRefinerPassV1Schema = external_exports.object({
   }
 });
 
-// node_modules/.pnpm/@intentsolutions+core@0.9.0/node_modules/@intentsolutions/core/dist/validators/v1/human-review-v1.js
+// node_modules/.pnpm/@intentsolutions+core@0.10.0/node_modules/@intentsolutions/core/dist/validators/v1/human-review-v1.js
 var HUMAN_REVIEW_IN_TOTO_STATEMENT_V1_TYPE = "https://in-toto.io/Statement/v1";
 var SHA256_PREFIX_LEN3 = "sha256:".length;
 var HumanReviewV1Schema = external_exports.object({
@@ -46291,7 +46326,7 @@ var HumanReviewStatementSchema = external_exports.object({
   }
 });
 
-// node_modules/.pnpm/@intentsolutions+core@0.9.0/node_modules/@intentsolutions/core/dist/validators/v1/authoring/marketplace-tier.js
+// node_modules/.pnpm/@intentsolutions+core@0.10.0/node_modules/@intentsolutions/core/dist/validators/v1/authoring/marketplace-tier.js
 var IS_MARKETPLACE_DEPRECATED_FIELDS = {
   "compatible-with": "compatibility",
   when_to_use: "description"
@@ -46382,7 +46417,7 @@ var SecurityChecksSchema = attach(securityChecksIssues);
 var DisclosureMarkersSchema = attach(disclosureMarkersIssues);
 var UniversalFoldsSchema = attach(universalFoldsIssues);
 
-// node_modules/.pnpm/@intentsolutions+core@0.9.0/node_modules/@intentsolutions/core/dist/validators/v1/authoring/skill-frontmatter.js
+// node_modules/.pnpm/@intentsolutions+core@0.10.0/node_modules/@intentsolutions/core/dist/validators/v1/authoring/skill-frontmatter.js
 var SKILL_FRONTMATTER_BASE_REQUIRED = ["name", "description"];
 var SKILL_FRONTMATTER_OVERLAY_REQUIRED = [
   "allowed-tools",
@@ -46555,7 +46590,7 @@ function skillFrontmatterIssues(artifact) {
 }
 var SkillFrontmatterSchema2 = attach(skillFrontmatterIssues);
 
-// node_modules/.pnpm/@intentsolutions+core@0.9.0/node_modules/@intentsolutions/core/dist/validators/v1/authoring/plugin-manifest.js
+// node_modules/.pnpm/@intentsolutions+core@0.10.0/node_modules/@intentsolutions/core/dist/validators/v1/authoring/plugin-manifest.js
 var PLUGIN_MANIFEST_BASE_REQUIRED = ["name"];
 var PLUGIN_MANIFEST_OVERLAY_REQUIRED = [
   "version",
@@ -46677,7 +46712,7 @@ function pluginManifestIssues(artifact) {
 }
 var PluginManifestSchema = attach(pluginManifestIssues);
 
-// node_modules/.pnpm/@intentsolutions+core@0.9.0/node_modules/@intentsolutions/core/dist/validators/v1/authoring/agent-definition.js
+// node_modules/.pnpm/@intentsolutions+core@0.10.0/node_modules/@intentsolutions/core/dist/validators/v1/authoring/agent-definition.js
 var AGENT_DEFINITION_BASE_REQUIRED = ["name", "description"];
 var AGENT_DEFINITION_OVERLAY_REQUIRED = [
   "tools",
@@ -46794,7 +46829,7 @@ function agentDefinitionIssues(artifact) {
 }
 var AgentDefinitionSchema = attach(agentDefinitionIssues);
 
-// node_modules/.pnpm/@intentsolutions+core@0.9.0/node_modules/@intentsolutions/core/dist/validators/v1/authoring/mcp-config.js
+// node_modules/.pnpm/@intentsolutions+core@0.10.0/node_modules/@intentsolutions/core/dist/validators/v1/authoring/mcp-config.js
 var MCP_CONFIG_BASE_REQUIRED = ["name", "command", "args", "transport", "env"];
 var MCP_CONFIG_OVERLAY_REQUIRED = ["description", "version", "enabled"];
 var MCP_CONFIG_REQUIRED_FIELDS = [
@@ -46889,7 +46924,7 @@ function mcpConfigIssues(artifact) {
 }
 var McpConfigSchema = attach(mcpConfigIssues);
 
-// node_modules/.pnpm/@intentsolutions+core@0.9.0/node_modules/@intentsolutions/core/dist/validators/v1/authoring/hook-config.js
+// node_modules/.pnpm/@intentsolutions+core@0.10.0/node_modules/@intentsolutions/core/dist/validators/v1/authoring/hook-config.js
 var HOOK_CONFIG_BASE_REQUIRED = ["event", "matcher", "type", "command"];
 var HOOK_CONFIG_OVERLAY_REQUIRED = [
   "description",
@@ -47012,7 +47047,7 @@ function hookConfigIssues(artifact) {
 }
 var HookConfigSchema = attach(hookConfigIssues);
 
-// node_modules/.pnpm/@intentsolutions+core@0.9.0/node_modules/@intentsolutions/core/dist/validators/v1/authoring/marketplace-catalog.js
+// node_modules/.pnpm/@intentsolutions+core@0.10.0/node_modules/@intentsolutions/core/dist/validators/v1/authoring/marketplace-catalog.js
 var MARKETPLACE_CATALOG_BASE_REQUIRED = ["name", "owner", "plugins"];
 var MARKETPLACE_CATALOG_OVERLAY_REQUIRED = [
   "version",
