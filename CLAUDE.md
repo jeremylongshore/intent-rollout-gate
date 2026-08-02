@@ -106,7 +106,12 @@ is CI-only, deliberately.
 
 ## Beads workflow
 
-This repo owns its own `.beads/` directory (initialized at M4 with prefix `IRG`). Convergence-level meta-beads continue to live in the home `~/.beads/` (prefix `OPS`).
+This repository is one member of the six-repo Intent Eval Platform workspace.
+The tracked `.beads/redirect` resolves the supported workspace layout to
+`~/000-projects/.beads/`, the canonical umbrella Dolt store. This repo no
+longer opens its former `IRG` member database; its `issues.jsonl`, backups, and
+Git history remain recovery artifacts. Verify with `bd where` and `bd info`,
+use `bd-sync` for bead↔GitHub↔Plane changes, and do not run `bd init` here.
 
 Workflow once initialized:
 
