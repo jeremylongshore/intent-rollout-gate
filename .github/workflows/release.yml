@@ -145,7 +145,7 @@ jobs:
           echo "dist/index.js is reproducible and in sync."
 
       - name: Upload dist artifact for the sign job
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: dist
           path: dist/index.js
@@ -405,7 +405,7 @@ jobs:
         uses: sigstore/cosign-installer@v3
 
       - name: Download dist artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: dist
           path: dist
@@ -493,7 +493,7 @@ jobs:
       # Upload the bundle as a workflow artifact for inspection only.
       - name: Upload signature bundle as artifact (dry-run only)
         if: ${{ inputs.dry-run }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: dist-sigstore-bundle-dryrun
           path: dist/index.js.sigstore.json
