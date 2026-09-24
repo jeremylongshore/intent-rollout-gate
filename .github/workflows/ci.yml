@@ -3,8 +3,9 @@ name: CI
 on:
   push:
     branches: [main]
+  # No `branches:` filter on purpose: with `branches: [main]` a stacked PR whose
+  # base is another feature branch gets no checks at all. Push builds stay on main.
   pull_request:
-    branches: [main]
 
 permissions:
   contents: read
@@ -16,7 +17,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
         with:
           version: 10
 
@@ -58,7 +59,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
         with:
           version: 10
 
