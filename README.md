@@ -21,6 +21,8 @@ The Rollout Gate is the **fourth repo** in the Intent Eval Platform convergence,
 | [`j-rig-binary-eval`](https://github.com/jeremylongshore/j-rig-skill-binary-eval) | 7-layer behavioral judgment harness—emits and consumes Evidence Bundle rows; home of the `@intentsolutions/rollout-gate` decision library | Apache 2.0 |
 | **`intent-rollout-gate`** *(this repo)* | **Thin GitHub Action shell—delegates the ship/no-ship decision to `@intentsolutions/rollout-gate`** | **Apache 2.0** |
 
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/U5S225PTME)
+
 ## What it does (v0.3.0)
 
 1. **Reads the Evidence Bundle** at `bundle-path` — both wire forms: the v2
