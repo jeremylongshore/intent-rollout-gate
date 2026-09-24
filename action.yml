@@ -20,6 +20,24 @@ inputs:
       {"bundle_format":"json-array","rows":[...]}. A missing, unreadable, or
       invalid-JSON file blocks (fail closed).
     required: true
+  report-path:
+    description: >-
+      Optional path to the exact J-Rig unified-report/v1 or suite-report/v1
+      JSON projection being promoted. When set, the action requires exactly one
+      passing audit-harness:ci:report-lineage Evidence Bundle row whose input_hash
+      matches the report bytes and whose validator/sample-balance metadata is
+      clean. This binds report provenance without changing the delegated
+      @intentsolutions/rollout-gate decision algebra.
+    required: false
+    default: ''
+  audit-manifest-path:
+    description: >-
+      Optional path to the exact J-Rig eval-suite/v1 audit manifest used with a
+      suite report. Required with suite-report/v1 because report-lineage binds
+      report bytes, a NUL separator, and manifest bytes into input_hash. It is
+      invalid without report-path and is not accepted for unified-report/v1.
+    required: false
+    default: ''
   policy-path:
     description: >-
       Path to the rollout policy JSON document ({"required_gates":[...],

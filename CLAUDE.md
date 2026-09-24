@@ -37,6 +37,13 @@ The convergence couples at the schema layer (the `gate-result/v1` predicate URI)
 
 **One exception to "no logic":** the shell runs each consumed `gate-result/v1` predicate body through the kernel's `GateResultV1Schema` (`@intentsolutions/core`) as an ADVISORY check (`countKernelInvalidPredicates`) — a malformed body surfaces a `core.warning` but never blocks; the decision stays 100% delegated.
 
+The optional `report-path` input is also wiring, not decision logic. It binds
+exact generic-report bytes to one passing `audit-harness:ci:report-lineage` row
+and checks the producer's selected Grader, Run-count, sample-balance, schema,
+and subject-digest metadata before delegation. Suite reports additionally bind
+the exact audit-manifest bytes through `audit-manifest-path`. It must never interpret
+thresholds or regression algebra locally.
+
 ## Build & test commands
 
 ```bash

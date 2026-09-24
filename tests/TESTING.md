@@ -15,7 +15,9 @@ taxonomy mapping and the gap-analysis that produced this policy live in
   `@intentsolutions/rollout-gate`; the predicate URI + `gate-result/v1` body
   schema come from `@intentsolutions/core` (the SSoT kernel). This repo owns
   wiring (input validation, file I/O, output + step-summary rendering,
-  fail-closed exit plumbing) and nothing else.
+  optional report-byte/lineage preflight, and fail-closed exit plumbing) and
+  nothing else. The report preflight verifies provenance fields but never
+  interprets thresholds or changes delegated decision algebra.
 - **Consequence for testing:** the suite is **fixture-dominant**. We assert the
   EXACT emitted decision for a given Evidence Bundle + policy; we do NOT
   re-test the decision algebra (owned + tested upstream in the package) or the
@@ -45,7 +47,7 @@ The decision-logic mutation budget lives upstream in `@intentsolutions/rollout-g
 | L1 — git hooks / harness integrity | Yes (advisory) | `audit-harness verify` in CI (`.harness-hash` pins the policy surface — `action.yml`, `tests/TESTING.md` — via `.harness-hash-extra-patterns`). |
 | L2 — static | Yes | `pnpm run typecheck` (tsc strict, `noUncheckedIndexedAccess`) + `action.yml` structural lint. |
 | L3 — unit | Yes | `tests/run.test.ts` — pure helpers (`renderSummary`, `countKernelInvalidPredicates`) over a mocked `@actions/core`. |
-| L4 — integration (PRIMARY) | Yes | Fixture Evidence Bundle + policy → real `decide()`/`run()` → exact decision + reasons + exit behavior. The dominant layer for this action. |
+| L4 — integration (PRIMARY) | Yes | Fixture Evidence Bundle + policy → real `decide()`/`run()` → exact decision + reasons + exit behavior; promotion fixtures additionally bind exact generic-report bytes to lineage evidence and require the skill gate. The dominant layer for this action. |
 | L5 — system | Yes | `ci.yml smoke-action` runs the built action against fixtures end-to-end and asserts outputs. |
 | L6 — E2E | N/A | No deployed surface; the consumer workflow is the real E2E, exercised by L5. |
 | L7 — acceptance | N/A | No BDD/`.feature` surface; the action's acceptance contract is `action.yml`'s I/O, covered by L4 + L5. |
@@ -70,6 +72,14 @@ The decision-logic mutation budget lives upstream in `@intentsolutions/rollout-g
    the delegated decision.
 5. **dist sync.** `dist/index.js` is a committed artifact. Any source change
    MUST be accompanied by a rebuild (`pnpm run build`); CI fails on a stale dist.
+6. **Promotion provenance.** When `report-path` is supplied, tests MUST prove
+   that the same promotion policy allows only a clean
+   `audit-harness:ci:report-lineage` row plus a passing
+   `j-rig:local:*` row, and blocks missing, advisory, malformed,
+   stale-hash, or non-passing lineage evidence. Suite promotion must also cover
+   the report-plus-audit-manifest hash boundary. A skill-only policy remains supported only
+   when it explicitly omits the lineage requirement and the caller omits
+   `report-path`.
 
 ## CI gates (`.github/workflows/ci.yml`)
 
@@ -77,7 +87,7 @@ The decision-logic mutation budget lives upstream in `@intentsolutions/rollout-g
 |---|---|
 | `check` | `audit-harness verify` → typecheck → `vitest run` → dist-sync (rebuild + `git diff --exit-code dist/`). |
 | `lint-action-yaml` | `action.yml` is well-formed YAML with required `name`/`description`/`runs` + node `runs.main`. |
-| `smoke-action` | runs the built action against `tests/fixtures/` allow + fail-row bundles and asserts the emitted `decision`/`reasons`. |
+| `smoke-action` | runs the built action against allow + fail-row bundles and the generic-report promotion bundle, asserting emitted `decision`/`reasons`. |
 
 ## Changing this policy
 

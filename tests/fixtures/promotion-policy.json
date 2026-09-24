@@ -1,0 +1,9 @@
+{
+  "required_gates": [
+    "audit-harness:ci:report-lineage",
+    "j-rig:local:*"
+  ],
+  "forbid_decisions": ["fail", "error"],
+  "advisory_blocks": true,
+  "allow_unknown_gates": false
+}

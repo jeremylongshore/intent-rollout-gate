@@ -128,6 +128,14 @@ jobs:
           bundle-path: tests/fixtures/evidence/allow-bundle.json
           policy-path: tests/fixtures/policy.json
 
+      - name: Generic report promotion → exact lineage + skill evidence allows
+        id: promotion
+        uses: ./
+        with:
+          bundle-path: tests/fixtures/evidence/generic-report-promotion-bundle.json
+          policy-path: tests/fixtures/promotion-policy.json
+          report-path: tests/fixtures/reports/generic-unified-report.json
+
       - name: Fail-row fixture, fail-on-block=false → decision=block, job still succeeds
         id: gate-block
         uses: ./
@@ -140,11 +148,15 @@ jobs:
         env:
           ALLOW_DECISION: ${{ steps.gate-allow.outputs.decision }}
           ALLOW_REASONS: ${{ steps.gate-allow.outputs.reasons }}
+          PROMOTION_DECISION: ${{ steps.promotion.outputs.decision }}
+          PROMOTION_REASONS: ${{ steps.promotion.outputs.reasons }}
           BLOCK_DECISION: ${{ steps.gate-block.outputs.decision }}
           BLOCK_REASONS: ${{ steps.gate-block.outputs.reasons }}
         run: |
           [ "$ALLOW_DECISION" = "allow" ] || { echo "expected allow, got: $ALLOW_DECISION"; exit 1; }
           [ "$ALLOW_REASONS" = "[]" ] || { echo "expected empty reasons, got: $ALLOW_REASONS"; exit 1; }
+          [ "$PROMOTION_DECISION" = "allow" ] || { echo "expected promotion allow, got: $PROMOTION_DECISION"; exit 1; }
+          [ "$PROMOTION_REASONS" = "[]" ] || { echo "expected empty promotion reasons, got: $PROMOTION_REASONS"; exit 1; }
           [ "$BLOCK_DECISION" = "block" ] || { echo "expected block, got: $BLOCK_DECISION"; exit 1; }
           echo "$BLOCK_REASONS" | python3 -c 'import json,sys; r=json.load(sys.stdin); assert isinstance(r, list) and len(r) > 0, "expected non-empty reasons array"'
           echo "Smoke OK: allow + non-failing block both behaved."

@@ -14,6 +14,7 @@
  * decision rather than a silent pass.
  */
 
+import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import * as core from "@actions/core";
 import {
@@ -61,6 +62,61 @@ export const SUPPORTED_PREDICATE_URI = GATE_RESULT_V1_URI;
  */
 export const ADVISORY_REFINER_PASS_URI = SKILL_REFINER_PASS_V1_URI;
 
+/** The audit-harness row that binds a generic report to its exact bytes. */
+const REPORT_LINEAGE_GATE_ID = "audit-harness:ci:report-lineage";
+const REPORT_SCHEMAS = new Set([
+  "j-rig/unified-report/v1",
+  "j-rig/suite-report/v1",
+]);
+const REPORT_COUNT_KEYS = [
+  "cell_count",
+  "attempted_runs",
+  "completed_runs",
+  "active_runs",
+  "harness_failure_count",
+  "graded_runs",
+  "ungraded_completed_runs",
+  "pass_count",
+  "fail_count",
+] as const;
+
+type GraderIdentity = {
+  grader_id: string;
+  grader_version: string;
+  grader_snapshot_sha256: string;
+};
+
+function readGraderIdentity(value: unknown): GraderIdentity | null {
+  if (value === null || typeof value !== "object") return null;
+  const candidate = value as Record<string, unknown>;
+  if (
+    typeof candidate.grader_id !== "string" ||
+    typeof candidate.grader_version !== "string" ||
+    typeof candidate.grader_snapshot_sha256 !== "string"
+  ) {
+    return null;
+  }
+  return {
+    grader_id: candidate.grader_id,
+    grader_version: candidate.grader_version,
+    grader_snapshot_sha256: candidate.grader_snapshot_sha256,
+  };
+}
+
+function readReportCounts(value: unknown): Record<string, number> | null {
+  if (value === null || typeof value !== "object") return null;
+  const candidate = value as Record<string, unknown>;
+  const counts: Record<string, number> = {};
+  for (const key of REPORT_COUNT_KEYS) {
+    const count = candidate[key];
+    if (typeof count !== "number" || !Number.isInteger(count) || count < 0) {
+      return null;
+    }
+    counts[key] = count;
+  }
+  return counts;
+}
+
 function errMessage(err: unknown): string {
   return err instanceof Error ? err.message : String(err);
 }
@@ -86,6 +142,197 @@ function bundleRows(bundle: unknown): unknown[] | null {
     return (bundle as { rows: unknown[] }).rows; // v1 legacy container
   }
   return null;
+}
+
+/**
+ * Bind an optional generic report file to its audit-harness Evidence Bundle row.
+ *
+ * This is provenance wiring, not rollout algebra: the actual allow/block
+ * decision remains delegated to `decide()`. When `report-path` is supplied,
+ * promotion is refused unless the exact report bytes are represented by one
+ * passing `audit-harness:ci:report-lineage` row carrying the producer's
+ * deterministic metadata contract. Existing skill-only callers leave this
+ * input empty and take the unchanged decision path.
+ */
+export function validateReportBinding(
+  bundle: unknown,
+  reportPath: string,
+  auditManifestPath = "",
+): string[] {
+  if (reportPath === "") {
+    return auditManifestPath === ""
+      ? []
+      : ["audit-manifest-path requires report-path"];
+  }
+
+  let reportBytes: Buffer;
+  let report: unknown;
+  try {
+    reportBytes = readFileSync(reportPath);
+    report = JSON.parse(reportBytes.toString("utf8")) as unknown;
+  } catch {
+    return ["report-path must be a readable, valid JSON report"];
+  }
+
+  if (
+    report === null ||
+    typeof report !== "object" ||
+    !REPORT_SCHEMAS.has(String((report as { schema?: unknown }).schema))
+  ) {
+    return [
+      "report-path must contain a supported j-rig unified or suite report",
+    ];
+  }
+
+  const reportSchema = (report as { schema: string }).schema;
+  if (reportSchema === "j-rig/suite-report/v1" && auditManifestPath === "") {
+    return [
+      "suite report promotion requires audit-manifest-path to bind the verified source",
+    ];
+  }
+  if (reportSchema === "j-rig/unified-report/v1" && auditManifestPath !== "") {
+    return ["audit-manifest-path is only valid with j-rig/suite-report/v1"];
+  }
+  const reportProjection =
+    reportSchema === "j-rig/suite-report/v1"
+      ? (report as { report?: unknown }).report
+      : report;
+  if (
+    reportProjection === null ||
+    typeof reportProjection !== "object" ||
+    !Array.isArray((reportProjection as { runs?: unknown }).runs) ||
+    (reportProjection as { runs: unknown[] }).runs.length === 0
+  ) {
+    return [
+      "report-path must contain at least one projected Run before promotion",
+    ];
+  }
+
+  const reportGrader = readGraderIdentity(
+    (reportProjection as { grader?: unknown }).grader,
+  );
+  if (reportGrader === null) {
+    return ["report-path is missing the selected Grader identity"];
+  }
+  const reportCounts = readReportCounts(
+    (reportProjection as { summary?: unknown }).summary,
+  );
+  if (reportCounts === null) {
+    return ["report-path is missing deterministic Run counts in summary"];
+  }
+
+  let inputBytes = reportBytes;
+  if (auditManifestPath !== "") {
+    let manifestBytes: Buffer;
+    try {
+      manifestBytes = readFileSync(auditManifestPath);
+      JSON.parse(manifestBytes.toString("utf8"));
+    } catch {
+      return ["audit-manifest-path must be a readable JSON audit manifest"];
+    }
+    inputBytes = Buffer.concat([reportBytes, Buffer.from("\0"), manifestBytes]);
+  }
+  const expectedInputHash = `sha256:${createHash("sha256").update(inputBytes).digest("hex")}`;
+  const rows = bundleRows(bundle);
+  if (rows === null) {
+    return ["report-path requires a valid Evidence Bundle"];
+  }
+
+  const lineageRows = rows.filter((row) => {
+    if (row === null || typeof row !== "object") return false;
+    const predicate = (row as { predicate?: unknown }).predicate;
+    return (
+      (row as { predicateType?: unknown }).predicateType ===
+        SUPPORTED_PREDICATE_URI &&
+      predicate !== null &&
+      typeof predicate === "object" &&
+      (predicate as { gate_id?: unknown }).gate_id === REPORT_LINEAGE_GATE_ID
+    );
+  });
+  if (lineageRows.length !== 1) {
+    return [
+      `report-path requires exactly one ${REPORT_LINEAGE_GATE_ID} Evidence Bundle row (found ${lineageRows.length})`,
+    ];
+  }
+
+  const predicate = (lineageRows[0] as { predicate: Record<string, unknown> })
+    .predicate;
+  if (predicate.gate_decision !== "pass") {
+    return [
+      `report-lineage gate must pass before report promotion (got ${String(predicate.gate_decision ?? "missing")})`,
+    ];
+  }
+  if (predicate.input_hash !== expectedInputHash) {
+    return ["report-lineage input_hash does not match report-path bytes"];
+  }
+
+  const subjects = (lineageRows[0] as { subject?: unknown }).subject;
+  const expectedSubjectDigest = expectedInputHash.slice("sha256:".length);
+  if (
+    !Array.isArray(subjects) ||
+    !subjects.some((subject) => {
+      if (subject === null || typeof subject !== "object") return false;
+      const digest = (subject as { digest?: unknown }).digest;
+      return (
+        digest !== null &&
+        typeof digest === "object" &&
+        (digest as { sha256?: unknown }).sha256 === expectedSubjectDigest
+      );
+    })
+  ) {
+    return ["report-lineage subject digest does not match report-path bytes"];
+  }
+
+  const metadata = predicate.metadata;
+  if (metadata === null || typeof metadata !== "object") {
+    return ["report-lineage row is missing deterministic validator metadata"];
+  }
+  const metadataRecord = metadata as Record<string, unknown>;
+  if (metadataRecord.validator !== "audit-harness-report-lineage-v1") {
+    return [
+      "report-lineage row was not produced by audit-harness-report-lineage-v1",
+    ];
+  }
+  if (metadataRecord.report_schema !== reportSchema) {
+    return ["report-lineage report_schema does not match report-path"];
+  }
+  const lineageGrader = readGraderIdentity(metadataRecord.selected_grader);
+  if (lineageGrader === null) {
+    return ["report-lineage row is missing the selected Grader identity"];
+  }
+  if (
+    lineageGrader.grader_id !== reportGrader.grader_id ||
+    lineageGrader.grader_version !== reportGrader.grader_version ||
+    lineageGrader.grader_snapshot_sha256 !== reportGrader.grader_snapshot_sha256
+  ) {
+    return ["report-lineage Grader identity does not match report-path"];
+  }
+  const lineageCounts = readReportCounts(metadataRecord.run_counts);
+  if (lineageCounts === null) {
+    return ["report-lineage row is missing deterministic Run counts"];
+  }
+  for (const key of REPORT_COUNT_KEYS) {
+    if (lineageCounts[key] !== reportCounts[key]) {
+      return [`report-lineage ${key} does not match report-path summary`];
+    }
+  }
+  const sampleBalance = metadataRecord.sample_balance;
+  if (
+    sampleBalance === null ||
+    typeof sampleBalance !== "object" ||
+    (sampleBalance as { duplicate_sample_index_count?: unknown })
+      .duplicate_sample_index_count !== 0
+  ) {
+    return ["report-lineage sample-balance metadata is not clean"];
+  }
+  if (
+    reportSchema === "j-rig/suite-report/v1" &&
+    metadataRecord.source_verified !== true
+  ) {
+    return ["suite report promotion requires a verified audit-manifest source"];
+  }
+
+  return [];
 }
 
 /** Narrow: is this row a statement whose predicateType is the given URI? */
@@ -358,6 +605,16 @@ export async function run(): Promise<void> {
           `@intentsolutions/core GateResultV1Schema validation (advisory only; ` +
           `decision is unaffected)`,
       );
+    }
+
+    const reportBindingReasons = validateReportBinding(
+      bundle,
+      core.getInput("report-path").trim(),
+      core.getInput("audit-manifest-path").trim(),
+    );
+    if (reportBindingReasons.length > 0) {
+      await conclude("block", reportBindingReasons, null, failOnBlock);
+      return;
     }
 
     // ADVISORY skill-refiner-pass/v1 enrichment (bead r8ir.1). Extract the valid
