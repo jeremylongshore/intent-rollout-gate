@@ -32,6 +32,9 @@ import {
   SkillRefinerPassV1Schema,
 } from "@intentsolutions/core/validators/v1";
 import { renderSummary, type RefinerAdvisoryRow } from "./summary";
+import { validateSkillPromotionBinding } from "./skill-promotion";
+
+export { validateSkillPromotionBinding } from "./skill-promotion";
 
 /**
  * Re-exported so existing wiring + tests keep importing `renderSummary` from
@@ -614,6 +617,16 @@ export async function run(): Promise<void> {
     );
     if (reportBindingReasons.length > 0) {
       await conclude("block", reportBindingReasons, null, failOnBlock);
+      return;
+    }
+
+    // Producer-side j-rig/skill-promotion/v1 provenance preflight. This does
+    // not replace the delegated rollout algebra: it only prevents a required
+    // real-skill row from being promoted when its identity, thresholds, or
+    // regression evidence is absent or internally inconsistent.
+    const skillPromotionReasons = validateSkillPromotionBinding(bundle, policy);
+    if (skillPromotionReasons.length > 0) {
+      await conclude("block", skillPromotionReasons, null, failOnBlock);
       return;
     }
 

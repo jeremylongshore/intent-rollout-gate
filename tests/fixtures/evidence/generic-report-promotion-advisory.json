@@ -40,7 +40,61 @@
       "input_hash": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
       "evaluated_at": "2026-08-02T00:02:00Z",
       "runner": "j-rig@2.0.0",
-      "commit_sha": "ffffffffffffffffffffffffffffffffffffffff"
+      "commit_sha": "ffffffffffffffffffffffffffffffffffffffff",
+      "metadata": {
+        "schema": "j-rig/skill-promotion/v1",
+        "eval_run_id": "0192cae6-0002-7000-8000-000000000000",
+        "run_ids": ["0192cae6-0002-7000-8000-000000000000"],
+        "storage_run_id": 42,
+        "storage_run_ids": [42],
+        "skill": {
+          "skill_version_id": "j-rig:skill-version:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "name": "generic-skill",
+          "version": "1.0.0",
+          "snapshot_sha256": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+        },
+        "eval_spec": {
+          "id": "j-rig:skill-profile:generic-skill",
+          "version": "1.0",
+          "profile_sha256": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+          "identity_kind": "j-rig-skill-profile"
+        },
+        "selected_grader": {
+          "grader_id": "answer-checker",
+          "grader_version": "1.0.0",
+          "grader_snapshot_sha256": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "thresholds": {
+          "status": "pass",
+          "required_pass_rate": 1,
+          "observed_pass_rate": 1,
+          "total_criteria": 1,
+          "passed": 1,
+          "failed": 0,
+          "unsure": 0,
+          "blocker_failures": 0,
+          "min_blocker_agreement": null,
+          "unstable_blocker_failures": 0
+        },
+        "regression": {
+          "required": true,
+          "enabled": true,
+          "baseline_sha256": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "result": "no-regressions",
+          "count": 0,
+          "sacred_count": 0
+        },
+        "baseline": {
+          "enabled": false,
+          "result": "not-run",
+          "comparison_count": 0,
+          "value_addition_count": 0
+        },
+        "rollout_decision": "ship",
+        "promotion_eligible": true,
+        "promotion_reasons": ["thresholds passed", "regression comparison passed"],
+        "gate_decision": "pass"
+      }
     }
   }
 ]
