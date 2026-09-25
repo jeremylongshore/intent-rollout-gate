@@ -71,7 +71,7 @@ jobs:
       major: ${{ steps.resolve.outputs.major }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           # Pin to the dispatched tag on workflow_dispatch (re-release/sign): without
           # this, checkout resolves GITHUB_REF (default branch) and the rebuilt+signed
@@ -164,7 +164,7 @@ jobs:
       contents: write # create the Release + push the floating-major tag
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           # Pin to the dispatched tag on workflow_dispatch (re-release/sign): without
           # this, checkout resolves GITHUB_REF (default branch) and the rebuilt+signed
@@ -243,7 +243,7 @@ jobs:
       id-token: write # cosign keyless (Fulcio OIDC)
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           # ISEDC E09 DR / CISO reproducible-from-tag invariant: this job signs
           # the EvidenceBundle, so the canonical bytes it hashes + cosign-signs
@@ -391,7 +391,7 @@ jobs:
       id-token: write # cosign keyless (Fulcio OIDC) — no secret needed
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           # Pin to the dispatched tag on workflow_dispatch (re-release/sign): without
           # this, checkout resolves GITHUB_REF (default branch) and the rebuilt+signed
