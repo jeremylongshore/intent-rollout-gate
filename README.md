@@ -70,8 +70,9 @@ JSON-array bundle this action reads. `--append-to` validates every row, refuses
 a duplicate row id, and writes atomically. Use `--output FILE` to write a single
 Statement instead. `--out` is a deprecated alias of `--output`.
 
-`--append-to` requires an audit-harness release that ships it. Until then, the
-reference release workflow below installs a pinned commit.
+`--append-to` ships in `@intentsolutions/audit-harness` 1.5.1 and later. The
+reference release workflow below installs 1.5.1 from npm and verifies the
+tarball against its pinned sha512 before running it.
 
 ```yaml
 # .github/workflows/ci.yml

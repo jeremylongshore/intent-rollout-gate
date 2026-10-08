@@ -14,6 +14,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 > - **`tests/TESTING.md` policy parsing** — deferred per DR-002 § 5; the action continues to consume JSON policy documents only.
 > - **M6 first adopter** — `audit-harness` self-adopts the gate end-to-end before any partner repo (DR-002 § 6 criterion 5).
 
+### Security
+
+- **Release gate verifies the audit-harness it runs.** The reusable
+  `release-gate.yml` fetched `emit-evidence` from an unreleased
+  `intent-audit-harness` commit as a GitHub source archive, with no checksum.
+  It now downloads `@intentsolutions/audit-harness@1.5.1` from npm with
+  `npm pack` (no install, no package scripts), checks the tarball's sha512
+  against the new `audit-harness-integrity` input (default: 1.5.1's npm
+  `dist.integrity`), and only then unpacks and runs it. The commit-SHA path is
+  removed; `audit-harness-version` now accepts an exact npm version only. The
+  self-test gains an `integrity` job that runs the workflow's own fetch and
+  verify scripts and proves a tampered tarball is refused.
+
 ### Fixed
 
 - **README quickstart.** The quickstart told consumers to run `emit-evidence
