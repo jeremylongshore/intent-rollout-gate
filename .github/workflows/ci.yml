@@ -15,7 +15,7 @@ jobs:
     name: Typecheck + tests + dist-sync
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - uses: pnpm/action-setup@v6
         with:
@@ -57,7 +57,7 @@ jobs:
     name: dist/index.js reproducibility (rebuild → diff must be empty)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - uses: pnpm/action-setup@v6
         with:
@@ -90,7 +90,7 @@ jobs:
     name: Lint action.yml
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Validate action.yml structure (YAML well-formed + required keys)
         run: |
@@ -119,7 +119,7 @@ jobs:
     name: Smoke — run the action against fixtures
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Allow fixture → decision=allow, job succeeds
         id: gate-allow
