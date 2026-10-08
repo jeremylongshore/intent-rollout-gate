@@ -64,27 +64,29 @@ policy only requires those three.
 
 ## Quickstart
 
+Each gate prints one gate-result envelope (`--json`), and
+`audit-harness emit-evidence --append-to` collects the envelopes into the
+JSON-array bundle this action reads. `--append-to` validates every row, refuses
+a duplicate row id, and writes atomically. Use `--output FILE` to write a single
+Statement instead. `--out` is a deprecated alias of `--output`.
+
 ```yaml
-# .github/workflows/release.yml
-name: release
+# .github/workflows/ci.yml
+name: ci
 on:
   push:
     branches: [main]
 
 jobs:
-  static-gates:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-      - run: pnpm exec audit-harness verify
-      - run: pnpm exec audit-harness emit-evidence --out evidence/
-
   rollout-decision:
-    needs: [static-gates]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: jeremylongshore/intent-rollout-gate@v0.3.0
+      - run: npm ci
+      - run: |
+          rm -f evidence/bundle.json
+          npx audit-harness verify --json | npx audit-harness emit-evidence --append-to evidence/bundle.json
+      - uses: jeremylongshore/intent-rollout-gate@v0.3.2
         id: gate
         with:
           bundle-path: evidence/bundle.json
@@ -95,6 +97,18 @@ jobs:
             }
       - run: echo "decision=${{ steps.gate.outputs.decision }}"
 ```
+
+`--append-to` requires an audit-harness release that ships it. Until then, the
+reference release workflow below installs a pinned commit.
+
+### Gate a tag release
+
+[`docs/release-gate.md`](docs/release-gate.md) documents a reusable workflow,
+`.github/workflows/release-gate.yml`. On a `v*` tag it runs your gates,
+assembles the bundle with `emit-evidence --append-to`, and runs this action
+with a release policy. Every action in it is pinned by full SHA, and it needs
+no secrets. Copy [`docs/examples/release.yml`](docs/examples/release.yml) to adopt it. A
+self-test workflow runs it against synthetic fixtures on every pull request.
 
 Or keep the policy in a committed file (enforcement travels with the code):
 

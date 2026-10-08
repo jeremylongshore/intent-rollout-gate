@@ -1,0 +1,171 @@
+name: Release gate (reusable)
+
+# Reference tag-release gate for repositories that adopt intent-rollout-gate.
+# A consumer calls it from its own `on: push: tags: ["v*"]` workflow (copy
+# docs/examples/release.yml) and passes three things:
+#
+#   gate-commands  one shell command per line; each prints ONE gate-result JSON
+#                  envelope on stdout (for example `npx audit-harness verify --json`).
+#                  A gate may exit non-zero: its verdict travels in the row and the
+#                  rollout gate decides. A gate that prints nothing fails the job.
+#   policy-path    the release policy JSON in the consumer repo.
+#   setup-command  optional toolchain setup run once before the gates.
+#
+# The job then:
+#   1. runs every gate and appends its row with
+#      `audit-harness emit-evidence --append-to <bundle>` (validated rows,
+#      duplicate row ids refused, atomic write),
+#   2. runs the rollout gate on the assembled bundle with the release policy,
+#   3. uploads the bundle and the policy as the `artifact-name` artifact,
+#      whatever the decision.
+#
+# No secrets are required or read. Permissions: contents: read.
+# Every action below is pinned by full commit SHA. The self-test is
+# .github/workflows/release-gate-self-test.yml.
+
+on:
+  workflow_call:
+    inputs:
+      gate-commands:
+        description: Newline-separated commands; each prints one gate-result JSON envelope on stdout. Blank lines and lines starting with '#' are skipped.
+        required: true
+        type: string
+      policy-path:
+        description: Path to the release policy JSON in the calling repository.
+        required: true
+        type: string
+      setup-command:
+        description: Optional command run once before the gates (for example `npm ci`).
+        required: false
+        type: string
+        default: ""
+      node-version:
+        description: Node.js version for the setup command and audit-harness.
+        required: false
+        type: string
+        default: "22"
+      audit-harness-version:
+        description: The audit-harness that provides `emit-evidence --append-to` - an npm version (for example 1.6.0) or a full 40-hex intent-audit-harness commit SHA.
+        required: false
+        type: string
+        default: b8e6f8d1d6c4d68cd355140768eae895d39ceccf # main after #188 (emit-evidence --append-to); not on npm yet
+      bundle-path:
+        description: Where the assembled Evidence Bundle is written.
+        required: false
+        type: string
+        default: evidence/release-bundle.json
+      fail-on-block:
+        description: true fails the job on a block decision; false reports only.
+        required: false
+        type: boolean
+        default: true
+      artifact-name:
+        description: Name of the uploaded evidence artifact.
+        required: false
+        type: string
+        default: release-evidence
+    outputs:
+      decision:
+        description: allow or block, from the rollout gate.
+        value: ${{ jobs.release-gate.outputs.decision }}
+      reasons:
+        description: JSON array of blocking reasons (empty on allow).
+        value: ${{ jobs.release-gate.outputs.reasons }}
+
+permissions:
+  contents: read
+
+jobs:
+  release-gate:
+    name: Gates, evidence bundle, rollout decision
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    outputs:
+      decision: ${{ steps.gate.outputs.decision }}
+      reasons: ${{ steps.gate.outputs.reasons }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ inputs.node-version }}
+
+      - name: Install the evidence emitter
+        env:
+          AUDIT_HARNESS_VERSION: ${{ inputs.audit-harness-version }}
+        run: |
+          set -euo pipefail
+          dir="$RUNNER_TEMP/release-gate-audit-harness"
+          mkdir -p "$dir"
+          if [[ "$AUDIT_HARNESS_VERSION" =~ ^[0-9a-f]{40}$ ]]; then
+            # Unreleased commit: GitHub's source archive at that exact SHA. The
+            # harness has no runtime dependencies, so no install step is needed.
+            curl -fsSL "https://codeload.github.com/jeremylongshore/intent-audit-harness/tar.gz/$AUDIT_HARNESS_VERSION" \
+              | tar -xz -C "$dir" --strip-components=1
+            emitter="$dir/bin/audit-harness.js"
+          elif [[ "$AUDIT_HARNESS_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            npm install --no-save --no-package-lock --no-audit --no-fund --prefix "$dir" \
+              "@intentsolutions/audit-harness@$AUDIT_HARNESS_VERSION"
+            emitter="$dir/node_modules/@intentsolutions/audit-harness/bin/audit-harness.js"
+          else
+            echo "::error::audit-harness-version must be an exact npm version or a 40-hex commit SHA"
+            exit 1
+          fi
+          node "$emitter" --version
+          echo "EMITTER=$emitter" >> "$GITHUB_ENV"
+
+      - name: Set up the gates' toolchain
+        if: inputs.setup-command != ''
+        env:
+          SETUP_COMMAND: ${{ inputs.setup-command }}
+        run: bash -euo pipefail -c "$SETUP_COMMAND"
+
+      - name: Run the gates and assemble the Evidence Bundle
+        env:
+          GATE_COMMANDS: ${{ inputs.gate-commands }}
+          BUNDLE_PATH: ${{ inputs.bundle-path }}
+        run: |
+          set -euo pipefail
+          rm -f "$BUNDLE_PATH"
+          n=0
+          while IFS= read -r cmd || [[ -n "$cmd" ]]; do
+            trimmed="${cmd#"${cmd%%[![:space:]]*}"}"
+            [[ -z "$trimmed" || "$trimmed" == \#* ]] && continue
+            n=$((n + 1))
+            row="$RUNNER_TEMP/gate-$n.json"
+            echo "::group::gate $n: $trimmed"
+            ec=0
+            bash -o pipefail -c "$trimmed" > "$row" || ec=$?
+            echo "gate exit code: $ec (the row's verdict, not this code, feeds the rollout gate)"
+            if [[ ! -s "$row" ]]; then
+              echo "::error::gate $n printed no gate-result JSON: $trimmed"
+              exit 1
+            fi
+            node "$EMITTER" emit-evidence --append-to "$BUNDLE_PATH" < "$row"
+            echo "::endgroup::"
+          done <<< "$GATE_COMMANDS"
+          if [[ "$n" -eq 0 ]]; then
+            echo "::error::gate-commands holds no command"
+            exit 1
+          fi
+          echo "assembled $n row(s) into $BUNDLE_PATH"
+
+      - name: Rollout gate with the release policy
+        id: gate
+        uses: jeremylongshore/intent-rollout-gate@a6e44951b2e950d250a65e5f5f3dbaf5deb6aab4 # main after #77 (decision library 2.2.0)
+        with:
+          bundle-path: ${{ inputs.bundle-path }}
+          policy-path: ${{ inputs.policy-path }}
+          fail-on-block: ${{ inputs.fail-on-block && 'true' || 'false' }}
+
+      - name: Upload the evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: ${{ inputs.artifact-name }}
+          path: |
+            ${{ inputs.bundle-path }}
+            ${{ inputs.policy-path }}
+          if-no-files-found: warn
