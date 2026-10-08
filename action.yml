@@ -42,7 +42,8 @@ inputs:
     description: >-
       Path to the rollout policy JSON document ({"required_gates":[...],
       "forbid_decisions":[...], "advisory_blocks":bool,
-      "allow_unknown_gates":bool} — see @intentsolutions/rollout-gate
+      "allow_unknown_gates":bool, "forbid_providers":[...],
+      "require_ground_truth":bool} — see @intentsolutions/rollout-gate
       parsePolicy). Exactly one of policy-path or policy-json is required;
       both or neither blocks (fail closed). Parsing tests/TESTING.md directly
       stays deferred per DR-002 § 5.

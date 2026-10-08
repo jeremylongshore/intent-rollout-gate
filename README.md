@@ -45,7 +45,7 @@ The Rollout Gate is the **fourth repo** in the Intent Eval Platform convergence,
    or inconsistent producer metadata blocks before delegation. Optional
    unknown local rows retain the delegated package's compatibility behavior.
 5. **Delegates the decision** to `decide(bundle, policy)` from
-   [`@intentsolutions/rollout-gate@2.0.0`](https://www.npmjs.com/package/@intentsolutions/rollout-gate).
+   [`@intentsolutions/rollout-gate@2.2.0`](https://www.npmjs.com/package/@intentsolutions/rollout-gate).
    Row validation reuses the kernel `@intentsolutions/core` gate-result/v1
    statement schema — no schema is re-declared anywhere in this repo.
 6. **Reports**: `decision` + `reasons` outputs, a markdown step summary with
@@ -136,11 +136,19 @@ requires the lineage gate.
   "required_gates": ["audit-harness:ci:*"],
   "forbid_decisions": ["fail", "error"],
   "advisory_blocks": false,
-  "allow_unknown_gates": true
+  "allow_unknown_gates": true,
+  "forbid_providers": ["stub"],
+  "require_ground_truth": true
 }
 ```
 
 `required_gates` patterns match `gate_id` values; `*` is the only wildcard.
+`forbid_providers` (default `["stub"]`) blocks any row whose
+`predicate.metadata.provider` is listed, and `require_ground_truth` (default
+`true`) blocks any row whose `predicate.metadata.ground_truth` is `false`, as
+J-Rig's `STUB-PROVIDERS.md` § 3 requires of every consumer. Rows without those
+fields, such as deterministic gates, are unaffected; accepting stub evidence
+takes both `"forbid_providers": []` and `"require_ground_truth": false`.
 Defaults (everything except `required_gates` is optional) are the fail-closed
 ones documented by
 [`@intentsolutions/rollout-gate`](https://www.npmjs.com/package/@intentsolutions/rollout-gate).

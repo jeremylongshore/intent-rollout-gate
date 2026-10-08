@@ -120,6 +120,62 @@ beforeEach(() => {
   delete process.env.GITHUB_STEP_SUMMARY;
 });
 
+describe("stub-provider rows (STUB-PROVIDERS.md § 3)", () => {
+  function writeStubBundle(directory: string): string {
+    const bundle = JSON.parse(readFileSync(ALLOW_BUNDLE, "utf8")) as Array<{
+      predicate: Record<string, unknown>;
+    }>;
+    bundle[0]!.predicate.metadata = { provider: "stub", ground_truth: false };
+    const bundlePath = join(directory, "stub-bundle.json");
+    writeFileSync(bundlePath, JSON.stringify(bundle), "utf8");
+    return bundlePath;
+  }
+
+  it("blocks a passing stub-provider row under the default policy", async () => {
+    const temp = mkdtempSync(join(tmpdir(), "iar-stub-"));
+    try {
+      inputs.set("bundle-path", writeStubBundle(temp));
+      inputs.set("policy-path", POLICY);
+
+      await run();
+
+      expect(outputs.get("decision")).toBe("block");
+      const reasons = reasonsOutput();
+      expect(reasons.some((r) => r.includes("forbidden provider 'stub'"))).toBe(
+        true,
+      );
+      expect(
+        reasons.some((r) => r.includes("declares ground_truth=false")),
+      ).toBe(true);
+      expect(setFailed).toHaveBeenCalled();
+    } finally {
+      rmSync(temp, { recursive: true, force: true });
+    }
+  });
+
+  it("allows the same bundle only when the policy opts out of both checks", async () => {
+    const temp = mkdtempSync(join(tmpdir(), "iar-stub-"));
+    try {
+      inputs.set("bundle-path", writeStubBundle(temp));
+      inputs.set(
+        "policy-json",
+        JSON.stringify({
+          required_gates: ["synth-tool:ci:*"],
+          forbid_providers: [],
+          require_ground_truth: false,
+        }),
+      );
+
+      await run();
+
+      expect(outputs.get("decision")).toBe("allow");
+      expect(setFailed).not.toHaveBeenCalled();
+    } finally {
+      rmSync(temp, { recursive: true, force: true });
+    }
+  });
+});
+
 describe("allow path", () => {
   it("emits decision=allow with empty reasons and does not fail the job", async () => {
     inputs.set("bundle-path", ALLOW_BUNDLE);
@@ -413,6 +469,8 @@ describe("generic report promotion binding", () => {
         forbid_decisions: ["fail", "error"],
         advisory_blocks: false,
         allow_unknown_gates: true,
+        forbid_providers: ["stub"],
+        require_ground_truth: true,
       }),
     ).toEqual([]);
   });
