@@ -10,8 +10,10 @@ the job. Copy [`examples/release.yml`](examples/release.yml) to start.
 ## What it runs
 
 1. Checks out the calling repository and sets up Node.js.
-2. Installs the pinned audit-harness, which supplies `emit-evidence --append-to`.
-   It is an exact npm version, or a commit SHA fetched as a source archive.
+2. Downloads the pinned `@intentsolutions/audit-harness` tarball from npm, which
+   supplies `emit-evidence --append-to`, and refuses it unless its sha512 equals
+   `audit-harness-integrity`. Nothing from the package runs before that check
+   passes (see [Supply-chain verification](#supply-chain-verification)).
 3. Runs `setup-command` once, if you set it (for example `npm ci`).
 4. Runs each line of `gate-commands`. Each command must print one gate-result
    JSON envelope on stdout. The gate's exit code is logged, but only the
@@ -32,7 +34,8 @@ the job. Copy [`examples/release.yml`](examples/release.yml) to start.
 | `policy-path` | yes | none | Release policy JSON in the calling repository (see the README's policy shape). |
 | `setup-command` | no | `''` | Run once before the gates. |
 | `node-version` | no | `22` | Node.js for the setup command and audit-harness. |
-| `audit-harness-version` | no | pinned commit | An exact npm version of `@intentsolutions/audit-harness`, or a 40-hex `intent-audit-harness` commit SHA, which is fetched as GitHub's source archive. The default is a commit SHA because `--append-to` is not on npm yet. Switch to an npm version once a release carries it. |
+| `audit-harness-version` | no | `1.5.1` | Exact stable npm version (no pre-release tag) of `@intentsolutions/audit-harness` (1.5.1 or later ships `--append-to`). Change it together with `audit-harness-integrity`. |
+| `audit-harness-integrity` | no | 1.5.1's `sha512-…` | The npm `dist.integrity` of that version's tarball. The job fails if the downloaded tarball hashes to anything else. |
 | `bundle-path` | no | `evidence/release-bundle.json` | Where the bundle is written. |
 | `fail-on-block` | no | `true` | Boolean; `false` reports without failing. |
 | `artifact-name` | no | `release-evidence` | Name of the uploaded evidence artifact. |
@@ -52,6 +55,38 @@ No secrets are required, and the workflow reads none. It runs with
 `contents: read` and checks out with `persist-credentials: false`. If a gate
 needs a credential, provide it in the calling workflow's own job instead; a
 reusable workflow sees only the secrets the caller passes in explicitly.
+
+## Supply-chain verification
+
+The emitter is fetched with `npm pack`, which only downloads the published
+tarball: nothing is installed and no package script runs. The next step
+computes the tarball's sha512 itself and compares it with
+`audit-harness-integrity`, a value pinned in the workflow rather than read from
+the registry, so a substituted or modified tarball fails the job even if the
+registry metadata was changed to match it. Only then is the package unpacked,
+its `package.json` checked to be the requested name and version, and its CLI
+run. The harness has no runtime dependencies, so there is no dependency tree
+to resolve.
+
+A lockfile with `npm ci` was the alternative. It was not used because this is
+a reusable workflow: it runs in the caller's checkout, where a lockfile from
+this repository does not exist, and a lockfile cannot follow a caller's
+`audit-harness-version` override.
+
+To move to a newer audit-harness release, pass both values:
+
+```bash
+npm view @intentsolutions/audit-harness@<version> dist.integrity
+```
+
+```yaml
+with:
+  audit-harness-version: <version>
+  audit-harness-integrity: sha512-<value printed above>
+```
+
+1.5.1 is also published with npm provenance; `npm audit signatures` in a
+project that installs it checks that attestation.
 
 ## Pinning
 
@@ -85,3 +120,8 @@ gh api repos/jeremylongshore/intent-rollout-gate/commits/main --jq .sha
 pull request with the synthetic fixtures in `tests/fixtures/release-gate/`.
 It asserts both outcomes: two passing rows must produce `allow` with no
 reasons, and a failing row must produce `block` with a reason that names it.
+Its `integrity` job reads the fetch and verify step scripts out of
+`release-gate.yml` and runs them against the genuine 1.5.1 tarball, which must
+pass, and against a copy with one line appended to the CLI and repacked, which
+must be refused with an integrity mismatch and must not be unpacked. A
+malformed integrity value must also be refused.

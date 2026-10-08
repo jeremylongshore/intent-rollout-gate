@@ -12,6 +12,8 @@ name: Release gate (reusable)
 #   setup-command  optional toolchain setup run once before the gates.
 #
 # The job then:
+#   0. downloads @intentsolutions/audit-harness from npm and refuses it unless
+#      the tarball's sha512 equals the pinned audit-harness-integrity,
 #   1. runs every gate and appends its row with
 #      `audit-harness emit-evidence --append-to <bundle>` (validated rows,
 #      duplicate row ids refused, atomic write),
@@ -45,10 +47,15 @@ on:
         type: string
         default: "22"
       audit-harness-version:
-        description: The audit-harness that provides `emit-evidence --append-to` - an npm version (for example 1.6.0) or a full 40-hex intent-audit-harness commit SHA.
+        description: Exact stable npm version (MAJOR.MINOR.PATCH, no pre-release tag) of @intentsolutions/audit-harness that provides `emit-evidence --append-to` (1.5.1 or later). Changing it requires the matching audit-harness-integrity.
         required: false
         type: string
-        default: b8e6f8d1d6c4d68cd355140768eae895d39ceccf # main after #188 (emit-evidence --append-to); not on npm yet
+        default: 1.5.1
+      audit-harness-integrity:
+        description: npm dist.integrity (sha512-...) of that version's tarball, from `npm view @intentsolutions/audit-harness@<version> dist.integrity`. The downloaded tarball must hash to exactly this value or the job fails before any harness code runs.
+        required: false
+        type: string
+        default: sha512-7TI7i8iKHNwYQ1ZPH8/23Y4Dp7z5ZBBo7HTbgihuCK4e4ZNbiCSpe/vgYRDTS0xhgk2T8mGOYFegTXWKNob8uA== # 1.5.1
       bundle-path:
         description: Where the assembled Evidence Bundle is written.
         required: false
@@ -92,27 +99,57 @@ jobs:
         with:
           node-version: ${{ inputs.node-version }}
 
-      - name: Install the evidence emitter
+      # Two steps on purpose: the self-test runs the verify step's exact script
+      # against a tampered tarball, so the check that guards real releases is the
+      # one that is proven to refuse.
+      - name: Fetch the audit-harness tarball
         env:
           AUDIT_HARNESS_VERSION: ${{ inputs.audit-harness-version }}
         run: |
           set -euo pipefail
-          dir="$RUNNER_TEMP/release-gate-audit-harness"
-          mkdir -p "$dir"
-          if [[ "$AUDIT_HARNESS_VERSION" =~ ^[0-9a-f]{40}$ ]]; then
-            # Unreleased commit: GitHub's source archive at that exact SHA. The
-            # harness has no runtime dependencies, so no install step is needed.
-            curl -fsSL "https://codeload.github.com/jeremylongshore/intent-audit-harness/tar.gz/$AUDIT_HARNESS_VERSION" \
-              | tar -xz -C "$dir" --strip-components=1
-            emitter="$dir/bin/audit-harness.js"
-          elif [[ "$AUDIT_HARNESS_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            npm install --no-save --no-package-lock --no-audit --no-fund --prefix "$dir" \
-              "@intentsolutions/audit-harness@$AUDIT_HARNESS_VERSION"
-            emitter="$dir/node_modules/@intentsolutions/audit-harness/bin/audit-harness.js"
-          else
-            echo "::error::audit-harness-version must be an exact npm version or a 40-hex commit SHA"
+          if [[ ! "$AUDIT_HARNESS_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::audit-harness-version must be an exact npm version (for example 1.5.1)"
             exit 1
           fi
+          dir="$RUNNER_TEMP/release-gate-audit-harness"
+          mkdir -p "$dir"
+          # npm pack only downloads the published tarball: nothing is installed and
+          # no package script runs. The verify step decides whether it is used.
+          npm pack --ignore-scripts --silent --pack-destination "$dir" \
+            "@intentsolutions/audit-harness@$AUDIT_HARNESS_VERSION" > /dev/null
+          # npm names a scoped package's tarball <scope>-<name>-<version>.tgz.
+          tarball="$dir/intentsolutions-audit-harness-$AUDIT_HARNESS_VERSION.tgz"
+          [[ -s "$tarball" ]] || { echo "::error::npm pack did not produce $tarball"; exit 1; }
+          echo "AUDIT_HARNESS_TARBALL=$tarball" >> "$GITHUB_ENV"
+
+      - name: Verify the audit-harness tarball and unpack the evidence emitter
+        env:
+          AUDIT_HARNESS_VERSION: ${{ inputs.audit-harness-version }}
+          AUDIT_HARNESS_INTEGRITY: ${{ inputs.audit-harness-integrity }}
+        run: |
+          set -euo pipefail
+          if [[ ! "$AUDIT_HARNESS_INTEGRITY" =~ ^sha512-[A-Za-z0-9+/]{86}==$ ]]; then
+            echo "::error::audit-harness-integrity must be an npm sha512 integrity string (sha512-<base64>)"
+            exit 1
+          fi
+          # The pinned hash is checked here, independently of the registry
+          # metadata npm pack trusted, so a substituted tarball cannot pass.
+          actual="sha512-$(openssl dgst -sha512 -binary "$AUDIT_HARNESS_TARBALL" | base64 -w0)"
+          if [[ "$actual" != "$AUDIT_HARNESS_INTEGRITY" ]]; then
+            echo "::error::audit-harness tarball integrity mismatch: expected $AUDIT_HARNESS_INTEGRITY, got $actual"
+            exit 1
+          fi
+          pkg="$RUNNER_TEMP/release-gate-audit-harness/package"
+          rm -rf "$pkg"
+          mkdir -p "$pkg"
+          tar -xzf "$AUDIT_HARNESS_TARBALL" -C "$pkg" --strip-components=1 --no-same-owner
+          # The harness has no runtime dependencies, so the unpacked package runs as is.
+          got="$(node -p 'const p=require(process.argv[1]); p.name + "@" + p.version' "$pkg/package.json")"
+          if [[ "$got" != "@intentsolutions/audit-harness@$AUDIT_HARNESS_VERSION" ]]; then
+            echo "::error::verified tarball is $got, not @intentsolutions/audit-harness@$AUDIT_HARNESS_VERSION"
+            exit 1
+          fi
+          emitter="$pkg/bin/audit-harness.js"
           node "$emitter" --version
           echo "EMITTER=$emitter" >> "$GITHUB_ENV"
 

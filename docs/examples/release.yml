@@ -19,6 +19,10 @@ jobs:
     with:
       policy-path: .github/rollout/release-policy.json
       setup-command: npm ci
+      # The emitter defaults to @intentsolutions/audit-harness 1.5.1, refused unless
+      # its tarball matches the pinned sha512. To use a newer release, set both:
+      # audit-harness-version: <version>
+      # audit-harness-integrity: <npm view @intentsolutions/audit-harness@<version> dist.integrity>
       # One command per line; each prints one gate-result JSON envelope.
       gate-commands: |
         npx --no-install audit-harness verify --json

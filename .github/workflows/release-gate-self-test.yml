@@ -7,9 +7,14 @@ name: Release gate self-test
 #   no-ship  one failing gate row    -> decision=block naming synth-gate-3
 #            (fail-on-block 'false' so the caller can assert the outputs)
 #
-# Each run installs the pinned audit-harness, assembles the bundle with
-# `emit-evidence --append-to`, and runs the pinned rollout gate: the exact path
-# a consumer's tag release takes. No secrets.
+# Each run downloads the pinned audit-harness from npm, verifies its sha512,
+# assembles the bundle with `emit-evidence --append-to`, and runs the pinned
+# rollout gate: the exact path a consumer's tag release takes. No secrets.
+#
+#   integrity  runs the reusable workflow's own fetch and verify step scripts
+#              (read out of release-gate.yml, not copied) against the genuine
+#              tarball (must pass) and a tampered one (must refuse, and must
+#              not hand an emitter to later steps).
 
 on:
   push:
@@ -41,6 +46,73 @@ jobs:
         cat tests/fixtures/release-gate/gate-fail.json; exit 1
       fail-on-block: false
       artifact-name: release-gate-self-test-no-ship
+
+  integrity:
+    name: Tampered audit-harness tarball is refused
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "22"
+
+      - name: Genuine tarball passes, tampered tarball is refused
+        run: |
+          set -euo pipefail
+          wf=.github/workflows/release-gate.yml
+          t="$RUNNER_TEMP/integrity-test"
+          mkdir -p "$t"
+          # The scripts under test are the reusable workflow's own steps, read with
+          # the runner image's mikefarah yq v4. Refuse any other yq up front so an
+          # image change fails here with a clear message, not as a misread step.
+          yq --version
+          yq --version | grep -Eq 'mikefarah/yq.* v?4\.' || { echo "::error::this test needs mikefarah yq v4 (preinstalled on ubuntu-24.04)"; exit 1; }
+          yq '.jobs["release-gate"].steps[] | select(.name == "Fetch the audit-harness tarball") | .run' "$wf" > "$t/fetch.sh"
+          yq '.jobs["release-gate"].steps[] | select(.name == "Verify the audit-harness tarball and unpack the evidence emitter") | .run' "$wf" > "$t/verify.sh"
+          [[ -s "$t/fetch.sh" && -s "$t/verify.sh" ]] || { echo "::error::could not read the fetch/verify steps from $wf"; exit 1; }
+          bash -n "$t/fetch.sh" && bash -n "$t/verify.sh"
+          AUDIT_HARNESS_VERSION="$(yq '.on.workflow_call.inputs["audit-harness-version"].default' "$wf")"
+          AUDIT_HARNESS_INTEGRITY="$(yq '.on.workflow_call.inputs["audit-harness-integrity"].default' "$wf")"
+          export AUDIT_HARNESS_VERSION AUDIT_HARNESS_INTEGRITY
+          echo "pinned: $AUDIT_HARNESS_VERSION $AUDIT_HARNESS_INTEGRITY"
+
+          # 1. Fetch, then verify the genuine tarball: must pass and export EMITTER.
+          GITHUB_ENV="$t/fetch.env" RUNNER_TEMP="$t/run" bash "$t/fetch.sh"
+          # shellcheck disable=SC1091
+          source "$t/fetch.env"
+          genuine="$AUDIT_HARNESS_TARBALL"
+          AUDIT_HARNESS_TARBALL="$genuine" GITHUB_ENV="$t/genuine.env" RUNNER_TEMP="$t/run" bash "$t/verify.sh"
+          grep -q '^EMITTER=' "$t/genuine.env" || { echo "::error::genuine tarball did not yield an emitter"; exit 1; }
+
+          # 2. Tamper: append one comment line to the CLI inside the package and repack it
+          #    as a well-formed tarball, so only the hash check can catch it.
+          mkdir -p "$t/tamper"
+          tar -xzf "$genuine" -C "$t/tamper"
+          printf '\n// tampered\n' >> "$t/tamper/package/bin/audit-harness.js"
+          tampered="$t/tampered.tgz"
+          tar -czf "$tampered" -C "$t/tamper" package
+          tar -tzf "$tampered" > /dev/null
+          ec=0
+          AUDIT_HARNESS_TARBALL="$tampered" GITHUB_ENV="$t/tampered.env" RUNNER_TEMP="$t/run2" \
+            bash "$t/verify.sh" > "$t/tampered.log" 2>&1 || ec=$?
+          sed "s/^::/  /" "$t/tampered.log"   # show the refusal without re-raising its annotation
+          [[ "$ec" -ne 0 ]] || { echo "::error::tampered tarball was accepted"; exit 1; }
+          grep -q 'integrity mismatch' "$t/tampered.log" || { echo "::error::tampered tarball failed for a reason other than the integrity check"; exit 1; }
+          if [[ -s "$t/tampered.env" ]] && grep -q '^EMITTER=' "$t/tampered.env"; then
+            echo "::error::tampered tarball exported an emitter"; exit 1
+          fi
+          [[ ! -e "$t/run2/release-gate-audit-harness/package" ]] || { echo "::error::tampered tarball was unpacked"; exit 1; }
+
+          # 3. A malformed pin is refused before hashing.
+          ec=0
+          AUDIT_HARNESS_INTEGRITY="sha1-deadbeef" AUDIT_HARNESS_TARBALL="$genuine" GITHUB_ENV="$t/bad.env" RUNNER_TEMP="$t/run3" \
+            bash "$t/verify.sh" > /dev/null 2>&1 || ec=$?
+          [[ "$ec" -ne 0 ]] || { echo "::error::malformed integrity pin was accepted"; exit 1; }
+          echo "integrity check: genuine tarball accepted; tampered tarball and malformed pin refused"
 
   assert:
     name: Assert both decisions
