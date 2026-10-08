@@ -70,6 +70,9 @@ JSON-array bundle this action reads. `--append-to` validates every row, refuses
 a duplicate row id, and writes atomically. Use `--output FILE` to write a single
 Statement instead. `--out` is a deprecated alias of `--output`.
 
+`--append-to` requires an audit-harness release that ships it. Until then, the
+reference release workflow below installs a pinned commit.
+
 ```yaml
 # .github/workflows/ci.yml
 name: ci
@@ -97,9 +100,6 @@ jobs:
             }
       - run: echo "decision=${{ steps.gate.outputs.decision }}"
 ```
-
-`--append-to` requires an audit-harness release that ships it. Until then, the
-reference release workflow below installs a pinned commit.
 
 ### Gate a tag release
 
