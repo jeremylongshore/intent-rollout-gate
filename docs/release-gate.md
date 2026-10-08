@@ -34,7 +34,7 @@ the job. Copy [`examples/release.yml`](examples/release.yml) to start.
 | `policy-path` | yes | none | Release policy JSON in the calling repository (see the README's policy shape). |
 | `setup-command` | no | `''` | Run once before the gates. |
 | `node-version` | no | `22` | Node.js for the setup command and audit-harness. |
-| `audit-harness-version` | no | `1.5.1` | Exact npm version of `@intentsolutions/audit-harness` (1.5.1 or later ships `--append-to`). Change it together with `audit-harness-integrity`. |
+| `audit-harness-version` | no | `1.5.1` | Exact stable npm version (no pre-release tag) of `@intentsolutions/audit-harness` (1.5.1 or later ships `--append-to`). Change it together with `audit-harness-integrity`. |
 | `audit-harness-integrity` | no | 1.5.1's `sha512-…` | The npm `dist.integrity` of that version's tarball. The job fails if the downloaded tarball hashes to anything else. |
 | `bundle-path` | no | `evidence/release-bundle.json` | Where the bundle is written. |
 | `fail-on-block` | no | `true` | Boolean; `false` reports without failing. |

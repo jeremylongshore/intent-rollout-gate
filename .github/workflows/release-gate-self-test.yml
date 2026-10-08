@@ -66,10 +66,15 @@ jobs:
           wf=.github/workflows/release-gate.yml
           t="$RUNNER_TEMP/integrity-test"
           mkdir -p "$t"
-          # The scripts under test are the reusable workflow's own steps.
+          # The scripts under test are the reusable workflow's own steps, read with
+          # the runner image's mikefarah yq v4. Refuse any other yq up front so an
+          # image change fails here with a clear message, not as a misread step.
+          yq --version
+          yq --version | grep -Eq 'mikefarah/yq.* v?4\.' || { echo "::error::this test needs mikefarah yq v4 (preinstalled on ubuntu-24.04)"; exit 1; }
           yq '.jobs["release-gate"].steps[] | select(.name == "Fetch the audit-harness tarball") | .run' "$wf" > "$t/fetch.sh"
           yq '.jobs["release-gate"].steps[] | select(.name == "Verify the audit-harness tarball and unpack the evidence emitter") | .run' "$wf" > "$t/verify.sh"
           [[ -s "$t/fetch.sh" && -s "$t/verify.sh" ]] || { echo "::error::could not read the fetch/verify steps from $wf"; exit 1; }
+          bash -n "$t/fetch.sh" && bash -n "$t/verify.sh"
           AUDIT_HARNESS_VERSION="$(yq '.on.workflow_call.inputs["audit-harness-version"].default' "$wf")"
           AUDIT_HARNESS_INTEGRITY="$(yq '.on.workflow_call.inputs["audit-harness-integrity"].default' "$wf")"
           export AUDIT_HARNESS_VERSION AUDIT_HARNESS_INTEGRITY

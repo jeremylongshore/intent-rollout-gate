@@ -47,7 +47,7 @@ on:
         type: string
         default: "22"
       audit-harness-version:
-        description: Exact npm version of @intentsolutions/audit-harness that provides `emit-evidence --append-to` (1.5.1 or later). Changing it requires the matching audit-harness-integrity.
+        description: Exact stable npm version (MAJOR.MINOR.PATCH, no pre-release tag) of @intentsolutions/audit-harness that provides `emit-evidence --append-to` (1.5.1 or later). Changing it requires the matching audit-harness-integrity.
         required: false
         type: string
         default: 1.5.1
@@ -117,6 +117,7 @@ jobs:
           # no package script runs. The verify step decides whether it is used.
           npm pack --ignore-scripts --silent --pack-destination "$dir" \
             "@intentsolutions/audit-harness@$AUDIT_HARNESS_VERSION" > /dev/null
+          # npm names a scoped package's tarball <scope>-<name>-<version>.tgz.
           tarball="$dir/intentsolutions-audit-harness-$AUDIT_HARNESS_VERSION.tgz"
           [[ -s "$tarball" ]] || { echo "::error::npm pack did not produce $tarball"; exit 1; }
           echo "AUDIT_HARNESS_TARBALL=$tarball" >> "$GITHUB_ENV"
