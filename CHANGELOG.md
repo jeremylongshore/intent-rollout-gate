@@ -14,6 +14,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 > - **`tests/TESTING.md` policy parsing** — deferred per DR-002 § 5; the action continues to consume JSON policy documents only.
 > - **M6 first adopter** — `audit-harness` self-adopts the gate end-to-end before any partner repo (DR-002 § 6 criterion 5).
 
+### Fixed
+
+- **README quickstart.** The quickstart told consumers to run `emit-evidence
+  --out evidence/`, a flag the harness rejected, and to write a single
+  Statement where the action reads an array. It now uses `--append-to`, and the
+  build and decision steps share one job, so the bundle is actually present
+  when the action runs.
+
 ### Changed
 
 - **Stub-provider rows block by default.** Bumped
@@ -44,6 +52,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   boundary emitted by audit-harness is reproducible at the consumer.
 
 ### Added
+
+- **Reference tag-release gate.** `.github/workflows/release-gate.yml` is a
+  reusable workflow. On a consumer's `v*` tag it runs that consumer's gates,
+  assembles their rows with `audit-harness emit-evidence --append-to`, runs this
+  action with a release policy, and uploads the bundle as evidence. Every action
+  in it is pinned by full SHA, and it needs no secrets. Adoption guide:
+  `docs/release-gate.md`, with a caller to copy at `docs/examples/release.yml`.
+  `release-gate-self-test.yml` runs the workflow on synthetic fixtures
+  (`tests/fixtures/release-gate/`) and asserts `allow` for passing rows and
+  `block` naming the failing row.
 
 - **Generic report promotion fixtures and CI dogfood.** A deterministic
   promotion bundle pairs the report-lineage row with a real-skill J-Rig

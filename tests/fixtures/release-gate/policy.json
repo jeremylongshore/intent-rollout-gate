@@ -1,0 +1,4 @@
+{
+  "required_gates": ["synth:ci:*"],
+  "forbid_decisions": ["fail", "error"]
+}

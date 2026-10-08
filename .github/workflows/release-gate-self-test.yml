@@ -1,0 +1,65 @@
+name: Release gate self-test
+
+# Exercises the reusable reference workflow (.github/workflows/release-gate.yml)
+# on synthetic fixtures (tests/fixtures/release-gate/) in both directions:
+#
+#   ship     two passing gate rows   -> decision=allow, empty reasons
+#   no-ship  one failing gate row    -> decision=block naming synth-gate-3
+#            (fail-on-block 'false' so the caller can assert the outputs)
+#
+# Each run installs the pinned audit-harness, assembles the bundle with
+# `emit-evidence --append-to`, and runs the pinned rollout gate: the exact path
+# a consumer's tag release takes. No secrets.
+
+on:
+  push:
+    branches: [main]
+  # No `branches:` filter on purpose (stacked PRs still get checks).
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ship:
+    uses: ./.github/workflows/release-gate.yml
+    with:
+      policy-path: tests/fixtures/release-gate/policy.json
+      gate-commands: |
+        # each line prints one gate-result envelope, as a real gate's --json would
+        cat tests/fixtures/release-gate/gate-pass-1.json
+        cat tests/fixtures/release-gate/gate-pass-2.json
+      artifact-name: release-gate-self-test-ship
+
+  no-ship:
+    uses: ./.github/workflows/release-gate.yml
+    with:
+      policy-path: tests/fixtures/release-gate/policy.json
+      gate-commands: |
+        cat tests/fixtures/release-gate/gate-pass-1.json
+        cat tests/fixtures/release-gate/gate-fail.json; exit 1
+      fail-on-block: false
+      artifact-name: release-gate-self-test-no-ship
+
+  assert:
+    name: Assert both decisions
+    needs: [ship, no-ship]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: ship -> allow, no-ship -> block naming the failing gate
+        env:
+          SHIP_DECISION: ${{ needs.ship.outputs.decision }}
+          SHIP_REASONS: ${{ needs.ship.outputs.reasons }}
+          NO_SHIP_DECISION: ${{ needs.no-ship.outputs.decision }}
+          NO_SHIP_REASONS: ${{ needs.no-ship.outputs.reasons }}
+        run: |
+          set -euo pipefail
+          echo "ship:    $SHIP_DECISION $SHIP_REASONS"
+          echo "no-ship: $NO_SHIP_DECISION $NO_SHIP_REASONS"
+          [[ "$SHIP_DECISION" == "allow" ]] || { echo "::error::ship expected allow"; exit 1; }
+          [[ "$SHIP_REASONS" == "[]" ]] || { echo "::error::ship expected empty reasons"; exit 1; }
+          [[ "$NO_SHIP_DECISION" == "block" ]] || { echo "::error::no-ship expected block"; exit 1; }
+          [[ "$NO_SHIP_REASONS" == *"synth:ci:synth-gate-3"* ]] \
+            || { echo "::error::no-ship reasons do not name synth:ci:synth-gate-3"; exit 1; }

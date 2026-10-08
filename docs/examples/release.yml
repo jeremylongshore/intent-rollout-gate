@@ -1,0 +1,32 @@
+# Copy to .github/workflows/release.yml in the repository you are gating.
+# Pushing a v* tag runs your gates, assembles the Evidence Bundle, and lets
+# intent-rollout-gate decide allow or block with your release policy.
+# Adoption guide: docs/release-gate.md in jeremylongshore/intent-rollout-gate.
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+jobs:
+  release-gate:
+    # Pin by full commit SHA. Resolve the current one with:
+    #   gh api repos/jeremylongshore/intent-rollout-gate/commits/main --jq .sha
+    uses: jeremylongshore/intent-rollout-gate/.github/workflows/release-gate.yml@RELEASE_GATE_SHA # main
+    with:
+      policy-path: .github/rollout/release-policy.json
+      setup-command: npm ci
+      # One command per line; each prints one gate-result JSON envelope.
+      gate-commands: |
+        npx --no-install audit-harness verify --json
+        # Add one line per gate. Anything that prints a gate-result envelope works,
+        # including your own scripts: {"gate_id":"<tool>:ci:<gate>","result":"PASS",
+        # "input_hash":"sha256:<64 hex>","policy_hash":"sha256:<64 hex>"}
+
+  # Downstream jobs (publish, deploy, GitHub Release) wait on the decision:
+  # publish:
+  #   needs: [release-gate]
+  #   if: needs.release-gate.outputs.decision == 'allow'
