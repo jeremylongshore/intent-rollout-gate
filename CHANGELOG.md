@@ -16,6 +16,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Stub-provider rows block by default.** Bumped
+  `@intentsolutions/rollout-gate` 2.0.0 → 2.2.0, which adds the policy keys
+  `forbid_providers` (default `["stub"]`) and `require_ground_truth` (default
+  `true`). A row whose `predicate.metadata.provider` is forbidden, or whose
+  `predicate.metadata.ground_truth` is `false`, now blocks the rollout, as
+  J-Rig's `STUB-PROVIDERS.md` § 3 requires. Rows without those fields are
+  unaffected; opting out takes both keys. The action's own `zod` floor moves to
+  `^4.6.5` to match, so `dist/` bundles one zod copy.
 - **Fail-closed real-skill promotion provenance.** Required `j-rig:local:*`
   rows now need the producer's `j-rig/skill-promotion/v1` metadata with bound
   run/skill/profile/Grader identity, clean thresholds, and an executed
