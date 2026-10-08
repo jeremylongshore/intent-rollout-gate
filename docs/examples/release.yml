@@ -15,7 +15,7 @@ jobs:
   release-gate:
     # Pinned by full commit SHA. To move to a newer commit, resolve it with:
     #   gh api repos/jeremylongshore/intent-rollout-gate/commits/main --jq .sha
-    uses: jeremylongshore/intent-rollout-gate/.github/workflows/release-gate.yml@cfd970240e8e7ec16aac234f09aaaa97bf272d48 # main after #78
+    uses: jeremylongshore/intent-rollout-gate/.github/workflows/release-gate.yml@79de18f5fd667321d9985cc63fbeaadbe8e6e311 # main after #80 (audit-harness 1.5.1, sha512-verified)
     with:
       policy-path: .github/rollout/release-policy.json
       setup-command: npm ci
