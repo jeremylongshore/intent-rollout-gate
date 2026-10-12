@@ -14,3 +14,10 @@
 # HARNESS_TAMPERED by `audit-harness verify` in CI.
 action.yml
 tests/TESTING.md
+
+# Canonical dashboard payload integrity, independently checked before signing.
+ci/emit-evidence.ts
+ci/assemble-manifest.ts
+tests/canonical-dashboard-payload.test.ts
+tests/fixtures/canonical-dashboard-payload.json
+tsconfig.json

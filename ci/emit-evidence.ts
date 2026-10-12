@@ -19,6 +19,7 @@
  *                                             re-canonicalises; CI runs
  *                                             `cosign sign-blob` over THIS file)
  *   build/evidence/gate-result-<i>.json     — the gate-result/v1 predicate body
+ *   build/evidence/evidence-payload-<i>.json — canonical statement-array bytes
  *   build/evidence/manifest-skeleton.json   — for ci/assemble-manifest.ts
  *
  * Signing + Rekor + final report-manifest.json assembly happen in CI
@@ -46,13 +47,9 @@
  *
  * ── Kernel pin (load-bearing) ──
  *
- * The dashboard validates ingest rows with `@intentsolutions/core@^0.9.0`
- * `EvidenceBundleSchema`. This repo already carries `@intentsolutions/core`
- * as a runtime dependency, lockfile-pinned to exactly 0.9.0, so the emitter
- * imports the SAME kernel bytes the Action itself bundles (release.yml
- * asserts the installed version is exactly 0.9.0, fail-closed). This differs
- * from audit-harness's CI-only `npm i --no-save` install ONLY because
- * audit-harness must stay zero-dep — iar already has the kernel.
+ * The dashboard and this Action pin @intentsolutions/core@0.10.0. The
+ * emitter consumes the same installed kernel through the frozen repository
+ * lockfile; release.yml asserts the exact version before emission.
  *
  * ── Contract (matches the dashboard ingest, verified against its source) ──
  *
@@ -86,6 +83,11 @@ import {
   EvidenceBundleSchema,
   GateResultV1Schema,
 } from "@intentsolutions/core/validators/v1";
+import {
+  EvidenceBundlePayloadSchema,
+  IN_TOTO_STATEMENT_V1_TYPE,
+  type EvidenceBundlePayload,
+} from "@intentsolutions/core/validators/v1/evidence-statement";
 
 const GITHUB_REPO = "jeremylongshore/intent-rollout-gate";
 const REPO_KEY = "iar";
@@ -153,6 +155,7 @@ export interface EmitRow {
   readonly bundle: unknown;
   readonly canonicalBundle: string;
   readonly gateResult: unknown;
+  readonly evidencePayload: EvidenceBundlePayload;
   readonly sourceSha: string;
 }
 
@@ -187,31 +190,55 @@ export function buildGateResult(
   return body;
 }
 
-export function buildEvidenceBundle(
+/** Wrap one gate predicate in the kernel's invariant-checked statement array. */
+export function buildEvidencePayload(
   gateResult: Record<string, unknown>,
+): EvidenceBundlePayload {
+  const body = GateResultV1Schema.parse(gateResult);
+  return EvidenceBundlePayloadSchema.parse([
+    {
+      _type: IN_TOTO_STATEMENT_V1_TYPE,
+      subject: [
+        { name: body.gate_id, digest: { sha256: body.input_hash.slice(7) } },
+      ],
+      predicateType: GATE_RESULT_V1_URI,
+      predicate: body,
+    },
+  ]);
+}
+
+/** Derive signed metadata from the complete ordered statement payload. */
+export function evidencePayloadMetadata(payloadRaw: unknown) {
+  const payload = EvidenceBundlePayloadSchema.parse(payloadRaw);
+  const subjects = new Map(
+    payload.flatMap((statement) =>
+      statement.subject.map(
+        (subject) => [stableStringify(subject), subject] as const,
+      ),
+    ),
+  );
+  return {
+    predicate_uri_set: [
+      ...new Set(payload.map((statement) => statement.predicateType)),
+    ],
+    row_count: payload.length,
+    subject_set: [...subjects.values()],
+    storage_key: `sha256:${sha256Hex(stableStringify(payloadRaw))}`,
+  };
+}
+
+export function buildEvidenceBundle(
+  evidencePayload: EvidenceBundlePayload,
   ctx: EmitContext,
 ): Record<string, unknown> {
-  const grHashHex = sha256Hex(stableStringify(gateResult));
-  const inputHash = String(gateResult["input_hash"]);
-  const subjectDigest = inputHash.startsWith("sha256:")
-    ? inputHash.slice("sha256:".length)
-    : inputHash;
   const bundle: Record<string, unknown> = {
     id: uuidv7(ctx.nowMs, ctx.rand16()),
     eval_run_id: uuidv7(ctx.nowMs, ctx.rand16()),
     created_at: ctx.nowIso,
-    predicate_uri_set: [GATE_RESULT_V1_URI],
-    row_count: 1,
-    subject_set: [
-      {
-        name: String(gateResult["gate_id"]),
-        digest: { sha256: subjectDigest },
-      },
-    ],
-    storage_key: `sha256:${grHashHex}`,
+    ...evidencePayloadMetadata(evidencePayload),
     signing_mode: "rekor_production",
-    rekor_log_indices: [], // real index lives in the sigstore Bundle (see header)
-    verification_status: "unverified", // the dashboard re-verifies; we don't self-attest
+    rekor_log_indices: [],
+    verification_status: "unverified",
     verification_last_checked_at: ctx.nowIso,
   };
   EvidenceBundleSchema.parse(bundle); // fail-closed
@@ -223,12 +250,14 @@ export function buildRows(
   ctx: EmitContext,
 ): EmitRow[] {
   return outcomes.map((o) => {
-    const gateResult = buildGateResult(o, ctx);
-    const bundle = buildEvidenceBundle(gateResult, ctx);
+    const evidencePayload = buildEvidencePayload(buildGateResult(o, ctx));
+    const gateResult = evidencePayload[0]!.predicate;
+    const bundle = buildEvidenceBundle(evidencePayload, ctx);
     return {
       bundle,
       canonicalBundle: stableStringify(bundle),
       gateResult,
+      evidencePayload,
       sourceSha: ctx.sourceSha,
     };
   });
@@ -244,6 +273,7 @@ export interface ManifestSkeleton {
   readonly rows: readonly {
     readonly bundleFile: string;
     readonly gateResults: readonly unknown[];
+    readonly evidencePayload: EvidenceBundlePayload;
     readonly sourceSha: string;
   }[];
 }
@@ -276,9 +306,15 @@ export function writeEmit(
       stableStringify(row.gateResult),
       "utf8",
     );
+    writeFileSync(
+      join(outDir, `evidence-payload-${i}.json`),
+      stableStringify(row.evidencePayload),
+      "utf8",
+    );
     return {
       bundleFile,
       gateResults: [row.gateResult],
+      evidencePayload: row.evidencePayload,
       sourceSha: row.sourceSha,
     };
   });
