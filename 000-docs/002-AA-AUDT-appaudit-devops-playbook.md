@@ -950,8 +950,8 @@ Measurable outcomes: two adopters in production; GitHub Marketplace listing live
 | Sister repo: j-rig-skill-binary-eval | <https://github.com/jeremylongshore/j-rig-skill-binary-eval> |
 | Sigstore Rekor (default transparency log) | <https://rekor.sigstore.dev> |
 | Sigstore Fulcio (default OIDC CA) | <https://fulcio.sigstore.dev> |
-| Security disclosures | mailto:security@intentsolutions.io |
-| Maintainer | mailto:jeremy@intentsolutions.io |
+| Security disclosures | <mailto:security@intentsolutions.io> |
+| Maintainer | <mailto:jeremy@intentsolutions.io> |
 
 ### First-Week Checklist
 

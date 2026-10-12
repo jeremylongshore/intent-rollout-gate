@@ -237,3 +237,6 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md). Decision-logic changes belong upstream
 ## Security
 
 See [SECURITY.md](./SECURITY.md). The Rollout Gate will emit signed in-toto attestations against an immutable predicate URI; security-relevant constraints (DNSSEC pre-condition for Rekor push, predicate URI immutability) bind here.
+
+The Action repository's own signed dashboard evidence is documented in
+[Canonical Dashboard Evidence](000-docs/012-AT-SPEC-canonical-dashboard-evidence-2026-10-12.md).

@@ -29,6 +29,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- The private `iar` dashboard emitter binds signed metadata to a kernel-valid
+  statement-array payload. Manifest assembly rejects missing or mutated payloads,
+  signed metadata drift and conflicting gate-result projections. Twelve synthetic
+  contracts run in the existing test gate and before release signing. The kernel
+  stays pinned to 0.10.0; Action decision logic and publication controls are unchanged.
+  Refs bead `bd_000-projects-0s2a`.
+
 - **README quickstart.** The quickstart told consumers to run `emit-evidence
   --out evidence/`, a flag the harness rejected, and to write a single
   Statement where the action reads an array. It now uses `--append-to`, and the

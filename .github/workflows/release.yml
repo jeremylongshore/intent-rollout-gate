@@ -289,6 +289,9 @@ jobs:
           fi
           echo "✓ @intentsolutions/core pinned at $installed"
 
+      - name: Canonical dashboard payload mutation contracts
+        run: pnpm exec vitest run tests/canonical-dashboard-payload.test.ts
+
       - name: Emit-evidence self-check (kernel-valid + canonical-stable)
         run: node --experimental-strip-types ci/emit-evidence.ts --self-check
 
