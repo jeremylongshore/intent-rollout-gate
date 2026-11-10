@@ -22,7 +22,7 @@
   },
   "dependencies": {
     "@actions/core": "^1.11.1",
-    "@intentsolutions/core": "0.10.0",
+    "@intentsolutions/core": "0.11.1",
     "@intentsolutions/rollout-gate": "2.2.0",
     "zod": "^4.6.5"
   },
