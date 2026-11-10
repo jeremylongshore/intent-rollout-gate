@@ -1,5 +1,46 @@
 # TEST_AUDIT.md — intent-rollout-gate
 
+## Verification refresh — 2026-11-10
+
+This bounded refresh covers bead `bd_000-projects-h08j.6.1` on base
+`0b5f40cc2839afa4c907be998c0c67af943310c0` and the accompanying hardening changes.
+The historical audit below records the original remediation; its GAP labels
+are not current findings. This refresh does not certify every platform gate.
+
+| Surface | Current evidence |
+|---|---|
+| Classification | GitHub Action, Node 24 runtime; decision semantics remain delegated upstream. |
+| Unit/integration | Vitest 3.2.6: 86 tests across 3 files pass. Fixtures exercise shell wiring, provenance checks, and fail-closed behavior. |
+| Coverage | V8 includes all four production `src/**/*.ts` files, including unimported files. Aggregate lines/statements 86.00%, branches 81.97%, functions 100%. |
+| Policy enforcement | Existing aggregate floors remain 85% lines and 80% branches. Both local `check` and CI's `Typecheck + tests + dist-sync` job invoke coverage. |
+| Integrity | 25 pinned files, including all four production TypeScript files and the extra-pattern inventory itself. CI, package scripts, coverage configuration, and testing policy are also pinned. |
+| Dependency updates | Weekly npm updates added alongside the existing GitHub Actions updates. |
+| Distribution | `pnpm run dist:check` rebuilds the committed bundle with no diff. |
+| System tests | Existing CI smoke job exercises the built Action; hosted results must be inspected on the PR. |
+
+### Negative checks
+
+A temporary unimported production file with unexecuted functions reduced line
+coverage to 48.95%. `pnpm run test:coverage` exited 1 and explicitly reported
+failure against the 85% floor. The probe was removed before the passing run.
+A temporary byte change in `src/run.ts` made `audit-harness verify` exit 2
+with `HARNESS_TAMPERED`; restoring the original bytes restored verification.
+Neither probe is part of the committed source.
+
+### Limits and remaining work
+
+Coverage floors are aggregate, not per-file: `main.ts` has 0% measured lines,
+`skill-promotion.ts` has 73.20% lines and 74.76% branches. CI smoke exercises
+the entry point separately and is not included in this unit coverage report.
+No source files are excluded to improve the aggregate result.
+The declared 70% mutation floor remains unmeasured and unenforced; mutation
+installation is outside this bead. No local hook or new architecture, CRAP,
+bias, or Gherkin gate is claimed. L6/L7 remain inapplicable to this Action's
+current deployment model. Harness version propagation and the wider platform
+verification work remain tracked separately under `bd_000-projects-h08j.6`.
+
+## Historical audit at ea77d6a
+
 Diagnostic-only test-suite audit (the `/audit-tests` output). Classifies the
 repo, maps it against the 7-layer Intent Solutions testing taxonomy, and lists
 the genuine gaps. The companion implementation (cluster bead `4hk3`) closes the
@@ -14,7 +55,7 @@ gaps marked **GAP** below; this file is the spec it implements against.
 | Test framework | vitest 3 (`tests/**/*.test.ts`, `tests/setup.ts` shim) |
 | Audited at | branch `feat/iar-kernel-and-test-suite`, base commit `ea77d6a` |
 
-## What this repo IS (and is not)
+### What this repo IS (and is not)
 
 This is a **delegating action shell**, not a decision engine. The architectural
 contract (`src/run.ts` header, Blueprint A, DR-002 § 6.1) is:
@@ -31,7 +72,7 @@ Bundle + a policy fed through the real `decide()`/`run()` path, asserting the
 EXACT emitted decision string + reasons + exit behavior. Re-testing the decision
 algebra itself is out of scope (it is tested upstream in the package).
 
-## 7-layer taxonomy mapping
+### 7-layer taxonomy mapping
 
 | Layer | Applies? | Status | Notes |
 |---|---|---|---|
@@ -43,7 +84,7 @@ algebra itself is out of scope (it is tested upstream in the package).
 | **L6 — E2E** | N/A | — | No deployed surface; the action runs in a consumer workflow. CI smoke (L5) is the realistic ceiling. |
 | **L7 — acceptance** | N/A | — | No `.feature`/BDD surface; the action's acceptance contract is the I/O of `action.yml`, exercised by L4 + L5. |
 
-## Cross-cutting gates
+### Cross-cutting gates
 
 | Gate | Status | Notes |
 |---|---|---|
@@ -52,7 +93,7 @@ algebra itself is out of scope (it is tested upstream in the package).
 | Credential redaction | **GAP-2** | No test asserts that secrets/credentials (e.g. the reserved `cosign-key` input, a secret smuggled into a policy field) never reach outputs / step summary / logs. |
 | Testing policy spec | **GAP-4** | `tests/TESTING.md` and `.harness-hash` are 0-byte stubs — criterion 4 is hollow. |
 
-## Genuine gaps (the `4hk3` + `ssqd` implementation targets)
+### Genuine gaps (the `4hk3` + `ssqd` implementation targets)
 
 - **GAP-1 — action self-test, fixture dominant.** Add a fixture EvidenceBundle +
   policy fed through `decide()`/`run()` asserting the EXACT `allow` / `block`
@@ -77,7 +118,7 @@ algebra itself is out of scope (it is tested upstream in the package).
   (`action.yml`, `tests/TESTING.md`) via `audit-harness init` + a
   `.harness-hash-extra-patterns` file, AFTER the test files are final.
 
-## Resolution
+### Resolution
 
 All four gaps are closed on branch `feat/iar-kernel-and-test-suite`:
 `tests/run.test.ts` now carries the fixture-dominant self-test + redaction
