@@ -45,9 +45,9 @@ The decision-logic mutation budget lives upstream in `@intentsolutions/rollout-g
 
 | Layer | Applies | Enforcement |
 |---|---|---|
-| L1 — git hooks / harness integrity | Yes (advisory) | `audit-harness verify` in CI (`.harness-hash` pins the policy surface — `action.yml`, `tests/TESTING.md` — via `.harness-hash-extra-patterns`). |
+| L1 — git hooks / harness integrity | Yes (advisory) | `audit-harness verify` in CI (`.harness-hash` pins workflows, test configuration, Action I/O, testing policy, all production TypeScript, and the extra-pattern inventory). |
 | L2 — static | Yes | `pnpm run typecheck` (tsc strict, `noUncheckedIndexedAccess`) + `action.yml` structural lint. |
-| L3 — unit | Yes | `tests/run.test.ts` — pure helpers (`renderSummary`, `countKernelInvalidPredicates`) over a mocked `@actions/core`. |
+| L3 — unit | Yes | `tests/run.test.ts` — pure helpers (`renderSummary`, `countKernelInvalidPredicates`) over a mocked `@actions/core`; `test:coverage` measures all `src/**/*.ts` and enforces the declared line/branch floors. |
 | L4 — integration (PRIMARY) | Yes | Fixture Evidence Bundle + policy → real `decide()`/`run()` → exact decision + reasons + exit behavior; promotion fixtures additionally bind exact generic-report bytes to lineage evidence and require the skill gate. The dominant layer for this action. |
 | L5 — system | Yes | `ci.yml smoke-action` runs the built action against fixtures end-to-end and asserts outputs. |
 | L6 — E2E | N/A | No deployed surface; the consumer workflow is the real E2E, exercised by L5. |
@@ -88,7 +88,7 @@ The decision-logic mutation budget lives upstream in `@intentsolutions/rollout-g
 
 | Job | Gate |
 |---|---|
-| `check` | `audit-harness verify` → typecheck → `vitest run` → dist-sync (rebuild + `git diff --exit-code dist/`). |
+| `check` | `audit-harness verify` → typecheck → `vitest run --coverage` → dist-sync (rebuild + `git diff --exit-code dist/`). |
 | `lint-action-yaml` | `action.yml` is well-formed YAML with required `name`/`description`/`runs` + node `runs.main`. |
 | `smoke-action` | runs the built action against allow + fail-row bundles and the generic-report promotion bundle, asserting emitted `decision`/`reasons`. |
 

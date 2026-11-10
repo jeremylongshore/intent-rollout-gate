@@ -42,8 +42,8 @@ jobs:
       - name: Typecheck
         run: pnpm run typecheck
 
-      - name: Unit tests
-        run: pnpm run test
+      - name: Tests and policy coverage floors
+        run: pnpm run test:coverage
 
       - name: Dist in sync (rebuild + diff must be clean)
         run: |
