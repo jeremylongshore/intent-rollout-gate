@@ -1,5 +1,5 @@
 823e8e38a377c7c82beb93b61e14a2108e9ce971eaf7e230498a41aaa0d3f56f  .github/workflows/actionlint.yml
-1f85e2fb94d0a22ca9def447d09df84a86d00b11d0ca85ca3b25738641585c69  .github/workflows/ci.yml
+63125bac8b3e2c0a10da7e76c69033c537b6057ed1158e7ea00af758c5767734  .github/workflows/ci.yml
 80fc6fc9c2fcefef75704585267988b3d962b6beb709b81e2e817f8f469277ce  .github/workflows/claim-precheck.yml
 70e1768451756a32afdf45f2eb1fb623b5368d05d24809bb3c31e75fc70f3fee  .github/workflows/codeql.yml
 0e36a4f1422584da233615f6cde6b2799b309e70d968e9c934988a7cb9f951db  .github/workflows/doc-quality.yml
