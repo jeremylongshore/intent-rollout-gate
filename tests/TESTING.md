@@ -105,7 +105,6 @@ pnpm exec audit-harness init   # re-pin after a reviewed policy edit
 An AI-proposed threshold edit without a paired `init` fails `audit-harness verify`
 in CI by design.
 
-
 ## Incoming signed evidence boundary
 
 The enforcing Action authenticates every row before advisory or delegated decision work.

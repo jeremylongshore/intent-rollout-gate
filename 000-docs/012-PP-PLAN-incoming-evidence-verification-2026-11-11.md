@@ -290,7 +290,6 @@ Use the admitted transient resource cap; dependency installation runs normal lif
 Then run unchanged full coverage/build/dist gates only after the fixture and type boundaries pass.
 The historical setup attempts and latest34-case passing receipt are recorded below; the expanded loader/container execution subsequently passed64cases.
 
-
 ### First admitted setup outcome
 
 The first admitted command used normal npm install followed by typecheck and the two focused
@@ -409,7 +408,6 @@ This proposal changes no production roots, workflow permissions, public signing 
 release tags, or consumer pins. The corrected34-case and expanded64-case focused runs subsequently passed; full repository
 gates, distributed Action migration and producer interoperability remain outstanding.
 
-
 ## Expanded local staging validation
 
 The current frozen source passed normal canonical pnpm dependency resolution, repository typecheck,
@@ -442,7 +440,6 @@ explicitly anchored key profiles are distinct: the latter obtains authenticated 
 no evidence-provided roots or URLs are accepted. Production custom-log roots are not enrolled by
 this change. Trust policy is loaded afresh for an evaluation; it is not a long-lived revocation feed.
 
-
 ### Producer compatibility and bounded-ingestion follow-up
 
 Source inspection of installed cosign2.4.1 establishes a producer incompatibility beyond bundle
@@ -463,7 +460,6 @@ concurrent growth, nonregular inputs and open failure. Strict execution also rec
 as required independently of the presence of a runtime trust argument, preventing an untyped caller
 from accidentally falling back to legacy parsing. These follow-up source/tests are not included
 in the earlier64-pass result; they subsequently passed in the78-case receipt below.
-
 
 ## Bounded incoming-release consumer inventory
 
@@ -500,7 +496,6 @@ consumer workflow blob SHAs, pins, aggregate coverage and the full receipt hash.
 records, unresolved local uses, access/parse gaps and consumer CSV remain under
 `/tmp/intent-ci-audit-github/rollout-consumers/`; private consumer identities, workflow paths, blob identifiers and pins are omitted from
 the repository-facing summary. Exact private mappings remain only in the local estate inventory. Private workflow bodies and secret values were not retained.
-
 
 ### Immutable local-reference follow-up and privacy correction
 
@@ -576,7 +571,6 @@ The normal signer install and eight focused suites passed78tests in18.118seconds
 Independent review subsequently found the pinned verifier interprets SAN policy strings as regular expressions. The local fix escapes all metacharacters and anchors both ends, including rejecting a terminal newline; real issued-certificate near-match negatives and an exact metacharacter positive passed in the85-case focused run. Issuer extensions are literal comparisons in the pinned library. The strict entry now retains authenticated row transparency and reports `verification-transparency` plus the summary as `all-inclusion`, `contains-private-unanchored`, or `not-verified`. Authentication success is distinct from public anchoring and rollout permission. These seven additional cases are not included in the78-pass receipt.
 
 Next qualification runs the corrected focused suites before build/full coverage/dist/actionlint and bundled self-consumer checks. No production roots, public anchors, external consumer pins, release tags or deployment approval are changed by this preparation. Independent producer deployment/keyless migration remains part of h08j.7 acceptance.
-
 
 ## Qualified local enforcing candidate and remaining acceptance
 

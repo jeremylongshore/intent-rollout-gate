@@ -186,8 +186,6 @@ PR-head content. OIDC uses exact issuer and workflow certificate identity plus v
 public Sigstore TUF roots. Key mode uses an enrolled public PEM, keyHint, active status,
 validity dates and explicit inclusion requirement. No private signing key is needed.
 
-
-
 | Input | Required | Default | Purpose |
 | --- | --- | --- | --- |
 | `bundle-path` | yes | — | Signed artifact set `{ "format": "sigstore-dsse-rows/v1", "rows": [...] }`, at most16MiB/256independently signed rows. No unsigned fallback. |
