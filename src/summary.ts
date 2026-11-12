@@ -37,9 +37,25 @@ export interface RefinerAdvisoryRow {
   readonly rekorRef: string | null;
 }
 
-/** Escape `|` so a cell value can never break a markdown table row. */
+/** Encode display text before inserting it into Markdown or inline HTML.
+ * Entities preserve visible punctuation without creating Markdown delimiters;
+ * controlled <br> elements preserve line breaks within a single cell/list item.
+ */
 function esc(value: string): string {
-  return value.replace(/\|/g, "\\|");
+  const entities: Record<string, string> = {
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+  };
+  return value.replace(/\r\n|\r|\n|[^\p{L}\p{N} \t]/gu, (character) => {
+    if (character === "\r\n" || character === "\r" || character === "\n")
+      return "<br>";
+    return entities[character] ?? `&#${character.codePointAt(0)!};`;
+  });
+}
+
+function code(value: string): string {
+  return `<code>${esc(value)}</code>`;
 }
 
 /**
@@ -67,7 +83,7 @@ export function renderSummary(
   const lines: string[] = [
     "## Intent Rollout Gate",
     "",
-    `**Decision:** \`${decision}\``,
+    `**Decision:** ${code(decision)}`,
     "",
   ];
 
@@ -81,9 +97,11 @@ export function renderSummary(
     for (const gate of result.evaluated.required_gates) {
       const matched =
         gate.matched_gate_ids.length > 0
-          ? gate.matched_gate_ids.map((id) => `\`${esc(id)}\``).join(", ")
+          ? gate.matched_gate_ids.map((id) => code(id)).join(", ")
           : "—";
-      lines.push(`| \`${esc(gate.pattern)}\` | ${gate.status} | ${matched} |`);
+      lines.push(
+        `| ${code(gate.pattern)} | ${esc(gate.status)} | ${matched} |`,
+      );
     }
     lines.push("");
 
@@ -96,9 +114,7 @@ export function renderSummary(
       lines.push("| --- | --- | --- |");
       for (const row of blockingRows) {
         const gateId =
-          row.gate_id === null
-            ? "_(schema-invalid)_"
-            : `\`${esc(row.gate_id)}\``;
+          row.gate_id === null ? "_(schema-invalid)_" : code(row.gate_id);
         lines.push(
           `| ${row.index} | ${gateId} | ${esc(row.reasons.join("; "))} |`,
         );
@@ -122,8 +138,8 @@ export function renderSummary(
     lines.push("| --- | --- | --- | --- |");
     for (const row of refinerRows) {
       lines.push(
-        `| ${esc(row.verdict)} | \`${esc(row.skillVersionId)}\` | ` +
-          `${row.behavioralDelta} | ${row.rekorRef === null ? "staging" : `\`${esc(row.rekorRef)}\``} |`,
+        `| ${esc(row.verdict)} | ${code(row.skillVersionId)} | ` +
+          `${row.behavioralDelta} | ${row.rekorRef === null ? "staging" : code(row.rekorRef)} |`,
       );
     }
     lines.push("");
@@ -132,7 +148,7 @@ export function renderSummary(
   if (reasons.length > 0) {
     lines.push("### Blocking reasons", "");
     for (const reason of reasons) {
-      lines.push(`- ${reason}`);
+      lines.push(`- ${esc(reason)}`);
     }
     lines.push("");
   }

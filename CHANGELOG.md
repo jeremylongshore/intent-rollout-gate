@@ -16,6 +16,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security
 
+- Encode untrusted step-summary display values so embedded Markdown, table
+  delimiters, line breaks and HTML cannot forge headings, rows or links.
+  Decision logic and machine-readable outputs remain unchanged.
+
 - **Release gate verifies the audit-harness it runs.** The reusable
   `release-gate.yml` fetched `emit-evidence` from an unreleased
   `intent-audit-harness` commit as a GitHub source archive, with no checksum.
