@@ -8,7 +8,7 @@ Intent Solutions is a Claude Partner Network Select Services Partner.
 
 Part of the **[Intent Eval Platform](https://github.com/intent-solutions-io/intent-eval-platform)** — the umbrella grouping the platform's six repos: five converge via a shared Evidence Bundle schema (`intent-eval-core`, `intent-eval-lab`, `audit-harness`, `j-rig-skill-binary-eval`, `intent-rollout-gate`), plus `intent-eval-dashboard` as a satellite consumer (not part of the convergence taxonomy).
 
-> **Status: v0.3.0 — frozen consumption contract & hardened release pipeline.** The action is a real Node runtime
+> **Source status: unreleased incoming-signature enforcement. Published v0.3.2 pins retain their legacy contract.** The action is a real Node runtime
 > that consumes an Evidence Bundle plus a rollout policy and decides
 > **allow / block**, fail closed. Per Blueprint A this repo is a **thin
 > shell**: every line of decision logic lives in the published
@@ -29,11 +29,12 @@ The Rollout Gate is the **fourth repo** in the Intent Eval Platform convergence,
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/U5S225PTME)
 
-## What it does (v0.3.0)
+## What the unreleased source does
 
-1. **Reads the Evidence Bundle** at `bundle-path` — both wire forms: the v2
-   plain array of in-toto Statements (kernel `EvidenceBundlePayload`) and the
-   v1 legacy container `{"bundle_format":"json-array","rows":[...]}`.
+1. **Authenticates every signed row** in the bounded `sigstore-dsse-rows/v1` file
+   at `bundle-path`, using externally trusted `verification-policy-json`.
+   Sigstore verifies signatures, certificate identities and claimed inclusion proofs;
+   invalid or unsigned evidence blocks before decision or advisory processing.
 2. **Resolves the rollout policy** from exactly one of `policy-path` (a JSON
    file) or `policy-json` (an inline JSON string). Both or neither → block.
 3. **Optionally binds a generic report** supplied through `report-path` to the
@@ -176,11 +177,19 @@ ones documented by
 Parsing a policy out of `tests/TESTING.md` directly stays deferred per
 [DR-002 § 5](./000-docs/004-AT-DECR-runtime-language-typescript-2026-06-10.md).
 
-## Inputs
+## Unreleased enforcing inputs
+
+These inputs describe the prepared source. Existing v0.3.2 examples above remain legacy
+migration references; do not point their unsigned payloads at the new enforcing entry.
+Supply trust JSON from protected workflow configuration, never the evidence or arbitrary
+PR-head content. OIDC uses exact issuer and workflow certificate identity plus verified
+public Sigstore TUF roots. Key mode uses an enrolled public PEM, keyHint, active status,
+validity dates and explicit inclusion requirement. No private signing key is needed.
 
 | Input | Required | Default | Purpose |
 | --- | --- | --- | --- |
-| `bundle-path` | yes | — | Path to the Evidence Bundle JSON file (v2 plain array or v1 container form). Missing/unreadable/invalid JSON → block. |
+| `bundle-path` | yes | — | Signed artifact set `{ "format": "sigstore-dsse-rows/v1", "rows": [...] }`, at most16MiB/256independently signed rows. No unsigned fallback. |
+| `verification-policy-json` | yes | — | Trusted incoming key or exact OIDC identity configuration, at most 64 KiB; missing/invalid trust blocks. |
 | `report-path` | no | `''` | Optional exact J-Rig `unified-report/v1` or `suite-report/v1` JSON projection. When set, one passing `audit-harness:ci:report-lineage` row must match its bytes, subject digest, Grader identity, Run counts, sample-balance metadata, and schema. |
 | `audit-manifest-path` | no | `''` | Required with `suite-report/v1` when `report-path` is set; binds the exact J-Rig audit-manifest bytes used by `report-lineage`. Invalid without `report-path` or with `unified-report/v1`. |
 | `policy-path` | one of | `''` | Path to the rollout policy JSON document. Exactly one of `policy-path` / `policy-json` is required. |
@@ -196,6 +205,8 @@ Parsing a policy out of `tests/TESTING.md` directly stays deferred per
 
 | Output | Purpose |
 | --- | --- |
+| `verification-transparency` | `all-inclusion` when every authenticated row has verified inclusion; `contains-private-unanchored` when at least one row is privately signed without inclusion; `not-verified` before authentication. Also shown in the summary; independent of the verdict. |
+| `verification-status` | `verified` after every row authenticates; `failed` on trust/authentication/format failure; `not-verified` if earlier wiring validation stops execution. Independent of the policy verdict and report-only exit knobs. |
 | `decision` | `allow` or `block`, verbatim from `@intentsolutions/rollout-gate` (`allow` ≙ ship, `block` ≙ no-ship in the pre-implementation vocabulary; `not-implemented` is retired). |
 | `reasons` | JSON array string of every blocking reason — empty array exactly when `decision` is `allow`. |
 | `summary` | Markdown decision summary (required-gate table + blocking rows + reasons). Also written to the job step summary. |
@@ -206,14 +217,15 @@ Parsing a policy out of `tests/TESTING.md` directly stays deferred per
 ```bash
 pnpm install --frozen-lockfile
 pnpm run check        # format:check (prettier) + typecheck + vitest unit tests
-pnpm run build        # esbuild bundle src/main.ts → dist/index.js (node20 target)
+pnpm run build        # esbuild bundle src/main.ts → dist/index.js (node22.22 target; supported Node22.22.2+,24.15+ or26+)
 pnpm run dist:check   # rebuild + git diff --exit-code dist/
 ```
 
 `dist/index.js` is **committed** (GitHub Actions convention) and CI fails any
 PR whose dist is out of sync with `src/`. The runtime declared in `action.yml`
-is `node24`; the bundle is transpiled to a node20-compatible target per the
-DR-002 "Node 20+" lock.
+is `node24`; the unreleased enforcing bundle targets Node 22.22 and requires
+Node 22.22.2+, 24.15+ or 26+. This is an explicit runtime migration from the
+published Node 20-compatible line, not a change to existing immutable artifacts.
 
 **Thin-shell rule:** this repo must never re-implement gate semantics, policy
 interpretation, or predicate evaluation. If decision behavior needs to change,

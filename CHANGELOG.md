@@ -14,7 +14,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 > - **`tests/TESTING.md` policy parsing** — deferred per DR-002 § 5; the action continues to consume JSON policy documents only.
 > - **M6 first adopter** — `audit-harness` self-adopts the gate end-to-end before any partner repo (DR-002 § 6 criterion 5).
 
+### Security follow-up
+
+- Isolate each TUF bootstrap in a fresh owner-only cache and remove it after success or failure.
+
 ### Security
+
+- **Unreleased incoming evidence enforcement:** the Action entry now requires externally
+  admitted trust and independent signed in-toto v1 rows before policy evaluation. Vetted
+  Sigstore primitives verify real signatures, identities and inclusion proofs; bounded
+  descriptor reads reject oversized/growing inputs. Policy report-only exits remain
+  unchanged, with explicit verification-status. Self-consumer workflows now sign their
+  local fixtures offline; external pinned releases are unchanged. This breaking source
+  contract still requires release qualification and producer migration before publication.
 
 - Encode untrusted step-summary display values so embedded Markdown, table
   delimiters, line breaks and HTML cannot forge headings, rows or links.

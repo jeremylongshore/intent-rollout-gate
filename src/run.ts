@@ -33,6 +33,10 @@ import {
 } from "@intentsolutions/core/validators/v1";
 import { renderSummary, type RefinerAdvisoryRow } from "./summary";
 import { validateSkillPromotionBinding } from "./skill-promotion";
+import { loadTrustedPolicy } from "./verification/trusted-loader";
+import { readSignedArtifacts } from "./verification/read-artifacts";
+import { verifyArtifactSet } from "./verification/verify-artifacts";
+import type { RowTrustPolicy } from "./verification/verify-row";
 
 export { validateSkillPromotionBinding } from "./skill-promotion";
 
@@ -474,14 +478,17 @@ export function stripRefinerPassRows(bundle: unknown): unknown {
  * `signed-decision-row-path` is reserved (always empty at v0.3.0 — decision-row
  * signing lands with the DNSSEC + CAA pre-condition work per DR-002 § 6.3).
  */
-async function conclude(
+async function concludeResult(
   decision: string,
   reasons: string[],
   result: DecideResult | null,
   failOnBlock: boolean,
   refinerRows: readonly RefinerAdvisoryRow[] = [],
+  transparency?: string,
 ): Promise<void> {
-  const summary = renderSummary(decision, reasons, result, refinerRows);
+  const summary =
+    renderSummary(decision, reasons, result, refinerRows) +
+    (transparency ? `\n\nEvidence transparency: **${transparency}**.\n` : "");
 
   core.setOutput("decision", decision);
   core.setOutput("reasons", JSON.stringify(reasons));
@@ -505,7 +512,51 @@ async function conclude(
   }
 }
 
+/** Legacy exported helper retained for compatibility tests; not the Action entry. */
 export async function run(): Promise<void> {
+  return execute();
+}
+
+/** Strict staging entry: caller must supply admitted external trust material. */
+export async function runVerified(trust: RowTrustPolicy): Promise<void> {
+  return execute(trust, true);
+}
+
+/** Proposed enforcing entry: only protected caller input supplies trust. */
+export async function runEnforcingAction(): Promise<void> {
+  return execute(undefined, true, async () => {
+    const input = core.getInput("verification-policy-json", { required: true });
+    if (Buffer.byteLength(input) > 64 * 1024)
+      throw new Error("verification policy exceeds size limit");
+    return loadTrustedPolicy(JSON.parse(input) as unknown);
+  });
+}
+
+async function execute(
+  trust?: RowTrustPolicy,
+  verificationRequired = false,
+  prepareTrust?: () => Promise<RowTrustPolicy>,
+): Promise<void> {
+  let transparency = verificationRequired ? "not-verified" : undefined;
+  const conclude = (
+    decision: string,
+    reasons: string[],
+    result: DecideResult | null,
+    failOnBlock: boolean,
+    refinerRows: readonly RefinerAdvisoryRow[] = [],
+  ) =>
+    concludeResult(
+      decision,
+      reasons,
+      result,
+      failOnBlock,
+      refinerRows,
+      transparency,
+    );
+  if (verificationRequired) {
+    core.setOutput("verification-status", "not-verified");
+    core.setOutput("verification-transparency", "not-verified");
+  }
   // FAIL CLOSED on the exit knob: anything except an explicit 'false' fails
   // the job on block. Legacy `dry-run: 'true'` (v0.0.x input) also disables
   // the failing exit — same observable contract the stub documented.
@@ -566,12 +617,30 @@ export async function run(): Promise<void> {
     // Bundle file: missing / unreadable / non-JSON → block (fail closed).
     let bundle: unknown;
     try {
-      bundle = JSON.parse(readFileSync(bundlePath, "utf8")) as unknown;
+      if (verificationRequired) {
+        trust ??= await prepareTrust?.();
+        if (!trust) throw new Error("trusted verification policy is required");
+        const bytes = readSignedArtifacts(bundlePath);
+        const rows = verifyArtifactSet(bytes, trust);
+        transparency = rows.every(
+          (row) => row.transparency === "verified-inclusion",
+        )
+          ? "all-inclusion"
+          : "contains-private-unanchored";
+        core.setOutput("verification-transparency", transparency);
+        bundle = rows.map((row) => row.statement);
+        core.setOutput("verification-status", "verified");
+      } else {
+        bundle = JSON.parse(readFileSync(bundlePath, "utf8")) as unknown;
+      }
     } catch (err) {
+      if (verificationRequired) core.setOutput("verification-status", "failed");
       await conclude(
         "block",
         [
-          `unreadable or invalid-JSON Evidence Bundle at '${bundlePath}': ${errMessage(err)}`,
+          verificationRequired
+            ? "Evidence authentication or signed artifact format failed"
+            : `unreadable or invalid-JSON Evidence Bundle at '${bundlePath}': ${errMessage(err)}`,
         ],
         null,
         failOnBlock,

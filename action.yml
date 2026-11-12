@@ -14,11 +14,20 @@ branding:
 inputs:
   bundle-path:
     description: >-
-      Filesystem path to the Evidence Bundle JSON file. Accepts both wire
-      forms: the v2 plain array of in-toto Statements (kernel
-      EvidenceBundlePayload) and the v1 legacy container
-      {"bundle_format":"json-array","rows":[...]}. A missing, unreadable, or
-      invalid-JSON file blocks (fail closed).
+      Filesystem path to a signed artifact set with format sigstore-dsse-rows/v1
+      and independent Sigstore DSSE bundles in rows. Every row is authenticated
+      before advisory or decision processing. Unsigned legacy arrays/containers
+      are not accepted by the proposed enforcing release. Input is bounded to
+      16 MiB and 256 rows; missing, unreadable or invalid evidence blocks.
+    required: true
+  verification-policy-json:
+    description: >-
+      Required trusted incoming signer configuration as JSON, at most 64 KiB.
+      Supply it from protected workflow configuration, not evidence, PR-head
+      files, or untrusted producer outputs. OIDC profile supplies exact issuer
+      and certificate workflow identity; key profile supplies enrolled public
+      PEM, keyHint, active status, validity dates and requireInclusion.
+      This input configures verification only; it never signs or publishes.
     required: true
   report-path:
     description: >-
@@ -101,6 +110,14 @@ inputs:
     default: 'false'
 
 outputs:
+  verification-transparency:
+    description: "all-inclusion, contains-private-unanchored, or not-verified; independent of rollout verdict."
+  verification-status:
+    description: >-
+      verified only after every signed row authenticates; failed on trust,
+      authentication or signed-format failure; not-verified if validation stops
+      before evidence authentication. Report-only exit settings never turn
+      failed authentication into verified evidence or invoke decision evaluation.
   decision:
     description: >-
       'allow' or 'block' — verbatim from @intentsolutions/rollout-gate

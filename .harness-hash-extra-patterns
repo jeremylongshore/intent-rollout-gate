@@ -17,3 +17,6 @@ tsconfig.json
 # Fail-closed wiring and this pin inventory must be reviewed together.
 src/**/*.ts
 .harness-hash-extra-patterns
+
+# Offline self-consumer producer: exact Statement signing and no public witnesses.
+scripts/sign-local-evidence.mjs

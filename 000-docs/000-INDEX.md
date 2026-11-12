@@ -15,6 +15,8 @@ Per Doc Filing Standard v4.x. Files follow `NNN-CC-CODE-description.md`.
 | 008 | RL (Release Report) | REPT | [Migration notes — v0.1.0-experimental -> v0.2.0 (2026-06-18)](./008-RL-REPT-v0.2.0-migration-notes-2026-06-18.md) |
 | 010 | RL (Release Report) | REPT | [Migration notes — generic report promotion binding (2026-08-01)](./010-RL-REPT-generic-report-promotion-migration-notes-2026-08-01.md) |
 | 011 | AT (Specification) | SPEC | [Skill-promotion consumer compatibility (2026-08-02)](./011-AT-SPEC-skill-promotion-consumer-compatibility-2026-08-02.md) |
+| 012 | PP (Plan) | PLAN | [Incoming evidence verification and producer migration (2026-11-11)](./012-PP-PLAN-incoming-evidence-verification-2026-11-11.md) |
+| 012a | RR-REFF | [Rollout consumer migration inventory](012a-RR-REFF-rollout-consumer-migration-inventory.json) | Bounded default-branch direct-use scan and explicit coverage gaps |
 
 ## Type codes used in this repo
 

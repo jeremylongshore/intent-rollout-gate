@@ -127,18 +127,40 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "22.23.1"
+          cache: pnpm
+
+      - name: Install self-test signer dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Sign precomposed fixture Statements with an ephemeral local key
+        id: sign-smoke
+        run: |
+          node scripts/sign-local-evidence.mjs --out-dir .signed-smoke \
+            tests/fixtures/evidence/allow-bundle.json \
+            tests/fixtures/evidence/generic-report-promotion-bundle.json \
+            tests/fixtures/evidence/fail-row-bundle.json
+
       - name: Allow fixture → decision=allow, job succeeds
         id: gate-allow
         uses: ./
         with:
-          bundle-path: tests/fixtures/evidence/allow-bundle.json
+          bundle-path: .signed-smoke/allow-bundle.signed.json
+          verification-policy-json: ${{ steps.sign-smoke.outputs.verification-policy }}
           policy-path: tests/fixtures/policy.json
 
       - name: Generic report promotion → exact lineage + skill evidence allows
         id: promotion
         uses: ./
         with:
-          bundle-path: tests/fixtures/evidence/generic-report-promotion-bundle.json
+          bundle-path: .signed-smoke/generic-report-promotion-bundle.signed.json
+          verification-policy-json: ${{ steps.sign-smoke.outputs.verification-policy }}
           policy-path: tests/fixtures/promotion-policy.json
           report-path: tests/fixtures/reports/generic-unified-report.json
 
@@ -146,12 +168,16 @@ jobs:
         id: gate-block
         uses: ./
         with:
-          bundle-path: tests/fixtures/evidence/fail-row-bundle.json
+          bundle-path: .signed-smoke/fail-row-bundle.signed.json
+          verification-policy-json: ${{ steps.sign-smoke.outputs.verification-policy }}
           policy-path: tests/fixtures/policy.json
           fail-on-block: "false"
 
       - name: Assert outputs
         env:
+          ALLOW_VERIFICATION: ${{ steps.gate-allow.outputs.verification-status }}
+          PROMOTION_VERIFICATION: ${{ steps.promotion.outputs.verification-status }}
+          BLOCK_VERIFICATION: ${{ steps.gate-block.outputs.verification-status }}
           ALLOW_DECISION: ${{ steps.gate-allow.outputs.decision }}
           ALLOW_REASONS: ${{ steps.gate-allow.outputs.reasons }}
           PROMOTION_DECISION: ${{ steps.promotion.outputs.decision }}
@@ -159,6 +185,9 @@ jobs:
           BLOCK_DECISION: ${{ steps.gate-block.outputs.decision }}
           BLOCK_REASONS: ${{ steps.gate-block.outputs.reasons }}
         run: |
+          for status in "$ALLOW_VERIFICATION" "$PROMOTION_VERIFICATION" "$BLOCK_VERIFICATION"; do
+            [ "$status" = "verified" ] || { echo "expected authenticated evidence"; exit 1; }
+          done
           [ "$ALLOW_DECISION" = "allow" ] || { echo "expected allow, got: $ALLOW_DECISION"; exit 1; }
           [ "$ALLOW_REASONS" = "[]" ] || { echo "expected empty reasons, got: $ALLOW_REASONS"; exit 1; }
           [ "$PROMOTION_DECISION" = "allow" ] || { echo "expected promotion allow, got: $PROMOTION_DECISION"; exit 1; }
