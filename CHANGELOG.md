@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 > - **`tests/TESTING.md` policy parsing** — deferred per DR-002 § 5; the action continues to consume JSON policy documents only.
 > - **M6 first adopter** — `audit-harness` self-adopts the gate end-to-end before any partner repo (DR-002 § 6 criterion 5).
 
+### Security follow-up
+
+- Encode untrusted summary text without changing its displayed punctuation or policy verdict; isolate each TUF bootstrap in a fresh owner-only cache and remove it after success or failure.
+
 ### Security
 
 - **Unreleased incoming evidence enforcement:** the Action entry now requires externally

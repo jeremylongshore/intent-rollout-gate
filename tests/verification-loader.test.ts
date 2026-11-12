@@ -1,3 +1,13 @@
+import {
+  existsSync,
+  mkdtempSync,
+  readdirSync,
+  rmSync,
+  statSync,
+  writeFileSync,
+} from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { TrustedRoot } from "@sigstore/protobuf-specs";
 import { loggedFixture } from "./verification-log-fixture";
 import type { TrustMaterial } from "@sigstore/verify";
@@ -19,6 +29,7 @@ beforeEach(() => {
 afterEach(() => {
   vi.useRealTimers();
   vi.clearAllMocks();
+  vi.unstubAllEnvs();
 });
 function enrollment(fixture: Pick<ReturnType<typeof signedFixture>, "trust">) {
   return {
@@ -93,6 +104,7 @@ describe("externally trusted material loading", () => {
         "verified-inclusion",
       );
       expect(getTrustedRoot).toHaveBeenCalledWith({
+        cachePath: expect.any(String),
         retry: 0,
         timeout: 5000,
         forceCache: false,
@@ -167,6 +179,7 @@ describe("externally trusted material loading", () => {
       "expired TUF",
     );
     expect(getTrustedRoot).toHaveBeenCalledWith({
+      cachePath: expect.any(String),
       retry: 0,
       timeout: 5000,
       forceCache: false,
@@ -181,4 +194,60 @@ describe("externally trusted material loading", () => {
     ).rejects.toThrow();
     expect(getTrustedRoot).not.toHaveBeenCalled();
   });
+});
+
+describe("TUF bootstrap cache isolation", () => {
+  it("uses a fresh owner-only empty directory for every acquisition rather than ambient poisoned state", async () => {
+    const persistent = mkdtempSync(join(tmpdir(), "synthetic-persistent-tuf-"));
+    const visited: string[] = [];
+    try {
+      writeFileSync(
+        join(persistent, "root.json"),
+        "synthetic poisoned cached root",
+      );
+      vi.stubEnv("XDG_DATA_HOME", persistent);
+      const fixture = await loggedFixture({ keyless: true });
+      for (let index = 0; index < 2; index++) {
+        vi.mocked(getTrustedRoot).mockImplementationOnce(async (options) => {
+          const cache = options?.cachePath;
+          if (!cache) throw new Error("explicit isolated cache is required");
+          expect(cache).not.toBe(persistent);
+          expect(statSync(cache).mode & 0o777).toBe(0o700);
+          expect(readdirSync(cache)).toEqual([]);
+          visited.push(cache);
+          writeFileSync(
+            join(cache, "root.json"),
+            "synthetic per-load cache state",
+          );
+          return syntheticTrustedRoot(fixture.trust.material);
+        });
+        await loadTrustedPolicy(NIGHTLY_IDENTITY);
+        expect(existsSync(visited[index]!)).toBe(false);
+      }
+      expect(visited[0]).not.toBe(visited[1]);
+      expect(existsSync(join(persistent, "root.json"))).toBe(true);
+    } finally {
+      rmSync(persistent, { recursive: true, force: true });
+    }
+  });
+  it.each(["oidc", "anchored-key"])(
+    "cleans failed %s root acquisition without private fallback",
+    async (mode) => {
+      let cache = "";
+      vi.mocked(getTrustedRoot).mockImplementationOnce(async (options) => {
+        cache = options?.cachePath ?? "";
+        expect(existsSync(cache)).toBe(true);
+        throw new Error("synthetic TUF acquisition failure");
+      });
+      const config =
+        mode === "oidc"
+          ? NIGHTLY_IDENTITY
+          : { ...enrollment(signedFixture()), requireInclusion: true };
+      await expect(loadTrustedPolicy(config)).rejects.toThrow(
+        "synthetic TUF acquisition failure",
+      );
+      expect(cache).not.toBe("");
+      expect(existsSync(cache)).toBe(false);
+    },
+  );
 });

@@ -189,7 +189,7 @@ validity dates and explicit inclusion requirement. No private signing key is nee
 | Input | Required | Default | Purpose |
 | --- | --- | --- | --- |
 | `bundle-path` | yes | — | Signed artifact set `{ "format": "sigstore-dsse-rows/v1", "rows": [...] }`, at most16MiB/256independently signed rows. No unsigned fallback. |
-| `verification-policy-json` | yes | — | Trusted incoming key or exact OIDC identity configuration, at most64KiB; missing/invalid trust blocks. |
+| `verification-policy-json` | yes | — | Trusted incoming key or exact OIDC identity configuration, at most 64 KiB; missing/invalid trust blocks. |
 | `report-path` | no | `''` | Optional exact J-Rig `unified-report/v1` or `suite-report/v1` JSON projection. When set, one passing `audit-harness:ci:report-lineage` row must match its bytes, subject digest, Grader identity, Run counts, sample-balance metadata, and schema. |
 | `audit-manifest-path` | no | `''` | Required with `suite-report/v1` when `report-path` is set; binds the exact J-Rig audit-manifest bytes used by `report-lineage`. Invalid without `report-path` or with `unified-report/v1`. |
 | `policy-path` | one of | `''` | Path to the rollout policy JSON document. Exactly one of `policy-path` / `policy-json` is required. |
@@ -223,8 +223,9 @@ pnpm run dist:check   # rebuild + git diff --exit-code dist/
 
 `dist/index.js` is **committed** (GitHub Actions convention) and CI fails any
 PR whose dist is out of sync with `src/`. The runtime declared in `action.yml`
-is `node24`; the bundle is transpiled to a node20-compatible target per the
-DR-002 "Node 20+" lock.
+is `node24`; the unreleased enforcing bundle targets Node 22.22 and requires
+Node 22.22.2+, 24.15+ or 26+. This is an explicit runtime migration from the
+published Node 20-compatible line, not a change to existing immutable artifacts.
 
 **Thin-shell rule:** this repo must never re-implement gate semantics, policy
 interpretation, or predicate evaluation. If decision behavior needs to change,

@@ -1,4 +1,7 @@
 import { createHash, createPublicKey } from "node:crypto";
+import { mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { getTrustedRoot } from "@sigstore/tuf";
 import { toTrustMaterial } from "@sigstore/verify";
 import { z } from "zod";
@@ -39,6 +42,24 @@ export const NIGHTLY_IDENTITY = {
     "https://github.com/jeremylongshore/j-rig-skill-binary-eval/.github/workflows/nightly-skill-evals.yml@refs/heads/main",
 } as const;
 
+/** Bootstrap from pinned TUF seeds in a fresh owner-only directory per load.
+ * Never reuse ambient HOME/XDG cache roots. This excludes other principals and
+ * stale job state, not a hostile process running under the same OS account.
+ */
+async function loadPublicRoot() {
+  const cachePath = mkdtempSync(join(tmpdir(), "intent-rollout-tuf-"));
+  try {
+    return await getTrustedRoot({
+      cachePath,
+      retry: 0,
+      timeout: 5000,
+      forceCache: false,
+    });
+  } finally {
+    rmSync(cachePath, { recursive: true, force: true });
+  }
+}
+
 /**
  * Input MUST originate in trusted caller configuration, never the evidence file.
  * No evidence-controlled root/mirror/cache URL, key path, or verification bypass.
@@ -49,11 +70,7 @@ export async function loadTrustedPolicy(
 ): Promise<RowTrustPolicy> {
   const config = policySchema.parse(configuration);
   if (config.kind === "oidc") {
-    const root = await getTrustedRoot({
-      retry: 0,
-      timeout: 5000,
-      forceCache: false,
-    });
+    const root = await loadPublicRoot();
     return { material: toTrustMaterial(root), signer: config };
   }
   const start = Date.parse(config.notBefore);
@@ -74,10 +91,7 @@ export async function loadTrustedPolicy(
     return { publicKey, validFor: activeAt };
   };
   const material = config.requireInclusion
-    ? toTrustMaterial(
-        await getTrustedRoot({ retry: 0, timeout: 5000, forceCache: false }),
-        publicKeyLookup,
-      )
+    ? toTrustMaterial(await loadPublicRoot(), publicKeyLookup)
     : {
         certificateAuthorities: [],
         timestampAuthorities: [],
