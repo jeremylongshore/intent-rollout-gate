@@ -186,7 +186,7 @@ describe("allow path", () => {
     expect(outputs.get("decision")).toBe("allow");
     expect(reasonsOutput()).toEqual([]);
     expect(outputs.get("signed-decision-row-path")).toBe("");
-    expect(outputs.get("summary")).toContain("`allow`");
+    expect(outputs.get("summary")).toContain("<code>allow</code>");
     expect(setFailed).not.toHaveBeenCalled();
     expect(info).toHaveBeenCalled();
   });
@@ -774,7 +774,7 @@ describe("step summary", () => {
     const md = summaryRaw.join("\n");
     expect(md).toContain("## Intent Rollout Gate");
     expect(md).toContain("| Pattern | Status | Matched gate IDs |");
-    expect(md).toContain("synth-tool:ci:*");
+    expect(md).toContain("<code>synth&#45;tool&#58;ci&#58;&#42;</code>");
     expect(md).toContain("### Blocking rows");
   });
 
@@ -815,21 +815,21 @@ describe("renderSummary", () => {
       },
     });
 
-    expect(md).toContain("**Decision:** `block`");
+    expect(md).toContain("**Decision:** <code>block</code>");
     expect(md).toContain(
-      "| `synth-tool:ci:*` | not-passing | `synth-tool:ci:synth-gate-2` |",
+      "| <code>synth&#45;tool&#58;ci&#58;&#42;</code> | not&#45;passing | <code>synth&#45;tool&#58;ci&#58;synth&#45;gate&#45;2</code> |",
     );
-    // pipes inside table cells are escaped so the table doesn't break
+    // Entity-encoded punctuation preserves the visible text within cells.
     expect(md).toContain(
-      "| 0 | `synth-tool:ci:synth-gate-2` | forbidden \\| decision |",
+      "| 0 | <code>synth&#45;tool&#58;ci&#58;synth&#45;gate&#45;2</code> | forbidden &#124; decision |",
     );
-    // the flat bullet list keeps reasons verbatim
-    expect(md).toContain("- reason-1 | piped");
+    // List text is encoded too, preserving the displayed characters.
+    expect(md).toContain("- reason&#45;1 &#124; piped");
   });
 
   it("renders a no-result (input-validation) block without tables", () => {
     const md = renderSummary("block", ["no policy provided"], null);
-    expect(md).toContain("**Decision:** `block`");
+    expect(md).toContain("**Decision:** <code>block</code>");
     expect(md).not.toContain("### Required gates");
     expect(md).toContain("- no policy provided");
   });
@@ -1278,10 +1278,10 @@ describe("renderSummary — advisory Skill Refiner section (r8ir.1)", () => {
     expect(md).toContain("does not affect the ship/no-ship decision");
     expect(md).toContain("| Verdict | SkillVersion | Behavioral Δ | Rekor |");
     expect(md).toContain(
-      "| accept | `018f6b1e-7c00-7aaa-8bbb-000000000001` | 0.12 | staging |",
+      "| accept | <code>018f6b1e&#45;7c00&#45;7aaa&#45;8bbb&#45;000000000001</code> | 0.12 | staging |",
     );
     expect(md).toContain(
-      "| reject | `018f6b1e-7c00-7aaa-8bbb-000000000003` | 0.004 | `1809941980` |",
+      "| reject | <code>018f6b1e&#45;7c00&#45;7aaa&#45;8bbb&#45;000000000003</code> | 0.004 | <code>1809941980</code> |",
     );
   });
 

@@ -133,13 +133,13 @@ jobs:
           # $GITHUB_STEP_SUMMARY. Assert the output carries it for both decisions.
           for s in "$SHIP_SUMMARY" "$NOSHIP_SUMMARY"; do
             echo "$s" | grep -q "## Intent Rollout Gate" || { echo "::error::decision-row summary missing header"; exit 1; }
-            echo "$s" | grep -q "intent-rollout-gate:ci:\*" || { echo "::error::decision-row summary missing the real required-gate pattern"; exit 1; }
+            echo "$s" | grep -Fq '<code>intent&#45;rollout&#45;gate&#58;ci&#58;&#42;</code>' || { echo "::error::decision-row summary missing the real required-gate pattern"; exit 1; }
           done
-          # Single quotes keep the literal grep patterns (incl. backticks) un-expanded.
+          # Fixed-string assertions match the encoded display contract exactly.
           # shellcheck disable=SC2016
-          echo "$NOSHIP_SUMMARY" | grep -q '\*\*Decision:\*\* `block`' || { echo "::error::no-ship decision row not marked block"; exit 1; }
+          echo "$NOSHIP_SUMMARY" | grep -Fq '**Decision:** <code>block</code>' || { echo "::error::no-ship decision row not marked block"; exit 1; }
           # shellcheck disable=SC2016
-          echo "$SHIP_SUMMARY" | grep -q '\*\*Decision:\*\* `allow`' || { echo "::error::ship decision row not marked allow"; exit 1; }
+          echo "$SHIP_SUMMARY" | grep -Fq '**Decision:** <code>allow</code>' || { echo "::error::ship decision row not marked allow"; exit 1; }
 
           # NOTE on $GITHUB_STEP_SUMMARY: the Action writes the decision row to the
           # step summary of ITS OWN step (each GitHub Actions step gets a fresh

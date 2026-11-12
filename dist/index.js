@@ -761,11 +761,11 @@ var require_errors = __commonJS({
       }
     };
     var HTTPParserError = class _HTTPParserError extends Error {
-      constructor(message, code, data) {
+      constructor(message, code2, data) {
         super(message);
         Error.captureStackTrace(this, _HTTPParserError);
         this.name = "HTTPParserError";
-        this.code = code ? `HPE_${code}` : void 0;
+        this.code = code2 ? `HPE_${code2}` : void 0;
         this.data = data ? data.toString() : void 0;
       }
     };
@@ -779,13 +779,13 @@ var require_errors = __commonJS({
       }
     };
     var RequestRetryError = class _RequestRetryError extends UndiciError {
-      constructor(message, code, { headers, data }) {
+      constructor(message, code2, { headers, data }) {
         super(message);
         Error.captureStackTrace(this, _RequestRetryError);
         this.name = "RequestRetryError";
         this.message = message || "Request retry error";
         this.code = "UND_ERR_REQ_RETRY";
-        this.statusCode = code;
+        this.statusCode = code2;
         this.data = data;
         this.headers = headers;
       }
@@ -7208,8 +7208,8 @@ var require_client = __commonJS({
       this[kSocket][kError] = err;
       onError(this[kClient], err);
     }
-    function onHttp2FrameError(type, code, id) {
-      const err = new InformationalError(`HTTP/2: "frameError" received - type ${type}, code ${code}`);
+    function onHttp2FrameError(type, code2, id) {
+      const err = new InformationalError(`HTTP/2: "frameError" received - type ${type}, code ${code2}`);
       if (id === 0) {
         this[kSocket][kError] = err;
         onError(this[kClient], err);
@@ -7219,9 +7219,9 @@ var require_client = __commonJS({
       util.destroy(this, new SocketError("other side closed"));
       util.destroy(this[kSocket], new SocketError("other side closed"));
     }
-    function onHTTP2GoAway(code) {
+    function onHTTP2GoAway(code2) {
       const client = this[kClient];
-      const err = new InformationalError(`HTTP/2: "GOAWAY" frame received with code ${code}`);
+      const err = new InformationalError(`HTTP/2: "GOAWAY" frame received with code ${code2}`);
       client[kSocket] = null;
       client[kHTTP2Session] = null;
       if (client.destroyed) {
@@ -8210,8 +8210,8 @@ upgrade: ${upgrade}\r
           util.destroy(stream, err);
         }
       });
-      stream.once("frameError", (type, code) => {
-        const err = new InformationalError(`HTTP/2: "frameError" received - type ${type}, code ${code}`);
+      stream.once("frameError", (type, code2) => {
+        const err = new InformationalError(`HTTP/2: "frameError" received - type ${type}, code ${code2}`);
         errorRequest(client, request, err);
         if (client[kHTTP2Session] && !client[kHTTP2Session].destroyed && !this.closed && !this.destroyed) {
           h2State.streams -= 1;
@@ -11306,7 +11306,7 @@ var require_RetryHandler = __commonJS({
         if (this.handler.onBodySent) return this.handler.onBodySent(chunk);
       }
       static [kRetryHandlerDefaultRetry](err, { state, opts }, cb) {
-        const { statusCode, code, headers } = err;
+        const { statusCode, code: code2, headers } = err;
         const { method, retryOptions } = opts;
         const {
           maxRetries,
@@ -11319,7 +11319,7 @@ var require_RetryHandler = __commonJS({
         } = retryOptions;
         let { counter, currentTimeout } = state;
         currentTimeout = currentTimeout != null && currentTimeout > 0 ? currentTimeout : timeout;
-        if (code && code !== "UND_ERR_REQ_RETRY" && code !== "UND_ERR_SOCKET" && !errorCodes.includes(code)) {
+        if (code2 && code2 !== "UND_ERR_REQ_RETRY" && code2 !== "UND_ERR_SOCKET" && !errorCodes.includes(code2)) {
           cb(err);
           return;
         }
@@ -11561,8 +11561,8 @@ var require_headers = __commonJS({
     var assert2 = require("assert");
     var kHeadersMap = Symbol("headers map");
     var kHeadersSortedMap = Symbol("headers map sorted");
-    function isHTTPWhiteSpaceCharCode(code) {
-      return code === 10 || code === 13 || code === 9 || code === 32;
+    function isHTTPWhiteSpaceCharCode(code2) {
+      return code2 === 10 || code2 === 13 || code2 === 9 || code2 === 32;
     }
     function headerValueNormalize(potentialValue) {
       let i = 0;
@@ -15505,33 +15505,33 @@ var require_util6 = __commonJS({
         return false;
       }
       for (const char of value) {
-        const code = char.charCodeAt(0);
-        if (code >= 0 || code <= 8 || (code >= 10 || code <= 31) || code === 127) {
+        const code2 = char.charCodeAt(0);
+        if (code2 >= 0 || code2 <= 8 || (code2 >= 10 || code2 <= 31) || code2 === 127) {
           return false;
         }
       }
     }
     function validateCookieName(name) {
       for (const char of name) {
-        const code = char.charCodeAt(0);
-        if (code <= 32 || code > 127 || char === "(" || char === ")" || char === ">" || char === "<" || char === "@" || char === "," || char === ";" || char === ":" || char === "\\" || char === '"' || char === "/" || char === "[" || char === "]" || char === "?" || char === "=" || char === "{" || char === "}") {
+        const code2 = char.charCodeAt(0);
+        if (code2 <= 32 || code2 > 127 || char === "(" || char === ")" || char === ">" || char === "<" || char === "@" || char === "," || char === ";" || char === ":" || char === "\\" || char === '"' || char === "/" || char === "[" || char === "]" || char === "?" || char === "=" || char === "{" || char === "}") {
           throw new Error("Invalid cookie name");
         }
       }
     }
     function validateCookieValue(value) {
       for (const char of value) {
-        const code = char.charCodeAt(0);
-        if (code < 33 || // exclude CTLs (0-31)
-        code === 34 || code === 44 || code === 59 || code === 92 || code > 126) {
+        const code2 = char.charCodeAt(0);
+        if (code2 < 33 || // exclude CTLs (0-31)
+        code2 === 34 || code2 === 44 || code2 === 59 || code2 === 92 || code2 > 126) {
           throw new Error("Invalid header value");
         }
       }
     }
     function validateCookiePath(path) {
       for (const char of path) {
-        const code = char.charCodeAt(0);
-        if (code < 33 || char === ";") {
+        const code2 = char.charCodeAt(0);
+        if (code2 < 33 || char === ";") {
           throw new Error("Invalid cookie path");
         }
       }
@@ -16262,21 +16262,21 @@ var require_util7 = __commonJS({
         return false;
       }
       for (const char of protocol) {
-        const code = char.charCodeAt(0);
-        if (code < 33 || code > 126 || char === "(" || char === ")" || char === "<" || char === ">" || char === "@" || char === "," || char === ";" || char === ":" || char === "\\" || char === '"' || char === "/" || char === "[" || char === "]" || char === "?" || char === "=" || char === "{" || char === "}" || code === 32 || // SP
-        code === 9) {
+        const code2 = char.charCodeAt(0);
+        if (code2 < 33 || code2 > 126 || char === "(" || char === ")" || char === "<" || char === ">" || char === "@" || char === "," || char === ";" || char === ":" || char === "\\" || char === '"' || char === "/" || char === "[" || char === "]" || char === "?" || char === "=" || char === "{" || char === "}" || code2 === 32 || // SP
+        code2 === 9) {
           return false;
         }
       }
       return true;
     }
-    function isValidStatusCode(code) {
-      if (code >= 1e3 && code < 1015) {
-        return code !== 1004 && // reserved
-        code !== 1005 && // "MUST NOT be set as a status code"
-        code !== 1006;
+    function isValidStatusCode(code2) {
+      if (code2 >= 1e3 && code2 < 1015) {
+        return code2 !== 1004 && // reserved
+        code2 !== 1005 && // "MUST NOT be set as a status code"
+        code2 !== 1006;
       }
-      return code >= 3e3 && code <= 4999;
+      return code2 >= 3e3 && code2 <= 4999;
     }
     function failWebsocketConnection(ws, reason) {
       const { [kController]: controller, [kResponse]: response } = ws;
@@ -16414,25 +16414,25 @@ var require_connection = __commonJS({
     function onSocketClose() {
       const { ws } = this;
       const wasClean = ws[kSentClose] && ws[kReceivedClose];
-      let code = 1005;
+      let code2 = 1005;
       let reason = "";
       const result = ws[kByteParser].closingInfo;
       if (result) {
-        code = result.code ?? 1005;
+        code2 = result.code ?? 1005;
         reason = result.reason;
       } else if (!ws[kSentClose]) {
-        code = 1006;
+        code2 = 1006;
       }
       ws[kReadyState] = states.CLOSED;
       fireEvent("close", ws, CloseEvent, {
         wasClean,
-        code,
+        code: code2,
         reason
       });
       if (channels.close.hasSubscribers) {
         channels.close.publish({
           websocket: ws,
-          code,
+          code: code2,
           reason
         });
       }
@@ -16710,21 +16710,21 @@ var require_receiver = __commonJS({
         return buffer;
       }
       parseCloseBody(onlyCode, data) {
-        let code;
+        let code2;
         if (data.length >= 2) {
-          code = data.readUInt16BE(0);
+          code2 = data.readUInt16BE(0);
         }
         if (onlyCode) {
-          if (!isValidStatusCode(code)) {
+          if (!isValidStatusCode(code2)) {
             return null;
           }
-          return { code };
+          return { code: code2 };
         }
         let reason = data.subarray(2);
         if (reason[0] === 239 && reason[1] === 187 && reason[2] === 191) {
           reason = reason.subarray(3);
         }
-        if (code !== void 0 && !isValidStatusCode(code)) {
+        if (code2 !== void 0 && !isValidStatusCode(code2)) {
           return null;
         }
         try {
@@ -16732,7 +16732,7 @@ var require_receiver = __commonJS({
         } catch {
           return null;
         }
-        return { code, reason };
+        return { code: code2, reason };
       }
       get closingInfo() {
         return this.#info.closeInfo;
@@ -16842,16 +16842,16 @@ var require_websocket = __commonJS({
        * @param {number|undefined} code
        * @param {string|undefined} reason
        */
-      close(code = void 0, reason = void 0) {
+      close(code2 = void 0, reason = void 0) {
         webidl.brandCheck(this, _WebSocket);
-        if (code !== void 0) {
-          code = webidl.converters["unsigned short"](code, { clamp: true });
+        if (code2 !== void 0) {
+          code2 = webidl.converters["unsigned short"](code2, { clamp: true });
         }
         if (reason !== void 0) {
           reason = webidl.converters.USVString(reason);
         }
-        if (code !== void 0) {
-          if (code !== 1e3 && (code < 3e3 || code > 4999)) {
+        if (code2 !== void 0) {
+          if (code2 !== 1e3 && (code2 < 3e3 || code2 > 4999)) {
             throw new DOMException2("invalid code", "InvalidAccessError");
           }
         }
@@ -16871,12 +16871,12 @@ var require_websocket = __commonJS({
           this[kReadyState] = _WebSocket.CLOSING;
         } else if (!isClosing(this)) {
           const frame = new WebsocketFrameSend();
-          if (code !== void 0 && reason === void 0) {
+          if (code2 !== void 0 && reason === void 0) {
             frame.frameData = Buffer.allocUnsafe(2);
-            frame.frameData.writeUInt16BE(code, 0);
-          } else if (code !== void 0 && reason !== void 0) {
+            frame.frameData.writeUInt16BE(code2, 0);
+          } else if (code2 !== void 0 && reason !== void 0) {
             frame.frameData = Buffer.allocUnsafe(2 + reasonByteLength);
-            frame.frameData.writeUInt16BE(code, 0);
+            frame.frameData.writeUInt16BE(code2, 0);
             frame.frameData.write(reason, 2, "utf-8");
           } else {
             frame.frameData = emptyBuffer;
@@ -18270,9 +18270,9 @@ var require_summary = __commonJS({
        *
        * @returns {Summary} summary instance
        */
-      addCodeBlock(code, lang) {
+      addCodeBlock(code2, lang) {
         const attrs = Object.assign({}, lang && { lang });
-        const element = this.wrap("pre", this.wrap("code", code), attrs);
+        const element = this.wrap("pre", this.wrap("code", code2), attrs);
         return this.addRaw(element).addEOL();
       }
       /**
@@ -19209,14 +19209,14 @@ var require_toolrunner = __commonJS({
               state.processClosed = true;
               state.CheckComplete();
             });
-            cp.on("exit", (code) => {
-              state.processExitCode = code;
+            cp.on("exit", (code2) => {
+              state.processExitCode = code2;
               state.processExited = true;
-              this._debug(`Exit code ${code} received from tool '${this.toolPath}'`);
+              this._debug(`Exit code ${code2} received from tool '${this.toolPath}'`);
               state.CheckComplete();
             });
-            cp.on("close", (code) => {
-              state.processExitCode = code;
+            cp.on("close", (code2) => {
+              state.processExitCode = code2;
               state.processExited = true;
               state.processClosed = true;
               this._debug(`STDIO streams have closed for tool '${this.toolPath}'`);
@@ -23158,12 +23158,12 @@ function isIso7064Mod97(iban3) {
   let remainder = 0;
   const len = iban3.length;
   for (let i = 4; i < len; i++) {
-    const code = iban3.charCodeAt(i);
-    remainder = (code >= 65 ? remainder * 100 + (code - 55) : remainder * 10 + (code - 48)) % 97;
+    const code2 = iban3.charCodeAt(i);
+    remainder = (code2 >= 65 ? remainder * 100 + (code2 - 55) : remainder * 10 + (code2 - 48)) % 97;
   }
   for (let i = 0; i < 4; i++) {
-    const code = iban3.charCodeAt(i);
-    remainder = (code >= 65 ? remainder * 100 + (code - 55) : remainder * 10 + (code - 48)) % 97;
+    const code2 = iban3.charCodeAt(i);
+    remainder = (code2 >= 65 ? remainder * 100 + (code2 - 55) : remainder * 10 + (code2 - 48)) % 97;
   }
   return remainder === 1;
 }
@@ -33081,12 +33081,12 @@ function compileFn(schema, options2) {
   doc.write(outputAccessor === null ? `return true;` : `return ${outputAccessor};`);
   const constantNames = ["INVALID", ...ctx.constants.keys()];
   const constantValues = [INVALID, ...ctx.constants.values()];
-  const code = doc.content.join("\n");
+  const code2 = doc.content.join("\n");
   const fullCode = options2?.debug ? constantNames.length > 0 ? `// Constants: ${constantNames.join(", ")}
-${code}` : code : "";
+${code2}` : code2 : "";
   const F = Function;
   const factoryCode = `return (input) => {
-${code}
+${code2}
 }`;
   let fn;
   try {
@@ -40859,8 +40859,8 @@ var require_stringifyString = __commonJS2({
             case "u":
               {
                 str2 += json2.slice(start, i);
-                const code = json2.substr(i + 2, 4);
-                switch (code) {
+                const code2 = json2.substr(i + 2, 4);
+                switch (code2) {
                   case "0000":
                     str2 += "\\0";
                     break;
@@ -40886,8 +40886,8 @@ var require_stringifyString = __commonJS2({
                     str2 += "\\P";
                     break;
                   default:
-                    if (code.substr(0, 2) === "00")
-                      str2 += "\\x" + code.substr(2);
+                    if (code2.substr(0, 2) === "00")
+                      str2 += "\\x" + code2.substr(2);
                     else
                       str2 += json2.substr(i, 6);
                 }
@@ -43320,22 +43320,22 @@ var require_errors2 = __commonJS2({
   "../../node_modules/.pnpm/yaml@2.9.1/node_modules/yaml/dist/errors.js"(exports2) {
     "use strict";
     var YAMLError = class extends Error {
-      constructor(name, pos, code, message) {
+      constructor(name, pos, code2, message) {
         super();
         this.name = name;
-        this.code = code;
+        this.code = code2;
         this.message = message;
         this.pos = pos;
       }
     };
     var YAMLParseError = class extends YAMLError {
-      constructor(pos, code, message) {
-        super("YAMLParseError", pos, code, message);
+      constructor(pos, code2, message) {
+        super("YAMLParseError", pos, code2, message);
       }
     };
     var YAMLWarning = class extends YAMLError {
-      constructor(pos, code, message) {
-        super("YAMLWarning", pos, code, message);
+      constructor(pos, code2, message) {
+        super("YAMLWarning", pos, code2, message);
       }
     };
     var prettifyError2 = (src, lc) => (error62) => {
@@ -44222,7 +44222,7 @@ var require_resolve_flow_scalar = __commonJS2({
       const { offset, type, source, end } = scalar;
       let _type;
       let value;
-      const _onError = (rel, code, msg) => onError(offset + rel, code, msg);
+      const _onError = (rel, code2, msg) => onError(offset + rel, code2, msg);
       switch (type) {
         case "scalar":
           _type = Scalar.Scalar.PLAIN;
@@ -44420,9 +44420,9 @@ var require_resolve_flow_scalar = __commonJS2({
     function parseCharCode(source, offset, length, onError) {
       const cc = source.substr(offset, length);
       const ok = cc.length === length && /^[0-9a-fA-F]+$/.test(cc);
-      const code = ok ? parseInt(cc, 16) : NaN;
+      const code2 = ok ? parseInt(cc, 16) : NaN;
       try {
-        return String.fromCodePoint(code);
+        return String.fromCodePoint(code2);
       } catch {
         const raw = source.substr(offset - 2, length + 2);
         onError(offset - 2, "BAD_DQ_ESCAPE", `Invalid escape sequence ${raw}`);
@@ -44734,12 +44734,12 @@ var require_composer = __commonJS2({
         this.prelude = [];
         this.errors = [];
         this.warnings = [];
-        this.onError = (source, code, message, warning2) => {
+        this.onError = (source, code2, message, warning2) => {
           const pos = getErrorPos(source);
           if (warning2)
-            this.warnings.push(new errors.YAMLWarning(pos, code, message));
+            this.warnings.push(new errors.YAMLWarning(pos, code2, message));
           else
-            this.errors.push(new errors.YAMLParseError(pos, code, message));
+            this.errors.push(new errors.YAMLParseError(pos, code2, message));
         };
         this.directives = new directives.Directives({ version: options2.version || "1.2" });
         this.options = options2;
@@ -44899,12 +44899,12 @@ var require_cst_scalar = __commonJS2({
     var stringifyString = require_stringifyString();
     function resolveAsScalar(token, strict = true, onError) {
       if (token) {
-        const _onError = (pos, code, message) => {
+        const _onError = (pos, code2, message) => {
           const offset = typeof pos === "number" ? pos : Array.isArray(pos) ? pos[0] : pos.offset;
           if (onError)
-            onError(offset, code, message);
+            onError(offset, code2, message);
           else
-            throw new errors.YAMLParseError([offset, offset + 1], code, message);
+            throw new errors.YAMLParseError([offset, offset + 1], code2, message);
         };
         switch (token.type) {
           case "scalar":
@@ -47917,11 +47917,11 @@ var require_binary2 = __commonJS2({
     var BASE64_MAP = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=\n\r";
     function resolveYamlBinary(data) {
       if (data === null) return false;
-      var code, idx, bitlen = 0, max = data.length, map2 = BASE64_MAP;
+      var code2, idx, bitlen = 0, max = data.length, map2 = BASE64_MAP;
       for (idx = 0; idx < max; idx++) {
-        code = map2.indexOf(data.charAt(idx));
-        if (code > 64) continue;
-        if (code < 0) return false;
+        code2 = map2.indexOf(data.charAt(idx));
+        if (code2 > 64) continue;
+        if (code2 < 0) return false;
         bitlen += 6;
       }
       return bitlen % 8 === 0;
@@ -54001,13 +54001,25 @@ var MarketplaceCatalogSchema2 = attach2(marketplaceCatalogIssues2);
 
 // src/summary.ts
 function esc2(value) {
-  return value.replace(/\|/g, "\\|");
+  const entities = {
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;"
+  };
+  return value.replace(/\r\n|\r|\n|[^\p{L}\p{N} \t]/gu, (character) => {
+    if (character === "\r\n" || character === "\r" || character === "\n")
+      return "<br>";
+    return entities[character] ?? `&#${character.codePointAt(0)};`;
+  });
+}
+function code(value) {
+  return `<code>${esc2(value)}</code>`;
 }
 function renderSummary(decision, reasons, result, refinerRows = []) {
   const lines = [
     "## Intent Rollout Gate",
     "",
-    `**Decision:** \`${decision}\``,
+    `**Decision:** ${code(decision)}`,
     ""
   ];
   if (result !== null) {
@@ -54018,8 +54030,10 @@ function renderSummary(decision, reasons, result, refinerRows = []) {
       lines.push("| _(none declared)_ | \u2014 | \u2014 |");
     }
     for (const gate of result.evaluated.required_gates) {
-      const matched = gate.matched_gate_ids.length > 0 ? gate.matched_gate_ids.map((id) => `\`${esc2(id)}\``).join(", ") : "\u2014";
-      lines.push(`| \`${esc2(gate.pattern)}\` | ${gate.status} | ${matched} |`);
+      const matched = gate.matched_gate_ids.length > 0 ? gate.matched_gate_ids.map((id) => code(id)).join(", ") : "\u2014";
+      lines.push(
+        `| ${code(gate.pattern)} | ${esc2(gate.status)} | ${matched} |`
+      );
     }
     lines.push("");
     const blockingRows = result.evaluated.rows.filter((row) => row.blocking);
@@ -54030,7 +54044,7 @@ function renderSummary(decision, reasons, result, refinerRows = []) {
       lines.push("| Row | Gate ID | Reasons |");
       lines.push("| --- | --- | --- |");
       for (const row of blockingRows) {
-        const gateId = row.gate_id === null ? "_(schema-invalid)_" : `\`${esc2(row.gate_id)}\``;
+        const gateId = row.gate_id === null ? "_(schema-invalid)_" : code(row.gate_id);
         lines.push(
           `| ${row.index} | ${gateId} | ${esc2(row.reasons.join("; "))} |`
         );
@@ -54052,7 +54066,7 @@ function renderSummary(decision, reasons, result, refinerRows = []) {
     lines.push("| --- | --- | --- | --- |");
     for (const row of refinerRows) {
       lines.push(
-        `| ${esc2(row.verdict)} | \`${esc2(row.skillVersionId)}\` | ${row.behavioralDelta} | ${row.rekorRef === null ? "staging" : `\`${esc2(row.rekorRef)}\``} |`
+        `| ${esc2(row.verdict)} | ${code(row.skillVersionId)} | ${row.behavioralDelta} | ${row.rekorRef === null ? "staging" : code(row.rekorRef)} |`
       );
     }
     lines.push("");
@@ -54060,7 +54074,7 @@ function renderSummary(decision, reasons, result, refinerRows = []) {
   if (reasons.length > 0) {
     lines.push("### Blocking reasons", "");
     for (const reason of reasons) {
-      lines.push(`- ${reason}`);
+      lines.push(`- ${esc2(reason)}`);
     }
     lines.push("");
   }
