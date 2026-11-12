@@ -16,6 +16,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security
 
+- **Unreleased incoming evidence enforcement:** the Action entry now requires externally
+  admitted trust and independent signed in-toto v1 rows before policy evaluation. Vetted
+  Sigstore primitives verify real signatures, identities and inclusion proofs; bounded
+  descriptor reads reject oversized/growing inputs. Policy report-only exits remain
+  unchanged, with explicit verification-status. Self-consumer workflows now sign their
+  local fixtures offline; external pinned releases are unchanged. This breaking source
+  contract still requires release qualification and producer migration before publication.
+
 - **Release gate verifies the audit-harness it runs.** The reusable
   `release-gate.yml` fetched `emit-evidence` from an unreleased
   `intent-audit-harness` commit as a GitHub source archive, with no checksum.

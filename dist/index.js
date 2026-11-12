@@ -7246,7 +7246,7 @@ var require_client = __commonJS({
       );
       resume(client);
     }
-    var constants = require_constants3();
+    var constants2 = require_constants3();
     var createRedirectInterceptor = require_redirectInterceptor();
     var EMPTY_BUF = Buffer.alloc(0);
     async function lazyllhttp() {
@@ -7313,7 +7313,7 @@ var require_client = __commonJS({
       constructor(client, socket, { exports: exports3 }) {
         assert2(Number.isFinite(client[kMaxHeadersSize]) && client[kMaxHeadersSize] > 0);
         this.llhttp = exports3;
-        this.ptr = this.llhttp.llhttp_alloc(constants.TYPE.RESPONSE);
+        this.ptr = this.llhttp.llhttp_alloc(constants2.TYPE.RESPONSE);
         this.client = client;
         this.socket = socket;
         this.timeout = null;
@@ -7405,19 +7405,19 @@ var require_client = __commonJS({
             currentBufferRef = null;
           }
           const offset = llhttp.llhttp_get_error_pos(this.ptr) - currentBufferPtr;
-          if (ret === constants.ERROR.PAUSED_UPGRADE) {
+          if (ret === constants2.ERROR.PAUSED_UPGRADE) {
             this.onUpgrade(data.slice(offset));
-          } else if (ret === constants.ERROR.PAUSED) {
+          } else if (ret === constants2.ERROR.PAUSED) {
             this.paused = true;
             socket.unshift(data.slice(offset));
-          } else if (ret !== constants.ERROR.OK) {
+          } else if (ret !== constants2.ERROR.OK) {
             const ptr = llhttp.llhttp_get_error_reason(this.ptr);
             let message = "";
             if (ptr) {
               const len = new Uint8Array(llhttp.memory.buffer, ptr).indexOf(0);
               message = "Response does not match the HTTP/1.1 protocol (" + Buffer.from(llhttp.memory.buffer, ptr, len).toString() + ")";
             }
-            throw new HTTPParserError(message, constants.ERROR[ret], data.slice(offset));
+            throw new HTTPParserError(message, constants2.ERROR[ret], data.slice(offset));
           }
         } catch (err) {
           util.destroy(socket, err);
@@ -7587,7 +7587,7 @@ var require_client = __commonJS({
           socket[kBlocking] = false;
           resume(client);
         }
-        return pause ? constants.ERROR.PAUSED : 0;
+        return pause ? constants2.ERROR.PAUSED : 0;
       }
       onBody(buf) {
         const { client, socket, statusCode, maxResponseSize } = this;
@@ -7609,7 +7609,7 @@ var require_client = __commonJS({
         }
         this.bytesRead += buf.length;
         if (request.onData(buf) === false) {
-          return constants.ERROR.PAUSED;
+          return constants2.ERROR.PAUSED;
         }
       }
       onMessageComplete() {
@@ -7644,13 +7644,13 @@ var require_client = __commonJS({
         if (socket[kWriting]) {
           assert2.strictEqual(client[kRunning], 0);
           util.destroy(socket, new InformationalError("reset"));
-          return constants.ERROR.PAUSED;
+          return constants2.ERROR.PAUSED;
         } else if (!shouldKeepAlive) {
           util.destroy(socket, new InformationalError("reset"));
-          return constants.ERROR.PAUSED;
+          return constants2.ERROR.PAUSED;
         } else if (socket[kReset] && client[kRunning] === 0) {
           util.destroy(socket, new InformationalError("reset"));
-          return constants.ERROR.PAUSED;
+          return constants2.ERROR.PAUSED;
         } else if (client[kPipelining] === 1) {
           setImmediate(resume, client);
         } else {
@@ -13050,7 +13050,7 @@ var require_fetch = __commonJS({
         this.emit("terminated", error62);
       }
     };
-    function fetch(input2, init = {}) {
+    function fetch2(input2, init = {}) {
       webidl.argumentLengthCheck(arguments, 1, { header: "globalThis.fetch" });
       const p = createDeferredPromise();
       let requestObject;
@@ -13980,7 +13980,7 @@ var require_fetch = __commonJS({
       }
     }
     module2.exports = {
-      fetch,
+      fetch: fetch2,
       Fetch,
       fetching,
       finalizeAndReportTiming
@@ -17236,7 +17236,7 @@ var require_undici = __commonJS({
     module2.exports.getGlobalDispatcher = getGlobalDispatcher;
     if (util.nodeMajor > 16 || util.nodeMajor === 16 && util.nodeMinor >= 8) {
       let fetchImpl = null;
-      module2.exports.fetch = async function fetch(resource) {
+      module2.exports.fetch = async function fetch2(resource) {
         if (!fetchImpl) {
           fetchImpl = require_fetch().fetch;
         }
@@ -19812,9 +19812,10645 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
   }
 });
 
+// node_modules/.pnpm/@sigstore+protobuf-specs@0.5.2/node_modules/@sigstore/protobuf-specs/dist/__generated__/envelope.js
+var require_envelope = __commonJS({
+  "node_modules/.pnpm/@sigstore+protobuf-specs@0.5.2/node_modules/@sigstore/protobuf-specs/dist/__generated__/envelope.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.Signature = exports2.Envelope = void 0;
+    exports2.Envelope = {
+      fromJSON(object2) {
+        return {
+          payload: isSet(object2.payload) ? Buffer.from(bytesFromBase64(object2.payload)) : Buffer.alloc(0),
+          payloadType: isSet(object2.payloadType) ? globalThis.String(object2.payloadType) : "",
+          signatures: globalThis.Array.isArray(object2?.signatures) ? object2.signatures.map((e) => exports2.Signature.fromJSON(e)) : []
+        };
+      },
+      toJSON(message) {
+        const obj = {};
+        if (message.payload.length !== 0) {
+          obj.payload = base64FromBytes(message.payload);
+        }
+        if (message.payloadType !== "") {
+          obj.payloadType = message.payloadType;
+        }
+        if (message.signatures?.length) {
+          obj.signatures = message.signatures.map((e) => exports2.Signature.toJSON(e));
+        }
+        return obj;
+      }
+    };
+    exports2.Signature = {
+      fromJSON(object2) {
+        return {
+          sig: isSet(object2.sig) ? Buffer.from(bytesFromBase64(object2.sig)) : Buffer.alloc(0),
+          keyid: isSet(object2.keyid) ? globalThis.String(object2.keyid) : ""
+        };
+      },
+      toJSON(message) {
+        const obj = {};
+        if (message.sig.length !== 0) {
+          obj.sig = base64FromBytes(message.sig);
+        }
+        if (message.keyid !== "") {
+          obj.keyid = message.keyid;
+        }
+        return obj;
+      }
+    };
+    function bytesFromBase64(b64) {
+      return Uint8Array.from(globalThis.Buffer.from(b64, "base64"));
+    }
+    function base64FromBytes(arr) {
+      return globalThis.Buffer.from(arr).toString("base64");
+    }
+    function isSet(value) {
+      return value !== null && value !== void 0;
+    }
+  }
+});
+
+// node_modules/.pnpm/@sigstore+protobuf-specs@0.5.2/node_modules/@sigstore/protobuf-specs/dist/__generated__/google/protobuf/timestamp.js
+var require_timestamp3 = __commonJS({
+  "node_modules/.pnpm/@sigstore+protobuf-specs@0.5.2/node_modules/@sigstore/protobuf-specs/dist/__generated__/google/protobuf/timestamp.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.Timestamp = void 0;
+    exports2.Timestamp = {
+      fromJSON(object2) {
+        return {
+          seconds: isSet(object2.seconds) ? globalThis.String(object2.seconds) : "0",
+          nanos: isSet(object2.nanos) ? globalThis.Number(object2.nanos) : 0
+        };
+      },
+      toJSON(message) {
+        const obj = {};
+        if (message.seconds !== "0") {
+          obj.seconds = message.seconds;
+        }
+        if (message.nanos !== 0) {
+          obj.nanos = Math.round(message.nanos);
+        }
+        return obj;
+      }
+    };
+    function isSet(value) {
+      return value !== null && value !== void 0;
+    }
+  }
+});
+
+// node_modules/.pnpm/@sigstore+protobuf-specs@0.5.2/node_modules/@sigstore/protobuf-specs/dist/__generated__/sigstore_common.js
+var require_sigstore_common = __commonJS({
+  "node_modules/.pnpm/@sigstore+protobuf-specs@0.5.2/node_modules/@sigstore/protobuf-specs/dist/__generated__/sigstore_common.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.TimeRange = exports2.X509CertificateChain = exports2.SubjectAlternativeName = exports2.X509Certificate = exports2.DistinguishedName = exports2.ObjectIdentifierValuePair = exports2.ObjectIdentifier = exports2.PublicKeyIdentifier = exports2.PublicKey = exports2.RFC3161SignedTimestamp = exports2.LogId = exports2.MessageSignature = exports2.HashOutput = exports2.SubjectAlternativeNameType = exports2.PublicKeyDetails = exports2.HashAlgorithm = void 0;
+    exports2.hashAlgorithmFromJSON = hashAlgorithmFromJSON;
+    exports2.hashAlgorithmToJSON = hashAlgorithmToJSON;
+    exports2.publicKeyDetailsFromJSON = publicKeyDetailsFromJSON;
+    exports2.publicKeyDetailsToJSON = publicKeyDetailsToJSON;
+    exports2.subjectAlternativeNameTypeFromJSON = subjectAlternativeNameTypeFromJSON;
+    exports2.subjectAlternativeNameTypeToJSON = subjectAlternativeNameTypeToJSON;
+    var timestamp_1 = require_timestamp3();
+    var HashAlgorithm;
+    (function(HashAlgorithm2) {
+      HashAlgorithm2[HashAlgorithm2["HASH_ALGORITHM_UNSPECIFIED"] = 0] = "HASH_ALGORITHM_UNSPECIFIED";
+      HashAlgorithm2[HashAlgorithm2["SHA2_256"] = 1] = "SHA2_256";
+      HashAlgorithm2[HashAlgorithm2["SHA2_384"] = 2] = "SHA2_384";
+      HashAlgorithm2[HashAlgorithm2["SHA2_512"] = 3] = "SHA2_512";
+      HashAlgorithm2[HashAlgorithm2["SHA3_256"] = 4] = "SHA3_256";
+      HashAlgorithm2[HashAlgorithm2["SHA3_384"] = 5] = "SHA3_384";
+    })(HashAlgorithm || (exports2.HashAlgorithm = HashAlgorithm = {}));
+    function hashAlgorithmFromJSON(object2) {
+      switch (object2) {
+        case 0:
+        case "HASH_ALGORITHM_UNSPECIFIED":
+          return HashAlgorithm.HASH_ALGORITHM_UNSPECIFIED;
+        case 1:
+        case "SHA2_256":
+          return HashAlgorithm.SHA2_256;
+        case 2:
+        case "SHA2_384":
+          return HashAlgorithm.SHA2_384;
+        case 3:
+        case "SHA2_512":
+          return HashAlgorithm.SHA2_512;
+        case 4:
+        case "SHA3_256":
+          return HashAlgorithm.SHA3_256;
+        case 5:
+        case "SHA3_384":
+          return HashAlgorithm.SHA3_384;
+        default:
+          throw new globalThis.Error("Unrecognized enum value " + object2 + " for enum HashAlgorithm");
+      }
+    }
+    function hashAlgorithmToJSON(object2) {
+      switch (object2) {
+        case HashAlgorithm.HASH_ALGORITHM_UNSPECIFIED:
+          return "HASH_ALGORITHM_UNSPECIFIED";
+        case HashAlgorithm.SHA2_256:
+          return "SHA2_256";
+        case HashAlgorithm.SHA2_384:
+          return "SHA2_384";
+        case HashAlgorithm.SHA2_512:
+          return "SHA2_512";
+        case HashAlgorithm.SHA3_256:
+          return "SHA3_256";
+        case HashAlgorithm.SHA3_384:
+          return "SHA3_384";
+        default:
+          throw new globalThis.Error("Unrecognized enum value " + object2 + " for enum HashAlgorithm");
+      }
+    }
+    var PublicKeyDetails;
+    (function(PublicKeyDetails2) {
+      PublicKeyDetails2[PublicKeyDetails2["PUBLIC_KEY_DETAILS_UNSPECIFIED"] = 0] = "PUBLIC_KEY_DETAILS_UNSPECIFIED";
+      PublicKeyDetails2[PublicKeyDetails2["PKCS1_RSA_PKCS1V5"] = 1] = "PKCS1_RSA_PKCS1V5";
+      PublicKeyDetails2[PublicKeyDetails2["PKCS1_RSA_PSS"] = 2] = "PKCS1_RSA_PSS";
+      PublicKeyDetails2[PublicKeyDetails2["PKIX_RSA_PKCS1V5"] = 3] = "PKIX_RSA_PKCS1V5";
+      PublicKeyDetails2[PublicKeyDetails2["PKIX_RSA_PSS"] = 4] = "PKIX_RSA_PSS";
+      PublicKeyDetails2[PublicKeyDetails2["PKIX_RSA_PKCS1V15_2048_SHA256"] = 9] = "PKIX_RSA_PKCS1V15_2048_SHA256";
+      PublicKeyDetails2[PublicKeyDetails2["PKIX_RSA_PKCS1V15_3072_SHA256"] = 10] = "PKIX_RSA_PKCS1V15_3072_SHA256";
+      PublicKeyDetails2[PublicKeyDetails2["PKIX_RSA_PKCS1V15_4096_SHA256"] = 11] = "PKIX_RSA_PKCS1V15_4096_SHA256";
+      PublicKeyDetails2[PublicKeyDetails2["PKIX_RSA_PSS_2048_SHA256"] = 16] = "PKIX_RSA_PSS_2048_SHA256";
+      PublicKeyDetails2[PublicKeyDetails2["PKIX_RSA_PSS_3072_SHA256"] = 17] = "PKIX_RSA_PSS_3072_SHA256";
+      PublicKeyDetails2[PublicKeyDetails2["PKIX_RSA_PSS_4096_SHA256"] = 18] = "PKIX_RSA_PSS_4096_SHA256";
+      PublicKeyDetails2[PublicKeyDetails2["PKIX_ECDSA_P256_HMAC_SHA_256"] = 6] = "PKIX_ECDSA_P256_HMAC_SHA_256";
+      PublicKeyDetails2[PublicKeyDetails2["PKIX_ECDSA_P256_SHA_256"] = 5] = "PKIX_ECDSA_P256_SHA_256";
+      PublicKeyDetails2[PublicKeyDetails2["PKIX_ECDSA_P384_SHA_384"] = 12] = "PKIX_ECDSA_P384_SHA_384";
+      PublicKeyDetails2[PublicKeyDetails2["PKIX_ECDSA_P521_SHA_512"] = 13] = "PKIX_ECDSA_P521_SHA_512";
+      PublicKeyDetails2[PublicKeyDetails2["PKIX_ED25519"] = 7] = "PKIX_ED25519";
+      PublicKeyDetails2[PublicKeyDetails2["PKIX_ED25519_PH"] = 8] = "PKIX_ED25519_PH";
+      PublicKeyDetails2[PublicKeyDetails2["PKIX_ECDSA_P384_SHA_256"] = 19] = "PKIX_ECDSA_P384_SHA_256";
+      PublicKeyDetails2[PublicKeyDetails2["PKIX_ECDSA_P521_SHA_256"] = 20] = "PKIX_ECDSA_P521_SHA_256";
+      PublicKeyDetails2[PublicKeyDetails2["LMS_SHA256"] = 14] = "LMS_SHA256";
+      PublicKeyDetails2[PublicKeyDetails2["LMOTS_SHA256"] = 15] = "LMOTS_SHA256";
+      PublicKeyDetails2[PublicKeyDetails2["ML_DSA_44"] = 23] = "ML_DSA_44";
+      PublicKeyDetails2[PublicKeyDetails2["ML_DSA_65"] = 21] = "ML_DSA_65";
+      PublicKeyDetails2[PublicKeyDetails2["ML_DSA_87"] = 22] = "ML_DSA_87";
+    })(PublicKeyDetails || (exports2.PublicKeyDetails = PublicKeyDetails = {}));
+    function publicKeyDetailsFromJSON(object2) {
+      switch (object2) {
+        case 0:
+        case "PUBLIC_KEY_DETAILS_UNSPECIFIED":
+          return PublicKeyDetails.PUBLIC_KEY_DETAILS_UNSPECIFIED;
+        case 1:
+        case "PKCS1_RSA_PKCS1V5":
+          return PublicKeyDetails.PKCS1_RSA_PKCS1V5;
+        case 2:
+        case "PKCS1_RSA_PSS":
+          return PublicKeyDetails.PKCS1_RSA_PSS;
+        case 3:
+        case "PKIX_RSA_PKCS1V5":
+          return PublicKeyDetails.PKIX_RSA_PKCS1V5;
+        case 4:
+        case "PKIX_RSA_PSS":
+          return PublicKeyDetails.PKIX_RSA_PSS;
+        case 9:
+        case "PKIX_RSA_PKCS1V15_2048_SHA256":
+          return PublicKeyDetails.PKIX_RSA_PKCS1V15_2048_SHA256;
+        case 10:
+        case "PKIX_RSA_PKCS1V15_3072_SHA256":
+          return PublicKeyDetails.PKIX_RSA_PKCS1V15_3072_SHA256;
+        case 11:
+        case "PKIX_RSA_PKCS1V15_4096_SHA256":
+          return PublicKeyDetails.PKIX_RSA_PKCS1V15_4096_SHA256;
+        case 16:
+        case "PKIX_RSA_PSS_2048_SHA256":
+          return PublicKeyDetails.PKIX_RSA_PSS_2048_SHA256;
+        case 17:
+        case "PKIX_RSA_PSS_3072_SHA256":
+          return PublicKeyDetails.PKIX_RSA_PSS_3072_SHA256;
+        case 18:
+        case "PKIX_RSA_PSS_4096_SHA256":
+          return PublicKeyDetails.PKIX_RSA_PSS_4096_SHA256;
+        case 6:
+        case "PKIX_ECDSA_P256_HMAC_SHA_256":
+          return PublicKeyDetails.PKIX_ECDSA_P256_HMAC_SHA_256;
+        case 5:
+        case "PKIX_ECDSA_P256_SHA_256":
+          return PublicKeyDetails.PKIX_ECDSA_P256_SHA_256;
+        case 12:
+        case "PKIX_ECDSA_P384_SHA_384":
+          return PublicKeyDetails.PKIX_ECDSA_P384_SHA_384;
+        case 13:
+        case "PKIX_ECDSA_P521_SHA_512":
+          return PublicKeyDetails.PKIX_ECDSA_P521_SHA_512;
+        case 7:
+        case "PKIX_ED25519":
+          return PublicKeyDetails.PKIX_ED25519;
+        case 8:
+        case "PKIX_ED25519_PH":
+          return PublicKeyDetails.PKIX_ED25519_PH;
+        case 19:
+        case "PKIX_ECDSA_P384_SHA_256":
+          return PublicKeyDetails.PKIX_ECDSA_P384_SHA_256;
+        case 20:
+        case "PKIX_ECDSA_P521_SHA_256":
+          return PublicKeyDetails.PKIX_ECDSA_P521_SHA_256;
+        case 14:
+        case "LMS_SHA256":
+          return PublicKeyDetails.LMS_SHA256;
+        case 15:
+        case "LMOTS_SHA256":
+          return PublicKeyDetails.LMOTS_SHA256;
+        case 23:
+        case "ML_DSA_44":
+          return PublicKeyDetails.ML_DSA_44;
+        case 21:
+        case "ML_DSA_65":
+          return PublicKeyDetails.ML_DSA_65;
+        case 22:
+        case "ML_DSA_87":
+          return PublicKeyDetails.ML_DSA_87;
+        default:
+          throw new globalThis.Error("Unrecognized enum value " + object2 + " for enum PublicKeyDetails");
+      }
+    }
+    function publicKeyDetailsToJSON(object2) {
+      switch (object2) {
+        case PublicKeyDetails.PUBLIC_KEY_DETAILS_UNSPECIFIED:
+          return "PUBLIC_KEY_DETAILS_UNSPECIFIED";
+        case PublicKeyDetails.PKCS1_RSA_PKCS1V5:
+          return "PKCS1_RSA_PKCS1V5";
+        case PublicKeyDetails.PKCS1_RSA_PSS:
+          return "PKCS1_RSA_PSS";
+        case PublicKeyDetails.PKIX_RSA_PKCS1V5:
+          return "PKIX_RSA_PKCS1V5";
+        case PublicKeyDetails.PKIX_RSA_PSS:
+          return "PKIX_RSA_PSS";
+        case PublicKeyDetails.PKIX_RSA_PKCS1V15_2048_SHA256:
+          return "PKIX_RSA_PKCS1V15_2048_SHA256";
+        case PublicKeyDetails.PKIX_RSA_PKCS1V15_3072_SHA256:
+          return "PKIX_RSA_PKCS1V15_3072_SHA256";
+        case PublicKeyDetails.PKIX_RSA_PKCS1V15_4096_SHA256:
+          return "PKIX_RSA_PKCS1V15_4096_SHA256";
+        case PublicKeyDetails.PKIX_RSA_PSS_2048_SHA256:
+          return "PKIX_RSA_PSS_2048_SHA256";
+        case PublicKeyDetails.PKIX_RSA_PSS_3072_SHA256:
+          return "PKIX_RSA_PSS_3072_SHA256";
+        case PublicKeyDetails.PKIX_RSA_PSS_4096_SHA256:
+          return "PKIX_RSA_PSS_4096_SHA256";
+        case PublicKeyDetails.PKIX_ECDSA_P256_HMAC_SHA_256:
+          return "PKIX_ECDSA_P256_HMAC_SHA_256";
+        case PublicKeyDetails.PKIX_ECDSA_P256_SHA_256:
+          return "PKIX_ECDSA_P256_SHA_256";
+        case PublicKeyDetails.PKIX_ECDSA_P384_SHA_384:
+          return "PKIX_ECDSA_P384_SHA_384";
+        case PublicKeyDetails.PKIX_ECDSA_P521_SHA_512:
+          return "PKIX_ECDSA_P521_SHA_512";
+        case PublicKeyDetails.PKIX_ED25519:
+          return "PKIX_ED25519";
+        case PublicKeyDetails.PKIX_ED25519_PH:
+          return "PKIX_ED25519_PH";
+        case PublicKeyDetails.PKIX_ECDSA_P384_SHA_256:
+          return "PKIX_ECDSA_P384_SHA_256";
+        case PublicKeyDetails.PKIX_ECDSA_P521_SHA_256:
+          return "PKIX_ECDSA_P521_SHA_256";
+        case PublicKeyDetails.LMS_SHA256:
+          return "LMS_SHA256";
+        case PublicKeyDetails.LMOTS_SHA256:
+          return "LMOTS_SHA256";
+        case PublicKeyDetails.ML_DSA_44:
+          return "ML_DSA_44";
+        case PublicKeyDetails.ML_DSA_65:
+          return "ML_DSA_65";
+        case PublicKeyDetails.ML_DSA_87:
+          return "ML_DSA_87";
+        default:
+          throw new globalThis.Error("Unrecognized enum value " + object2 + " for enum PublicKeyDetails");
+      }
+    }
+    var SubjectAlternativeNameType;
+    (function(SubjectAlternativeNameType2) {
+      SubjectAlternativeNameType2[SubjectAlternativeNameType2["SUBJECT_ALTERNATIVE_NAME_TYPE_UNSPECIFIED"] = 0] = "SUBJECT_ALTERNATIVE_NAME_TYPE_UNSPECIFIED";
+      SubjectAlternativeNameType2[SubjectAlternativeNameType2["EMAIL"] = 1] = "EMAIL";
+      SubjectAlternativeNameType2[SubjectAlternativeNameType2["URI"] = 2] = "URI";
+      SubjectAlternativeNameType2[SubjectAlternativeNameType2["OTHER_NAME"] = 3] = "OTHER_NAME";
+    })(SubjectAlternativeNameType || (exports2.SubjectAlternativeNameType = SubjectAlternativeNameType = {}));
+    function subjectAlternativeNameTypeFromJSON(object2) {
+      switch (object2) {
+        case 0:
+        case "SUBJECT_ALTERNATIVE_NAME_TYPE_UNSPECIFIED":
+          return SubjectAlternativeNameType.SUBJECT_ALTERNATIVE_NAME_TYPE_UNSPECIFIED;
+        case 1:
+        case "EMAIL":
+          return SubjectAlternativeNameType.EMAIL;
+        case 2:
+        case "URI":
+          return SubjectAlternativeNameType.URI;
+        case 3:
+        case "OTHER_NAME":
+          return SubjectAlternativeNameType.OTHER_NAME;
+        default:
+          throw new globalThis.Error("Unrecognized enum value " + object2 + " for enum SubjectAlternativeNameType");
+      }
+    }
+    function subjectAlternativeNameTypeToJSON(object2) {
+      switch (object2) {
+        case SubjectAlternativeNameType.SUBJECT_ALTERNATIVE_NAME_TYPE_UNSPECIFIED:
+          return "SUBJECT_ALTERNATIVE_NAME_TYPE_UNSPECIFIED";
+        case SubjectAlternativeNameType.EMAIL:
+          return "EMAIL";
+        case SubjectAlternativeNameType.URI:
+          return "URI";
+        case SubjectAlternativeNameType.OTHER_NAME:
+          return "OTHER_NAME";
+        default:
+          throw new globalThis.Error("Unrecognized enum value " + object2 + " for enum SubjectAlternativeNameType");
+      }
+    }
+    exports2.HashOutput = {
+      fromJSON(object2) {
+        return {
+          algorithm: isSet(object2.algorithm) ? hashAlgorithmFromJSON(object2.algorithm) : 0,
+          digest: isSet(object2.digest) ? Buffer.from(bytesFromBase64(object2.digest)) : Buffer.alloc(0)
+        };
+      },
+      toJSON(message) {
+        const obj = {};
+        if (message.algorithm !== 0) {
+          obj.algorithm = hashAlgorithmToJSON(message.algorithm);
+        }
+        if (message.digest.length !== 0) {
+          obj.digest = base64FromBytes(message.digest);
+        }
+        return obj;
+      }
+    };
+    exports2.MessageSignature = {
+      fromJSON(object2) {
+        return {
+          messageDigest: isSet(object2.messageDigest) ? exports2.HashOutput.fromJSON(object2.messageDigest) : void 0,
+          signature: isSet(object2.signature) ? Buffer.from(bytesFromBase64(object2.signature)) : Buffer.alloc(0)
+        };
+      },
+      toJSON(message) {
+        const obj = {};
+        if (message.messageDigest !== void 0) {
+          obj.messageDigest = exports2.HashOutput.toJSON(message.messageDigest);
+        }
+        if (message.signature.length !== 0) {
+          obj.signature = base64FromBytes(message.signature);
+        }
+        return obj;
+      }
+    };
+    exports2.LogId = {
+      fromJSON(object2) {
+        return { keyId: isSet(object2.keyId) ? Buffer.from(bytesFromBase64(object2.keyId)) : Buffer.alloc(0) };
+      },
+      toJSON(message) {
+        const obj = {};
+        if (message.keyId.length !== 0) {
+          obj.keyId = base64FromBytes(message.keyId);
+        }
+        return obj;
+      }
+    };
+    exports2.RFC3161SignedTimestamp = {
+      fromJSON(object2) {
+        return {
+          signedTimestamp: isSet(object2.signedTimestamp) ? Buffer.from(bytesFromBase64(object2.signedTimestamp)) : Buffer.alloc(0)
+        };
+      },
+      toJSON(message) {
+        const obj = {};
+        if (message.signedTimestamp.length !== 0) {
+          obj.signedTimestamp = base64FromBytes(message.signedTimestamp);
+        }
+        return obj;
+      }
+    };
+    exports2.PublicKey = {
+      fromJSON(object2) {
+        return {
+          rawBytes: isSet(object2.rawBytes) ? Buffer.from(bytesFromBase64(object2.rawBytes)) : void 0,
+          keyDetails: isSet(object2.keyDetails) ? publicKeyDetailsFromJSON(object2.keyDetails) : 0,
+          validFor: isSet(object2.validFor) ? exports2.TimeRange.fromJSON(object2.validFor) : void 0
+        };
+      },
+      toJSON(message) {
+        const obj = {};
+        if (message.rawBytes !== void 0) {
+          obj.rawBytes = base64FromBytes(message.rawBytes);
+        }
+        if (message.keyDetails !== 0) {
+          obj.keyDetails = publicKeyDetailsToJSON(message.keyDetails);
+        }
+        if (message.validFor !== void 0) {
+          obj.validFor = exports2.TimeRange.toJSON(message.validFor);
+        }
+        return obj;
+      }
+    };
+    exports2.PublicKeyIdentifier = {
+      fromJSON(object2) {
+        return { hint: isSet(object2.hint) ? globalThis.String(object2.hint) : "" };
+      },
+      toJSON(message) {
+        const obj = {};
+        if (message.hint !== "") {
+          obj.hint = message.hint;
+        }
+        return obj;
+      }
+    };
+    exports2.ObjectIdentifier = {
+      fromJSON(object2) {
+        return { id: globalThis.Array.isArray(object2?.id) ? object2.id.map((e) => globalThis.Number(e)) : [] };
+      },
+      toJSON(message) {
+        const obj = {};
+        if (message.id?.length) {
+          obj.id = message.id.map((e) => Math.round(e));
+        }
+        return obj;
+      }
+    };
+    exports2.ObjectIdentifierValuePair = {
+      fromJSON(object2) {
+        return {
+          oid: isSet(object2.oid) ? exports2.ObjectIdentifier.fromJSON(object2.oid) : void 0,
+          value: isSet(object2.value) ? Buffer.from(bytesFromBase64(object2.value)) : Buffer.alloc(0)
+        };
+      },
+      toJSON(message) {
+        const obj = {};
+        if (message.oid !== void 0) {
+          obj.oid = exports2.ObjectIdentifier.toJSON(message.oid);
+        }
+        if (message.value.length !== 0) {
+          obj.value = base64FromBytes(message.value);
+        }
+        return obj;
+      }
+    };
+    exports2.DistinguishedName = {
+      fromJSON(object2) {
+        return {
+          organization: isSet(object2.organization) ? globalThis.String(object2.organization) : "",
+          commonName: isSet(object2.commonName) ? globalThis.String(object2.commonName) : ""
+        };
+      },
+      toJSON(message) {
+        const obj = {};
+        if (message.organization !== "") {
+          obj.organization = message.organization;
+        }
+        if (message.commonName !== "") {
+          obj.commonName = message.commonName;
+        }
+        return obj;
+      }
+    };
+    exports2.X509Certificate = {
+      fromJSON(object2) {
+        return { rawBytes: isSet(object2.rawBytes) ? Buffer.from(bytesFromBase64(object2.rawBytes)) : Buffer.alloc(0) };
+      },
+      toJSON(message) {
+        const obj = {};
+        if (message.rawBytes.length !== 0) {
+          obj.rawBytes = base64FromBytes(message.rawBytes);
+        }
+        return obj;
+      }
+    };
+    exports2.SubjectAlternativeName = {
+      fromJSON(object2) {
+        return {
+          type: isSet(object2.type) ? subjectAlternativeNameTypeFromJSON(object2.type) : 0,
+          identity: isSet(object2.regexp) ? { $case: "regexp", regexp: globalThis.String(object2.regexp) } : isSet(object2.value) ? { $case: "value", value: globalThis.String(object2.value) } : void 0
+        };
+      },
+      toJSON(message) {
+        const obj = {};
+        if (message.type !== 0) {
+          obj.type = subjectAlternativeNameTypeToJSON(message.type);
+        }
+        if (message.identity?.$case === "regexp") {
+          obj.regexp = message.identity.regexp;
+        } else if (message.identity?.$case === "value") {
+          obj.value = message.identity.value;
+        }
+        return obj;
+      }
+    };
+    exports2.X509CertificateChain = {
+      fromJSON(object2) {
+        return {
+          certificates: globalThis.Array.isArray(object2?.certificates) ? object2.certificates.map((e) => exports2.X509Certificate.fromJSON(e)) : []
+        };
+      },
+      toJSON(message) {
+        const obj = {};
+        if (message.certificates?.length) {
+          obj.certificates = message.certificates.map((e) => exports2.X509Certificate.toJSON(e));
+        }
+        return obj;
+      }
+    };
+    exports2.TimeRange = {
+      fromJSON(object2) {
+        return {
+          start: isSet(object2.start) ? fromJsonTimestamp(object2.start) : void 0,
+          end: isSet(object2.end) ? fromJsonTimestamp(object2.end) : void 0
+        };
+      },
+      toJSON(message) {
+        const obj = {};
+        if (message.start !== void 0) {
+          obj.start = message.start.toISOString();
+        }
+        if (message.end !== void 0) {
+          obj.end = message.end.toISOString();
+        }
+        return obj;
+      }
+    };
+    function bytesFromBase64(b64) {
+      return Uint8Array.from(globalThis.Buffer.from(b64, "base64"));
+    }
+    function base64FromBytes(arr) {
+      return globalThis.Buffer.from(arr).toString("base64");
+    }
+    function fromTimestamp(t) {
+      let millis = (globalThis.Number(t.seconds) || 0) * 1e3;
+      millis += (t.nanos || 0) / 1e6;
+      return new globalThis.Date(millis);
+    }
+    function fromJsonTimestamp(o) {
+      if (o instanceof globalThis.Date) {
+        return o;
+      } else if (typeof o === "string") {
+        return new globalThis.Date(o);
+      } else {
+        return fromTimestamp(timestamp_1.Timestamp.fromJSON(o));
+      }
+    }
+    function isSet(value) {
+      return value !== null && value !== void 0;
+    }
+  }
+});
+
+// node_modules/.pnpm/@sigstore+protobuf-specs@0.5.2/node_modules/@sigstore/protobuf-specs/dist/__generated__/sigstore_rekor.js
+var require_sigstore_rekor = __commonJS({
+  "node_modules/.pnpm/@sigstore+protobuf-specs@0.5.2/node_modules/@sigstore/protobuf-specs/dist/__generated__/sigstore_rekor.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.TransparencyLogEntry = exports2.InclusionPromise = exports2.InclusionProof = exports2.Checkpoint = exports2.KindVersion = void 0;
+    var sigstore_common_1 = require_sigstore_common();
+    exports2.KindVersion = {
+      fromJSON(object2) {
+        return {
+          kind: isSet(object2.kind) ? globalThis.String(object2.kind) : "",
+          version: isSet(object2.version) ? globalThis.String(object2.version) : ""
+        };
+      },
+      toJSON(message) {
+        const obj = {};
+        if (message.kind !== "") {
+          obj.kind = message.kind;
+        }
+        if (message.version !== "") {
+          obj.version = message.version;
+        }
+        return obj;
+      }
+    };
+    exports2.Checkpoint = {
+      fromJSON(object2) {
+        return { envelope: isSet(object2.envelope) ? globalThis.String(object2.envelope) : "" };
+      },
+      toJSON(message) {
+        const obj = {};
+        if (message.envelope !== "") {
+          obj.envelope = message.envelope;
+        }
+        return obj;
+      }
+    };
+    exports2.InclusionProof = {
+      fromJSON(object2) {
+        return {
+          logIndex: isSet(object2.logIndex) ? globalThis.String(object2.logIndex) : "0",
+          rootHash: isSet(object2.rootHash) ? Buffer.from(bytesFromBase64(object2.rootHash)) : Buffer.alloc(0),
+          treeSize: isSet(object2.treeSize) ? globalThis.String(object2.treeSize) : "0",
+          hashes: globalThis.Array.isArray(object2?.hashes) ? object2.hashes.map((e) => Buffer.from(bytesFromBase64(e))) : [],
+          checkpoint: isSet(object2.checkpoint) ? exports2.Checkpoint.fromJSON(object2.checkpoint) : void 0
+        };
+      },
+      toJSON(message) {
+        const obj = {};
+        if (message.logIndex !== "0") {
+          obj.logIndex = message.logIndex;
+        }
+        if (message.rootHash.length !== 0) {
+          obj.rootHash = base64FromBytes(message.rootHash);
+        }
+        if (message.treeSize !== "0") {
+          obj.treeSize = message.treeSize;
+        }
+        if (message.hashes?.length) {
+          obj.hashes = message.hashes.map((e) => base64FromBytes(e));
+        }
+        if (message.checkpoint !== void 0) {
+          obj.checkpoint = exports2.Checkpoint.toJSON(message.checkpoint);
+        }
+        return obj;
+      }
+    };
+    exports2.InclusionPromise = {
+      fromJSON(object2) {
+        return {
+          signedEntryTimestamp: isSet(object2.signedEntryTimestamp) ? Buffer.from(bytesFromBase64(object2.signedEntryTimestamp)) : Buffer.alloc(0)
+        };
+      },
+      toJSON(message) {
+        const obj = {};
+        if (message.signedEntryTimestamp.length !== 0) {
+          obj.signedEntryTimestamp = base64FromBytes(message.signedEntryTimestamp);
+        }
+        return obj;
+      }
+    };
+    exports2.TransparencyLogEntry = {
+      fromJSON(object2) {
+        return {
+          logIndex: isSet(object2.logIndex) ? globalThis.String(object2.logIndex) : "0",
+          logId: isSet(object2.logId) ? sigstore_common_1.LogId.fromJSON(object2.logId) : void 0,
+          kindVersion: isSet(object2.kindVersion) ? exports2.KindVersion.fromJSON(object2.kindVersion) : void 0,
+          integratedTime: isSet(object2.integratedTime) ? globalThis.String(object2.integratedTime) : "0",
+          inclusionPromise: isSet(object2.inclusionPromise) ? exports2.InclusionPromise.fromJSON(object2.inclusionPromise) : void 0,
+          inclusionProof: isSet(object2.inclusionProof) ? exports2.InclusionProof.fromJSON(object2.inclusionProof) : void 0,
+          canonicalizedBody: isSet(object2.canonicalizedBody) ? Buffer.from(bytesFromBase64(object2.canonicalizedBody)) : Buffer.alloc(0)
+        };
+      },
+      toJSON(message) {
+        const obj = {};
+        if (message.logIndex !== "0") {
+          obj.logIndex = message.logIndex;
+        }
+        if (message.logId !== void 0) {
+          obj.logId = sigstore_common_1.LogId.toJSON(message.logId);
+        }
+        if (message.kindVersion !== void 0) {
+          obj.kindVersion = exports2.KindVersion.toJSON(message.kindVersion);
+        }
+        if (message.integratedTime !== "0") {
+          obj.integratedTime = message.integratedTime;
+        }
+        if (message.inclusionPromise !== void 0) {
+          obj.inclusionPromise = exports2.InclusionPromise.toJSON(message.inclusionPromise);
+        }
+        if (message.inclusionProof !== void 0) {
+          obj.inclusionProof = exports2.InclusionProof.toJSON(message.inclusionProof);
+        }
+        if (message.canonicalizedBody.length !== 0) {
+          obj.canonicalizedBody = base64FromBytes(message.canonicalizedBody);
+        }
+        return obj;
+      }
+    };
+    function bytesFromBase64(b64) {
+      return Uint8Array.from(globalThis.Buffer.from(b64, "base64"));
+    }
+    function base64FromBytes(arr) {
+      return globalThis.Buffer.from(arr).toString("base64");
+    }
+    function isSet(value) {
+      return value !== null && value !== void 0;
+    }
+  }
+});
+
+// node_modules/.pnpm/@sigstore+protobuf-specs@0.5.2/node_modules/@sigstore/protobuf-specs/dist/__generated__/sigstore_bundle.js
+var require_sigstore_bundle = __commonJS({
+  "node_modules/.pnpm/@sigstore+protobuf-specs@0.5.2/node_modules/@sigstore/protobuf-specs/dist/__generated__/sigstore_bundle.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.Bundle = exports2.VerificationMaterial = exports2.TimestampVerificationData = void 0;
+    var envelope_1 = require_envelope();
+    var sigstore_common_1 = require_sigstore_common();
+    var sigstore_rekor_1 = require_sigstore_rekor();
+    exports2.TimestampVerificationData = {
+      fromJSON(object2) {
+        return {
+          rfc3161Timestamps: globalThis.Array.isArray(object2?.rfc3161Timestamps) ? object2.rfc3161Timestamps.map((e) => sigstore_common_1.RFC3161SignedTimestamp.fromJSON(e)) : []
+        };
+      },
+      toJSON(message) {
+        const obj = {};
+        if (message.rfc3161Timestamps?.length) {
+          obj.rfc3161Timestamps = message.rfc3161Timestamps.map((e) => sigstore_common_1.RFC3161SignedTimestamp.toJSON(e));
+        }
+        return obj;
+      }
+    };
+    exports2.VerificationMaterial = {
+      fromJSON(object2) {
+        return {
+          content: isSet(object2.publicKey) ? { $case: "publicKey", publicKey: sigstore_common_1.PublicKeyIdentifier.fromJSON(object2.publicKey) } : isSet(object2.x509CertificateChain) ? {
+            $case: "x509CertificateChain",
+            x509CertificateChain: sigstore_common_1.X509CertificateChain.fromJSON(object2.x509CertificateChain)
+          } : isSet(object2.certificate) ? { $case: "certificate", certificate: sigstore_common_1.X509Certificate.fromJSON(object2.certificate) } : void 0,
+          tlogEntries: globalThis.Array.isArray(object2?.tlogEntries) ? object2.tlogEntries.map((e) => sigstore_rekor_1.TransparencyLogEntry.fromJSON(e)) : [],
+          timestampVerificationData: isSet(object2.timestampVerificationData) ? exports2.TimestampVerificationData.fromJSON(object2.timestampVerificationData) : void 0
+        };
+      },
+      toJSON(message) {
+        const obj = {};
+        if (message.content?.$case === "publicKey") {
+          obj.publicKey = sigstore_common_1.PublicKeyIdentifier.toJSON(message.content.publicKey);
+        } else if (message.content?.$case === "x509CertificateChain") {
+          obj.x509CertificateChain = sigstore_common_1.X509CertificateChain.toJSON(message.content.x509CertificateChain);
+        } else if (message.content?.$case === "certificate") {
+          obj.certificate = sigstore_common_1.X509Certificate.toJSON(message.content.certificate);
+        }
+        if (message.tlogEntries?.length) {
+          obj.tlogEntries = message.tlogEntries.map((e) => sigstore_rekor_1.TransparencyLogEntry.toJSON(e));
+        }
+        if (message.timestampVerificationData !== void 0) {
+          obj.timestampVerificationData = exports2.TimestampVerificationData.toJSON(message.timestampVerificationData);
+        }
+        return obj;
+      }
+    };
+    exports2.Bundle = {
+      fromJSON(object2) {
+        return {
+          mediaType: isSet(object2.mediaType) ? globalThis.String(object2.mediaType) : "",
+          verificationMaterial: isSet(object2.verificationMaterial) ? exports2.VerificationMaterial.fromJSON(object2.verificationMaterial) : void 0,
+          content: isSet(object2.messageSignature) ? { $case: "messageSignature", messageSignature: sigstore_common_1.MessageSignature.fromJSON(object2.messageSignature) } : isSet(object2.dsseEnvelope) ? { $case: "dsseEnvelope", dsseEnvelope: envelope_1.Envelope.fromJSON(object2.dsseEnvelope) } : void 0
+        };
+      },
+      toJSON(message) {
+        const obj = {};
+        if (message.mediaType !== "") {
+          obj.mediaType = message.mediaType;
+        }
+        if (message.verificationMaterial !== void 0) {
+          obj.verificationMaterial = exports2.VerificationMaterial.toJSON(message.verificationMaterial);
+        }
+        if (message.content?.$case === "messageSignature") {
+          obj.messageSignature = sigstore_common_1.MessageSignature.toJSON(message.content.messageSignature);
+        } else if (message.content?.$case === "dsseEnvelope") {
+          obj.dsseEnvelope = envelope_1.Envelope.toJSON(message.content.dsseEnvelope);
+        }
+        return obj;
+      }
+    };
+    function isSet(value) {
+      return value !== null && value !== void 0;
+    }
+  }
+});
+
+// node_modules/.pnpm/@sigstore+protobuf-specs@0.5.2/node_modules/@sigstore/protobuf-specs/dist/__generated__/sigstore_trustroot.js
+var require_sigstore_trustroot = __commonJS({
+  "node_modules/.pnpm/@sigstore+protobuf-specs@0.5.2/node_modules/@sigstore/protobuf-specs/dist/__generated__/sigstore_trustroot.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.ClientTrustConfig = exports2.ServiceConfiguration = exports2.Service = exports2.SigningConfig = exports2.TrustedRoot = exports2.CertificateAuthority = exports2.TransparencyLogInstance = exports2.ServiceSelector = void 0;
+    exports2.serviceSelectorFromJSON = serviceSelectorFromJSON;
+    exports2.serviceSelectorToJSON = serviceSelectorToJSON;
+    var sigstore_common_1 = require_sigstore_common();
+    var ServiceSelector;
+    (function(ServiceSelector2) {
+      ServiceSelector2[ServiceSelector2["SERVICE_SELECTOR_UNDEFINED"] = 0] = "SERVICE_SELECTOR_UNDEFINED";
+      ServiceSelector2[ServiceSelector2["ALL"] = 1] = "ALL";
+      ServiceSelector2[ServiceSelector2["ANY"] = 2] = "ANY";
+      ServiceSelector2[ServiceSelector2["EXACT"] = 3] = "EXACT";
+    })(ServiceSelector || (exports2.ServiceSelector = ServiceSelector = {}));
+    function serviceSelectorFromJSON(object2) {
+      switch (object2) {
+        case 0:
+        case "SERVICE_SELECTOR_UNDEFINED":
+          return ServiceSelector.SERVICE_SELECTOR_UNDEFINED;
+        case 1:
+        case "ALL":
+          return ServiceSelector.ALL;
+        case 2:
+        case "ANY":
+          return ServiceSelector.ANY;
+        case 3:
+        case "EXACT":
+          return ServiceSelector.EXACT;
+        default:
+          throw new globalThis.Error("Unrecognized enum value " + object2 + " for enum ServiceSelector");
+      }
+    }
+    function serviceSelectorToJSON(object2) {
+      switch (object2) {
+        case ServiceSelector.SERVICE_SELECTOR_UNDEFINED:
+          return "SERVICE_SELECTOR_UNDEFINED";
+        case ServiceSelector.ALL:
+          return "ALL";
+        case ServiceSelector.ANY:
+          return "ANY";
+        case ServiceSelector.EXACT:
+          return "EXACT";
+        default:
+          throw new globalThis.Error("Unrecognized enum value " + object2 + " for enum ServiceSelector");
+      }
+    }
+    exports2.TransparencyLogInstance = {
+      fromJSON(object2) {
+        return {
+          baseUrl: isSet(object2.baseUrl) ? globalThis.String(object2.baseUrl) : "",
+          hashAlgorithm: isSet(object2.hashAlgorithm) ? (0, sigstore_common_1.hashAlgorithmFromJSON)(object2.hashAlgorithm) : 0,
+          publicKey: isSet(object2.publicKey) ? sigstore_common_1.PublicKey.fromJSON(object2.publicKey) : void 0,
+          logId: isSet(object2.logId) ? sigstore_common_1.LogId.fromJSON(object2.logId) : void 0,
+          checkpointKeyId: isSet(object2.checkpointKeyId) ? sigstore_common_1.LogId.fromJSON(object2.checkpointKeyId) : void 0,
+          operator: isSet(object2.operator) ? globalThis.String(object2.operator) : ""
+        };
+      },
+      toJSON(message) {
+        const obj = {};
+        if (message.baseUrl !== "") {
+          obj.baseUrl = message.baseUrl;
+        }
+        if (message.hashAlgorithm !== 0) {
+          obj.hashAlgorithm = (0, sigstore_common_1.hashAlgorithmToJSON)(message.hashAlgorithm);
+        }
+        if (message.publicKey !== void 0) {
+          obj.publicKey = sigstore_common_1.PublicKey.toJSON(message.publicKey);
+        }
+        if (message.logId !== void 0) {
+          obj.logId = sigstore_common_1.LogId.toJSON(message.logId);
+        }
+        if (message.checkpointKeyId !== void 0) {
+          obj.checkpointKeyId = sigstore_common_1.LogId.toJSON(message.checkpointKeyId);
+        }
+        if (message.operator !== "") {
+          obj.operator = message.operator;
+        }
+        return obj;
+      }
+    };
+    exports2.CertificateAuthority = {
+      fromJSON(object2) {
+        return {
+          subject: isSet(object2.subject) ? sigstore_common_1.DistinguishedName.fromJSON(object2.subject) : void 0,
+          uri: isSet(object2.uri) ? globalThis.String(object2.uri) : "",
+          certChain: isSet(object2.certChain) ? sigstore_common_1.X509CertificateChain.fromJSON(object2.certChain) : void 0,
+          validFor: isSet(object2.validFor) ? sigstore_common_1.TimeRange.fromJSON(object2.validFor) : void 0,
+          operator: isSet(object2.operator) ? globalThis.String(object2.operator) : ""
+        };
+      },
+      toJSON(message) {
+        const obj = {};
+        if (message.subject !== void 0) {
+          obj.subject = sigstore_common_1.DistinguishedName.toJSON(message.subject);
+        }
+        if (message.uri !== "") {
+          obj.uri = message.uri;
+        }
+        if (message.certChain !== void 0) {
+          obj.certChain = sigstore_common_1.X509CertificateChain.toJSON(message.certChain);
+        }
+        if (message.validFor !== void 0) {
+          obj.validFor = sigstore_common_1.TimeRange.toJSON(message.validFor);
+        }
+        if (message.operator !== "") {
+          obj.operator = message.operator;
+        }
+        return obj;
+      }
+    };
+    exports2.TrustedRoot = {
+      fromJSON(object2) {
+        return {
+          mediaType: isSet(object2.mediaType) ? globalThis.String(object2.mediaType) : "",
+          tlogs: globalThis.Array.isArray(object2?.tlogs) ? object2.tlogs.map((e) => exports2.TransparencyLogInstance.fromJSON(e)) : [],
+          certificateAuthorities: globalThis.Array.isArray(object2?.certificateAuthorities) ? object2.certificateAuthorities.map((e) => exports2.CertificateAuthority.fromJSON(e)) : [],
+          ctlogs: globalThis.Array.isArray(object2?.ctlogs) ? object2.ctlogs.map((e) => exports2.TransparencyLogInstance.fromJSON(e)) : [],
+          timestampAuthorities: globalThis.Array.isArray(object2?.timestampAuthorities) ? object2.timestampAuthorities.map((e) => exports2.CertificateAuthority.fromJSON(e)) : []
+        };
+      },
+      toJSON(message) {
+        const obj = {};
+        if (message.mediaType !== "") {
+          obj.mediaType = message.mediaType;
+        }
+        if (message.tlogs?.length) {
+          obj.tlogs = message.tlogs.map((e) => exports2.TransparencyLogInstance.toJSON(e));
+        }
+        if (message.certificateAuthorities?.length) {
+          obj.certificateAuthorities = message.certificateAuthorities.map((e) => exports2.CertificateAuthority.toJSON(e));
+        }
+        if (message.ctlogs?.length) {
+          obj.ctlogs = message.ctlogs.map((e) => exports2.TransparencyLogInstance.toJSON(e));
+        }
+        if (message.timestampAuthorities?.length) {
+          obj.timestampAuthorities = message.timestampAuthorities.map((e) => exports2.CertificateAuthority.toJSON(e));
+        }
+        return obj;
+      }
+    };
+    exports2.SigningConfig = {
+      fromJSON(object2) {
+        return {
+          mediaType: isSet(object2.mediaType) ? globalThis.String(object2.mediaType) : "",
+          caUrls: globalThis.Array.isArray(object2?.caUrls) ? object2.caUrls.map((e) => exports2.Service.fromJSON(e)) : [],
+          oidcUrls: globalThis.Array.isArray(object2?.oidcUrls) ? object2.oidcUrls.map((e) => exports2.Service.fromJSON(e)) : [],
+          rekorTlogUrls: globalThis.Array.isArray(object2?.rekorTlogUrls) ? object2.rekorTlogUrls.map((e) => exports2.Service.fromJSON(e)) : [],
+          rekorTlogConfig: isSet(object2.rekorTlogConfig) ? exports2.ServiceConfiguration.fromJSON(object2.rekorTlogConfig) : void 0,
+          tsaUrls: globalThis.Array.isArray(object2?.tsaUrls) ? object2.tsaUrls.map((e) => exports2.Service.fromJSON(e)) : [],
+          tsaConfig: isSet(object2.tsaConfig) ? exports2.ServiceConfiguration.fromJSON(object2.tsaConfig) : void 0
+        };
+      },
+      toJSON(message) {
+        const obj = {};
+        if (message.mediaType !== "") {
+          obj.mediaType = message.mediaType;
+        }
+        if (message.caUrls?.length) {
+          obj.caUrls = message.caUrls.map((e) => exports2.Service.toJSON(e));
+        }
+        if (message.oidcUrls?.length) {
+          obj.oidcUrls = message.oidcUrls.map((e) => exports2.Service.toJSON(e));
+        }
+        if (message.rekorTlogUrls?.length) {
+          obj.rekorTlogUrls = message.rekorTlogUrls.map((e) => exports2.Service.toJSON(e));
+        }
+        if (message.rekorTlogConfig !== void 0) {
+          obj.rekorTlogConfig = exports2.ServiceConfiguration.toJSON(message.rekorTlogConfig);
+        }
+        if (message.tsaUrls?.length) {
+          obj.tsaUrls = message.tsaUrls.map((e) => exports2.Service.toJSON(e));
+        }
+        if (message.tsaConfig !== void 0) {
+          obj.tsaConfig = exports2.ServiceConfiguration.toJSON(message.tsaConfig);
+        }
+        return obj;
+      }
+    };
+    exports2.Service = {
+      fromJSON(object2) {
+        return {
+          url: isSet(object2.url) ? globalThis.String(object2.url) : "",
+          majorApiVersion: isSet(object2.majorApiVersion) ? globalThis.Number(object2.majorApiVersion) : 0,
+          validFor: isSet(object2.validFor) ? sigstore_common_1.TimeRange.fromJSON(object2.validFor) : void 0,
+          operator: isSet(object2.operator) ? globalThis.String(object2.operator) : ""
+        };
+      },
+      toJSON(message) {
+        const obj = {};
+        if (message.url !== "") {
+          obj.url = message.url;
+        }
+        if (message.majorApiVersion !== 0) {
+          obj.majorApiVersion = Math.round(message.majorApiVersion);
+        }
+        if (message.validFor !== void 0) {
+          obj.validFor = sigstore_common_1.TimeRange.toJSON(message.validFor);
+        }
+        if (message.operator !== "") {
+          obj.operator = message.operator;
+        }
+        return obj;
+      }
+    };
+    exports2.ServiceConfiguration = {
+      fromJSON(object2) {
+        return {
+          selector: isSet(object2.selector) ? serviceSelectorFromJSON(object2.selector) : 0,
+          count: isSet(object2.count) ? globalThis.Number(object2.count) : 0
+        };
+      },
+      toJSON(message) {
+        const obj = {};
+        if (message.selector !== 0) {
+          obj.selector = serviceSelectorToJSON(message.selector);
+        }
+        if (message.count !== 0) {
+          obj.count = Math.round(message.count);
+        }
+        return obj;
+      }
+    };
+    exports2.ClientTrustConfig = {
+      fromJSON(object2) {
+        return {
+          mediaType: isSet(object2.mediaType) ? globalThis.String(object2.mediaType) : "",
+          trustedRoot: isSet(object2.trustedRoot) ? exports2.TrustedRoot.fromJSON(object2.trustedRoot) : void 0,
+          signingConfig: isSet(object2.signingConfig) ? exports2.SigningConfig.fromJSON(object2.signingConfig) : void 0
+        };
+      },
+      toJSON(message) {
+        const obj = {};
+        if (message.mediaType !== "") {
+          obj.mediaType = message.mediaType;
+        }
+        if (message.trustedRoot !== void 0) {
+          obj.trustedRoot = exports2.TrustedRoot.toJSON(message.trustedRoot);
+        }
+        if (message.signingConfig !== void 0) {
+          obj.signingConfig = exports2.SigningConfig.toJSON(message.signingConfig);
+        }
+        return obj;
+      }
+    };
+    function isSet(value) {
+      return value !== null && value !== void 0;
+    }
+  }
+});
+
+// node_modules/.pnpm/@sigstore+protobuf-specs@0.5.2/node_modules/@sigstore/protobuf-specs/dist/__generated__/sigstore_verification.js
+var require_sigstore_verification = __commonJS({
+  "node_modules/.pnpm/@sigstore+protobuf-specs@0.5.2/node_modules/@sigstore/protobuf-specs/dist/__generated__/sigstore_verification.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.Input = exports2.Artifact = exports2.ArtifactVerificationOptions_ObserverTimestampOptions = exports2.ArtifactVerificationOptions_TlogIntegratedTimestampOptions = exports2.ArtifactVerificationOptions_TimestampAuthorityOptions = exports2.ArtifactVerificationOptions_CtlogOptions = exports2.ArtifactVerificationOptions_TlogOptions = exports2.ArtifactVerificationOptions = exports2.PublicKeyIdentities = exports2.CertificateIdentities = exports2.CertificateIdentity = void 0;
+    var sigstore_bundle_1 = require_sigstore_bundle();
+    var sigstore_common_1 = require_sigstore_common();
+    var sigstore_trustroot_1 = require_sigstore_trustroot();
+    exports2.CertificateIdentity = {
+      fromJSON(object2) {
+        return {
+          issuer: isSet(object2.issuer) ? globalThis.String(object2.issuer) : "",
+          san: isSet(object2.san) ? sigstore_common_1.SubjectAlternativeName.fromJSON(object2.san) : void 0,
+          oids: globalThis.Array.isArray(object2?.oids) ? object2.oids.map((e) => sigstore_common_1.ObjectIdentifierValuePair.fromJSON(e)) : []
+        };
+      },
+      toJSON(message) {
+        const obj = {};
+        if (message.issuer !== "") {
+          obj.issuer = message.issuer;
+        }
+        if (message.san !== void 0) {
+          obj.san = sigstore_common_1.SubjectAlternativeName.toJSON(message.san);
+        }
+        if (message.oids?.length) {
+          obj.oids = message.oids.map((e) => sigstore_common_1.ObjectIdentifierValuePair.toJSON(e));
+        }
+        return obj;
+      }
+    };
+    exports2.CertificateIdentities = {
+      fromJSON(object2) {
+        return {
+          identities: globalThis.Array.isArray(object2?.identities) ? object2.identities.map((e) => exports2.CertificateIdentity.fromJSON(e)) : []
+        };
+      },
+      toJSON(message) {
+        const obj = {};
+        if (message.identities?.length) {
+          obj.identities = message.identities.map((e) => exports2.CertificateIdentity.toJSON(e));
+        }
+        return obj;
+      }
+    };
+    exports2.PublicKeyIdentities = {
+      fromJSON(object2) {
+        return {
+          publicKeys: globalThis.Array.isArray(object2?.publicKeys) ? object2.publicKeys.map((e) => sigstore_common_1.PublicKey.fromJSON(e)) : []
+        };
+      },
+      toJSON(message) {
+        const obj = {};
+        if (message.publicKeys?.length) {
+          obj.publicKeys = message.publicKeys.map((e) => sigstore_common_1.PublicKey.toJSON(e));
+        }
+        return obj;
+      }
+    };
+    exports2.ArtifactVerificationOptions = {
+      fromJSON(object2) {
+        return {
+          signers: isSet(object2.certificateIdentities) ? {
+            $case: "certificateIdentities",
+            certificateIdentities: exports2.CertificateIdentities.fromJSON(object2.certificateIdentities)
+          } : isSet(object2.publicKeys) ? { $case: "publicKeys", publicKeys: exports2.PublicKeyIdentities.fromJSON(object2.publicKeys) } : void 0,
+          tlogOptions: isSet(object2.tlogOptions) ? exports2.ArtifactVerificationOptions_TlogOptions.fromJSON(object2.tlogOptions) : void 0,
+          ctlogOptions: isSet(object2.ctlogOptions) ? exports2.ArtifactVerificationOptions_CtlogOptions.fromJSON(object2.ctlogOptions) : void 0,
+          tsaOptions: isSet(object2.tsaOptions) ? exports2.ArtifactVerificationOptions_TimestampAuthorityOptions.fromJSON(object2.tsaOptions) : void 0,
+          integratedTsOptions: isSet(object2.integratedTsOptions) ? exports2.ArtifactVerificationOptions_TlogIntegratedTimestampOptions.fromJSON(object2.integratedTsOptions) : void 0,
+          observerOptions: isSet(object2.observerOptions) ? exports2.ArtifactVerificationOptions_ObserverTimestampOptions.fromJSON(object2.observerOptions) : void 0
+        };
+      },
+      toJSON(message) {
+        const obj = {};
+        if (message.signers?.$case === "certificateIdentities") {
+          obj.certificateIdentities = exports2.CertificateIdentities.toJSON(message.signers.certificateIdentities);
+        } else if (message.signers?.$case === "publicKeys") {
+          obj.publicKeys = exports2.PublicKeyIdentities.toJSON(message.signers.publicKeys);
+        }
+        if (message.tlogOptions !== void 0) {
+          obj.tlogOptions = exports2.ArtifactVerificationOptions_TlogOptions.toJSON(message.tlogOptions);
+        }
+        if (message.ctlogOptions !== void 0) {
+          obj.ctlogOptions = exports2.ArtifactVerificationOptions_CtlogOptions.toJSON(message.ctlogOptions);
+        }
+        if (message.tsaOptions !== void 0) {
+          obj.tsaOptions = exports2.ArtifactVerificationOptions_TimestampAuthorityOptions.toJSON(message.tsaOptions);
+        }
+        if (message.integratedTsOptions !== void 0) {
+          obj.integratedTsOptions = exports2.ArtifactVerificationOptions_TlogIntegratedTimestampOptions.toJSON(message.integratedTsOptions);
+        }
+        if (message.observerOptions !== void 0) {
+          obj.observerOptions = exports2.ArtifactVerificationOptions_ObserverTimestampOptions.toJSON(message.observerOptions);
+        }
+        return obj;
+      }
+    };
+    exports2.ArtifactVerificationOptions_TlogOptions = {
+      fromJSON(object2) {
+        return {
+          threshold: isSet(object2.threshold) ? globalThis.Number(object2.threshold) : 0,
+          performOnlineVerification: isSet(object2.performOnlineVerification) ? globalThis.Boolean(object2.performOnlineVerification) : false,
+          disable: isSet(object2.disable) ? globalThis.Boolean(object2.disable) : false
+        };
+      },
+      toJSON(message) {
+        const obj = {};
+        if (message.threshold !== 0) {
+          obj.threshold = Math.round(message.threshold);
+        }
+        if (message.performOnlineVerification !== false) {
+          obj.performOnlineVerification = message.performOnlineVerification;
+        }
+        if (message.disable !== false) {
+          obj.disable = message.disable;
+        }
+        return obj;
+      }
+    };
+    exports2.ArtifactVerificationOptions_CtlogOptions = {
+      fromJSON(object2) {
+        return {
+          threshold: isSet(object2.threshold) ? globalThis.Number(object2.threshold) : 0,
+          disable: isSet(object2.disable) ? globalThis.Boolean(object2.disable) : false
+        };
+      },
+      toJSON(message) {
+        const obj = {};
+        if (message.threshold !== 0) {
+          obj.threshold = Math.round(message.threshold);
+        }
+        if (message.disable !== false) {
+          obj.disable = message.disable;
+        }
+        return obj;
+      }
+    };
+    exports2.ArtifactVerificationOptions_TimestampAuthorityOptions = {
+      fromJSON(object2) {
+        return {
+          threshold: isSet(object2.threshold) ? globalThis.Number(object2.threshold) : 0,
+          disable: isSet(object2.disable) ? globalThis.Boolean(object2.disable) : false
+        };
+      },
+      toJSON(message) {
+        const obj = {};
+        if (message.threshold !== 0) {
+          obj.threshold = Math.round(message.threshold);
+        }
+        if (message.disable !== false) {
+          obj.disable = message.disable;
+        }
+        return obj;
+      }
+    };
+    exports2.ArtifactVerificationOptions_TlogIntegratedTimestampOptions = {
+      fromJSON(object2) {
+        return {
+          threshold: isSet(object2.threshold) ? globalThis.Number(object2.threshold) : 0,
+          disable: isSet(object2.disable) ? globalThis.Boolean(object2.disable) : false
+        };
+      },
+      toJSON(message) {
+        const obj = {};
+        if (message.threshold !== 0) {
+          obj.threshold = Math.round(message.threshold);
+        }
+        if (message.disable !== false) {
+          obj.disable = message.disable;
+        }
+        return obj;
+      }
+    };
+    exports2.ArtifactVerificationOptions_ObserverTimestampOptions = {
+      fromJSON(object2) {
+        return {
+          threshold: isSet(object2.threshold) ? globalThis.Number(object2.threshold) : 0,
+          disable: isSet(object2.disable) ? globalThis.Boolean(object2.disable) : false
+        };
+      },
+      toJSON(message) {
+        const obj = {};
+        if (message.threshold !== 0) {
+          obj.threshold = Math.round(message.threshold);
+        }
+        if (message.disable !== false) {
+          obj.disable = message.disable;
+        }
+        return obj;
+      }
+    };
+    exports2.Artifact = {
+      fromJSON(object2) {
+        return {
+          data: isSet(object2.artifactUri) ? { $case: "artifactUri", artifactUri: globalThis.String(object2.artifactUri) } : isSet(object2.artifact) ? { $case: "artifact", artifact: Buffer.from(bytesFromBase64(object2.artifact)) } : isSet(object2.artifactDigest) ? { $case: "artifactDigest", artifactDigest: sigstore_common_1.HashOutput.fromJSON(object2.artifactDigest) } : void 0
+        };
+      },
+      toJSON(message) {
+        const obj = {};
+        if (message.data?.$case === "artifactUri") {
+          obj.artifactUri = message.data.artifactUri;
+        } else if (message.data?.$case === "artifact") {
+          obj.artifact = base64FromBytes(message.data.artifact);
+        } else if (message.data?.$case === "artifactDigest") {
+          obj.artifactDigest = sigstore_common_1.HashOutput.toJSON(message.data.artifactDigest);
+        }
+        return obj;
+      }
+    };
+    exports2.Input = {
+      fromJSON(object2) {
+        return {
+          artifactTrustRoot: isSet(object2.artifactTrustRoot) ? sigstore_trustroot_1.TrustedRoot.fromJSON(object2.artifactTrustRoot) : void 0,
+          artifactVerificationOptions: isSet(object2.artifactVerificationOptions) ? exports2.ArtifactVerificationOptions.fromJSON(object2.artifactVerificationOptions) : void 0,
+          bundle: isSet(object2.bundle) ? sigstore_bundle_1.Bundle.fromJSON(object2.bundle) : void 0,
+          artifact: isSet(object2.artifact) ? exports2.Artifact.fromJSON(object2.artifact) : void 0
+        };
+      },
+      toJSON(message) {
+        const obj = {};
+        if (message.artifactTrustRoot !== void 0) {
+          obj.artifactTrustRoot = sigstore_trustroot_1.TrustedRoot.toJSON(message.artifactTrustRoot);
+        }
+        if (message.artifactVerificationOptions !== void 0) {
+          obj.artifactVerificationOptions = exports2.ArtifactVerificationOptions.toJSON(message.artifactVerificationOptions);
+        }
+        if (message.bundle !== void 0) {
+          obj.bundle = sigstore_bundle_1.Bundle.toJSON(message.bundle);
+        }
+        if (message.artifact !== void 0) {
+          obj.artifact = exports2.Artifact.toJSON(message.artifact);
+        }
+        return obj;
+      }
+    };
+    function bytesFromBase64(b64) {
+      return Uint8Array.from(globalThis.Buffer.from(b64, "base64"));
+    }
+    function base64FromBytes(arr) {
+      return globalThis.Buffer.from(arr).toString("base64");
+    }
+    function isSet(value) {
+      return value !== null && value !== void 0;
+    }
+  }
+});
+
+// node_modules/.pnpm/@sigstore+protobuf-specs@0.5.2/node_modules/@sigstore/protobuf-specs/dist/index.js
+var require_dist2 = __commonJS({
+  "node_modules/.pnpm/@sigstore+protobuf-specs@0.5.2/node_modules/@sigstore/protobuf-specs/dist/index.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o, m, k, k2) {
+      if (k2 === void 0) k2 = k;
+      var desc = Object.getOwnPropertyDescriptor(m, k);
+      if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m[k];
+        } };
+      }
+      Object.defineProperty(o, k2, desc);
+    }) : (function(o, m, k, k2) {
+      if (k2 === void 0) k2 = k;
+      o[k2] = m[k];
+    }));
+    var __exportStar = exports2 && exports2.__exportStar || function(m, exports3) {
+      for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports3, p)) __createBinding(exports3, m, p);
+    };
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    __exportStar(require_envelope(), exports2);
+    __exportStar(require_sigstore_bundle(), exports2);
+    __exportStar(require_sigstore_common(), exports2);
+    __exportStar(require_sigstore_rekor(), exports2);
+    __exportStar(require_sigstore_trustroot(), exports2);
+    __exportStar(require_sigstore_verification(), exports2);
+  }
+});
+
+// node_modules/.pnpm/@sigstore+tuf@5.0.1/node_modules/@sigstore/tuf/dist/appdata.js
+var require_appdata = __commonJS({
+  "node_modules/.pnpm/@sigstore+tuf@5.0.1/node_modules/@sigstore/tuf/dist/appdata.js"(exports2) {
+    "use strict";
+    var __importDefault = exports2 && exports2.__importDefault || function(mod) {
+      return mod && mod.__esModule ? mod : { "default": mod };
+    };
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.appDataPath = appDataPath;
+    var os_1 = __importDefault(require("os"));
+    var path_1 = __importDefault(require("path"));
+    function appDataPath(name) {
+      const homedir = os_1.default.homedir();
+      switch (process.platform) {
+        /* istanbul ignore next */
+        case "darwin": {
+          const appSupport = path_1.default.join(homedir, "Library", "Application Support");
+          return path_1.default.join(appSupport, name);
+        }
+        /* istanbul ignore next */
+        case "win32": {
+          const localAppData = process.env.LOCALAPPDATA || path_1.default.join(homedir, "AppData", "Local");
+          return path_1.default.join(localAppData, name, "Data");
+        }
+        /* istanbul ignore next */
+        default: {
+          const localData = process.env.XDG_DATA_HOME || path_1.default.join(homedir, ".local", "share");
+          return path_1.default.join(localData, name);
+        }
+      }
+    }
+  }
+});
+
+// node_modules/.pnpm/@tufjs+models@5.0.2/node_modules/@tufjs/models/dist/error.js
+var require_error = __commonJS({
+  "node_modules/.pnpm/@tufjs+models@5.0.2/node_modules/@tufjs/models/dist/error.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.UnsupportedAlgorithmError = exports2.CryptoError = exports2.LengthOrHashMismatchError = exports2.UnsignedMetadataError = exports2.RepositoryError = exports2.ValueError = void 0;
+    var ValueError = class extends Error {
+    };
+    exports2.ValueError = ValueError;
+    var RepositoryError = class extends Error {
+    };
+    exports2.RepositoryError = RepositoryError;
+    var UnsignedMetadataError = class extends RepositoryError {
+    };
+    exports2.UnsignedMetadataError = UnsignedMetadataError;
+    var LengthOrHashMismatchError = class extends RepositoryError {
+    };
+    exports2.LengthOrHashMismatchError = LengthOrHashMismatchError;
+    var CryptoError = class extends Error {
+    };
+    exports2.CryptoError = CryptoError;
+    var UnsupportedAlgorithmError = class extends CryptoError {
+    };
+    exports2.UnsupportedAlgorithmError = UnsupportedAlgorithmError;
+  }
+});
+
+// node_modules/.pnpm/@tufjs+models@5.0.2/node_modules/@tufjs/models/dist/utils/guard.js
+var require_guard = __commonJS({
+  "node_modules/.pnpm/@tufjs+models@5.0.2/node_modules/@tufjs/models/dist/utils/guard.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.isDefined = isDefined;
+    exports2.isObject = isObject2;
+    exports2.isStringArray = isStringArray11;
+    exports2.isObjectArray = isObjectArray;
+    exports2.isStringRecord = isStringRecord;
+    exports2.isObjectRecord = isObjectRecord;
+    function isDefined(val) {
+      return val !== void 0;
+    }
+    function isObject2(value) {
+      return typeof value === "object" && value !== null;
+    }
+    function isStringArray11(value) {
+      return Array.isArray(value) && value.every((v) => typeof v === "string");
+    }
+    function isObjectArray(value) {
+      return Array.isArray(value) && value.every(isObject2);
+    }
+    function isStringRecord(value) {
+      return typeof value === "object" && value !== null && Object.keys(value).every((k) => typeof k === "string") && Object.values(value).every((v) => typeof v === "string");
+    }
+    function isObjectRecord(value) {
+      return typeof value === "object" && value !== null && Object.keys(value).every((k) => typeof k === "string") && Object.values(value).every((v) => typeof v === "object" && v !== null);
+    }
+  }
+});
+
+// node_modules/.pnpm/@tufjs+canonical-json@2.0.0/node_modules/@tufjs/canonical-json/lib/index.js
+var require_lib2 = __commonJS({
+  "node_modules/.pnpm/@tufjs+canonical-json@2.0.0/node_modules/@tufjs/canonical-json/lib/index.js"(exports2, module2) {
+    var COMMA = ",";
+    var COLON = ":";
+    var LEFT_SQUARE_BRACKET = "[";
+    var RIGHT_SQUARE_BRACKET = "]";
+    var LEFT_CURLY_BRACKET = "{";
+    var RIGHT_CURLY_BRACKET = "}";
+    function canonicalize(object2) {
+      const buffer = [];
+      if (typeof object2 === "string") {
+        buffer.push(canonicalizeString(object2));
+      } else if (typeof object2 === "boolean") {
+        buffer.push(JSON.stringify(object2));
+      } else if (Number.isInteger(object2)) {
+        buffer.push(JSON.stringify(object2));
+      } else if (object2 === null) {
+        buffer.push(JSON.stringify(object2));
+      } else if (Array.isArray(object2)) {
+        buffer.push(LEFT_SQUARE_BRACKET);
+        let first = true;
+        object2.forEach((element) => {
+          if (!first) {
+            buffer.push(COMMA);
+          }
+          first = false;
+          buffer.push(canonicalize(element));
+        });
+        buffer.push(RIGHT_SQUARE_BRACKET);
+      } else if (typeof object2 === "object") {
+        buffer.push(LEFT_CURLY_BRACKET);
+        let first = true;
+        Object.keys(object2).sort().forEach((property) => {
+          if (!first) {
+            buffer.push(COMMA);
+          }
+          first = false;
+          buffer.push(canonicalizeString(property));
+          buffer.push(COLON);
+          buffer.push(canonicalize(object2[property]));
+        });
+        buffer.push(RIGHT_CURLY_BRACKET);
+      } else {
+        throw new TypeError("cannot encode " + object2.toString());
+      }
+      return buffer.join("");
+    }
+    function canonicalizeString(string4) {
+      const escapedString = string4.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+      return '"' + escapedString + '"';
+    }
+    module2.exports = {
+      canonicalize
+    };
+  }
+});
+
+// node_modules/.pnpm/@tufjs+models@5.0.2/node_modules/@tufjs/models/dist/utils/verify.js
+var require_verify = __commonJS({
+  "node_modules/.pnpm/@tufjs+models@5.0.2/node_modules/@tufjs/models/dist/utils/verify.js"(exports2) {
+    "use strict";
+    var __importDefault = exports2 && exports2.__importDefault || function(mod) {
+      return mod && mod.__esModule ? mod : { "default": mod };
+    };
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.verifySignature = void 0;
+    var canonical_json_1 = require_lib2();
+    var crypto_1 = __importDefault(require("crypto"));
+    var verifySignature = (metaDataSignedData, key, signature) => {
+      const canonicalData = Buffer.from((0, canonical_json_1.canonicalize)(metaDataSignedData));
+      return crypto_1.default.verify(key.hashAlgorithm, canonicalData, key, Buffer.from(signature, "hex"));
+    };
+    exports2.verifySignature = verifySignature;
+  }
+});
+
+// node_modules/.pnpm/@tufjs+models@5.0.2/node_modules/@tufjs/models/dist/utils/index.js
+var require_utils4 = __commonJS({
+  "node_modules/.pnpm/@tufjs+models@5.0.2/node_modules/@tufjs/models/dist/utils/index.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o, m, k, k2) {
+      if (k2 === void 0) k2 = k;
+      var desc = Object.getOwnPropertyDescriptor(m, k);
+      if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m[k];
+        } };
+      }
+      Object.defineProperty(o, k2, desc);
+    }) : (function(o, m, k, k2) {
+      if (k2 === void 0) k2 = k;
+      o[k2] = m[k];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o, v) {
+      Object.defineProperty(o, "default", { enumerable: true, value: v });
+    }) : function(o, v) {
+      o["default"] = v;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function(o2) {
+          var ar = [];
+          for (var k in o2) if (Object.prototype.hasOwnProperty.call(o2, k)) ar[ar.length] = k;
+          return ar;
+        };
+        return ownKeys(o);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.crypto = exports2.guard = void 0;
+    exports2.guard = __importStar(require_guard());
+    exports2.crypto = __importStar(require_verify());
+  }
+});
+
+// node_modules/.pnpm/@tufjs+models@5.0.2/node_modules/@tufjs/models/dist/base.js
+var require_base = __commonJS({
+  "node_modules/.pnpm/@tufjs+models@5.0.2/node_modules/@tufjs/models/dist/base.js"(exports2) {
+    "use strict";
+    var __importDefault = exports2 && exports2.__importDefault || function(mod) {
+      return mod && mod.__esModule ? mod : { "default": mod };
+    };
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.Signed = exports2.MetadataKind = void 0;
+    exports2.isMetadataKind = isMetadataKind;
+    var util_1 = __importDefault(require("util"));
+    var error_1 = require_error();
+    var utils_1 = require_utils4();
+    var SPECIFICATION_VERSION = ["1", "0", "31"];
+    var MetadataKind;
+    (function(MetadataKind2) {
+      MetadataKind2["Root"] = "root";
+      MetadataKind2["Timestamp"] = "timestamp";
+      MetadataKind2["Snapshot"] = "snapshot";
+      MetadataKind2["Targets"] = "targets";
+    })(MetadataKind || (exports2.MetadataKind = MetadataKind = {}));
+    function isMetadataKind(value) {
+      return typeof value === "string" && Object.values(MetadataKind).includes(value);
+    }
+    var Signed = class _Signed {
+      specVersion;
+      expires;
+      version;
+      unrecognizedFields;
+      constructor(options2) {
+        this.specVersion = options2.specVersion || SPECIFICATION_VERSION.join(".");
+        const specList = this.specVersion.split(".");
+        if (!(specList.length === 2 || specList.length === 3) || !specList.every((item) => isNumeric(item))) {
+          throw new error_1.ValueError("Failed to parse specVersion");
+        }
+        if (specList[0] != SPECIFICATION_VERSION[0]) {
+          throw new error_1.ValueError("Unsupported specVersion");
+        }
+        this.expires = options2.expires;
+        this.version = options2.version;
+        this.unrecognizedFields = options2.unrecognizedFields || {};
+      }
+      equals(other) {
+        if (!(other instanceof _Signed)) {
+          return false;
+        }
+        return this.specVersion === other.specVersion && this.expires === other.expires && this.version === other.version && util_1.default.isDeepStrictEqual(this.unrecognizedFields, other.unrecognizedFields);
+      }
+      isExpired(referenceTime) {
+        if (!referenceTime) {
+          referenceTime = /* @__PURE__ */ new Date();
+        }
+        return referenceTime >= new Date(this.expires);
+      }
+      static commonFieldsFromJSON(data) {
+        const { spec_version, expires, version: version2, ...rest } = data;
+        if (!utils_1.guard.isDefined(spec_version)) {
+          throw new error_1.ValueError("spec_version is not defined");
+        } else if (typeof spec_version !== "string") {
+          throw new TypeError("spec_version must be a string");
+        }
+        if (!utils_1.guard.isDefined(expires)) {
+          throw new error_1.ValueError("expires is not defined");
+        } else if (!(typeof expires === "string")) {
+          throw new TypeError("expires must be a string");
+        } else if (Number.isNaN(new Date(expires).getTime())) {
+          throw new error_1.ValueError("Failed to parse expires");
+        }
+        if (!utils_1.guard.isDefined(version2)) {
+          throw new error_1.ValueError("version is not defined");
+        } else if (!(typeof version2 === "number")) {
+          throw new TypeError("version must be a number");
+        }
+        return {
+          specVersion: spec_version,
+          expires,
+          version: version2,
+          unrecognizedFields: rest
+        };
+      }
+    };
+    exports2.Signed = Signed;
+    function isNumeric(str2) {
+      return !isNaN(Number(str2));
+    }
+  }
+});
+
+// node_modules/.pnpm/@tufjs+models@5.0.2/node_modules/@tufjs/models/dist/file.js
+var require_file2 = __commonJS({
+  "node_modules/.pnpm/@tufjs+models@5.0.2/node_modules/@tufjs/models/dist/file.js"(exports2) {
+    "use strict";
+    var __importDefault = exports2 && exports2.__importDefault || function(mod) {
+      return mod && mod.__esModule ? mod : { "default": mod };
+    };
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.TargetFile = exports2.MetaFile = void 0;
+    var crypto_1 = __importDefault(require("crypto"));
+    var util_1 = __importDefault(require("util"));
+    var error_1 = require_error();
+    var utils_1 = require_utils4();
+    var MetaFile = class _MetaFile {
+      version;
+      length;
+      hashes;
+      unrecognizedFields;
+      constructor(opts) {
+        if (opts.version <= 0) {
+          throw new error_1.ValueError("Metafile version must be at least 1");
+        }
+        if (opts.length !== void 0) {
+          validateLength(opts.length);
+        }
+        this.version = opts.version;
+        this.length = opts.length;
+        this.hashes = opts.hashes;
+        this.unrecognizedFields = opts.unrecognizedFields || {};
+      }
+      equals(other) {
+        if (!(other instanceof _MetaFile)) {
+          return false;
+        }
+        return this.version === other.version && this.length === other.length && util_1.default.isDeepStrictEqual(this.hashes, other.hashes) && util_1.default.isDeepStrictEqual(this.unrecognizedFields, other.unrecognizedFields);
+      }
+      verify(data) {
+        if (this.length !== void 0) {
+          if (data.length !== this.length) {
+            throw new error_1.LengthOrHashMismatchError(`Expected length ${this.length} but got ${data.length}`);
+          }
+        }
+        if (this.hashes) {
+          Object.entries(this.hashes).forEach(([key, value]) => {
+            let hash2;
+            try {
+              hash2 = crypto_1.default.createHash(key);
+            } catch (e) {
+              throw new error_1.LengthOrHashMismatchError(`Hash algorithm ${key} not supported`);
+            }
+            const observedHash = hash2.update(data).digest("hex");
+            if (observedHash !== value) {
+              throw new error_1.LengthOrHashMismatchError(`Expected hash ${value} but got ${observedHash}`);
+            }
+          });
+        }
+      }
+      toJSON() {
+        const json2 = {
+          version: this.version,
+          ...this.unrecognizedFields
+        };
+        if (this.length !== void 0) {
+          json2.length = this.length;
+        }
+        if (this.hashes) {
+          json2.hashes = this.hashes;
+        }
+        return json2;
+      }
+      static fromJSON(data) {
+        const { version: version2, length, hashes, ...rest } = data;
+        if (typeof version2 !== "number") {
+          throw new TypeError("version must be a number");
+        }
+        if (utils_1.guard.isDefined(length) && typeof length !== "number") {
+          throw new TypeError("length must be a number");
+        }
+        if (utils_1.guard.isDefined(hashes) && !utils_1.guard.isStringRecord(hashes)) {
+          throw new TypeError("hashes must be string keys and values");
+        }
+        return new _MetaFile({
+          version: version2,
+          length,
+          hashes,
+          unrecognizedFields: rest
+        });
+      }
+    };
+    exports2.MetaFile = MetaFile;
+    var TargetFile = class _TargetFile {
+      length;
+      path;
+      hashes;
+      unrecognizedFields;
+      constructor(opts) {
+        validateLength(opts.length);
+        this.length = opts.length;
+        this.path = opts.path;
+        this.hashes = opts.hashes;
+        this.unrecognizedFields = opts.unrecognizedFields || {};
+      }
+      get custom() {
+        const custom2 = this.unrecognizedFields["custom"];
+        if (!custom2 || Array.isArray(custom2) || !(typeof custom2 === "object")) {
+          return {};
+        }
+        return custom2;
+      }
+      equals(other) {
+        if (!(other instanceof _TargetFile)) {
+          return false;
+        }
+        return this.length === other.length && this.path === other.path && util_1.default.isDeepStrictEqual(this.hashes, other.hashes) && util_1.default.isDeepStrictEqual(this.unrecognizedFields, other.unrecognizedFields);
+      }
+      async verify(stream) {
+        let observedLength = 0;
+        const digests = Object.keys(this.hashes).reduce((acc, key) => {
+          try {
+            acc[key] = crypto_1.default.createHash(key);
+          } catch (e) {
+            throw new error_1.LengthOrHashMismatchError(`Hash algorithm ${key} not supported`);
+          }
+          return acc;
+        }, {});
+        for await (const chunk of stream) {
+          observedLength += chunk.length;
+          Object.values(digests).forEach((digest) => {
+            digest.update(chunk);
+          });
+        }
+        if (observedLength !== this.length) {
+          throw new error_1.LengthOrHashMismatchError(`Expected length ${this.length} but got ${observedLength}`);
+        }
+        Object.entries(digests).forEach(([key, value]) => {
+          const expected = this.hashes[key];
+          const actual = value.digest("hex");
+          if (actual !== expected) {
+            throw new error_1.LengthOrHashMismatchError(`Expected hash ${expected} but got ${actual}`);
+          }
+        });
+      }
+      toJSON() {
+        return {
+          length: this.length,
+          hashes: this.hashes,
+          ...this.unrecognizedFields
+        };
+      }
+      static fromJSON(path, data) {
+        const { length, hashes, ...rest } = data;
+        if (typeof length !== "number") {
+          throw new TypeError("length must be a number");
+        }
+        if (!utils_1.guard.isStringRecord(hashes)) {
+          throw new TypeError("hashes must have string keys and values");
+        }
+        return new _TargetFile({
+          length,
+          path,
+          hashes,
+          unrecognizedFields: rest
+        });
+      }
+    };
+    exports2.TargetFile = TargetFile;
+    function validateLength(length) {
+      if (length < 0) {
+        throw new error_1.ValueError("Length must be at least 0");
+      }
+    }
+  }
+});
+
+// node_modules/.pnpm/@tufjs+models@5.0.2/node_modules/@tufjs/models/dist/utils/oid.js
+var require_oid = __commonJS({
+  "node_modules/.pnpm/@tufjs+models@5.0.2/node_modules/@tufjs/models/dist/utils/oid.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.encodeOIDString = encodeOIDString;
+    var ANS1_TAG_OID = 6;
+    function encodeOIDString(oid) {
+      const parts = oid.split(".");
+      const first = parseInt(parts[0], 10) * 40 + parseInt(parts[1], 10);
+      const rest = [];
+      parts.slice(2).forEach((part) => {
+        const bytes = encodeVariableLengthInteger(parseInt(part, 10));
+        rest.push(...bytes);
+      });
+      const der = Buffer.from([first, ...rest]);
+      return Buffer.from([ANS1_TAG_OID, der.length, ...der]);
+    }
+    function encodeVariableLengthInteger(value) {
+      const bytes = [];
+      let mask = 0;
+      do {
+        bytes.unshift(value & 127 | mask);
+        value >>= 7;
+        mask = 128;
+      } while (value > 0);
+      return bytes;
+    }
+  }
+});
+
+// node_modules/.pnpm/@tufjs+models@5.0.2/node_modules/@tufjs/models/dist/utils/key.js
+var require_key = __commonJS({
+  "node_modules/.pnpm/@tufjs+models@5.0.2/node_modules/@tufjs/models/dist/utils/key.js"(exports2) {
+    "use strict";
+    var __importDefault = exports2 && exports2.__importDefault || function(mod) {
+      return mod && mod.__esModule ? mod : { "default": mod };
+    };
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.getPublicKey = getPublicKey;
+    var crypto_1 = __importDefault(require("crypto"));
+    var error_1 = require_error();
+    var oid_1 = require_oid();
+    var ASN1_TAG_SEQUENCE = 48;
+    var ANS1_TAG_BIT_STRING = 3;
+    var NULL_BYTE = 0;
+    var OID_EDDSA = "1.3.101.112";
+    var OID_EC_PUBLIC_KEY = "1.2.840.10045.2.1";
+    var OID_EC_CURVE_P256V1 = "1.2.840.10045.3.1.7";
+    var OID_EC_CURVE_P384 = "1.3.132.0.34";
+    var PEM_HEADER = "-----BEGIN PUBLIC KEY-----";
+    function getPublicKey(keyInfo) {
+      switch (keyInfo.keyType) {
+        case "rsa":
+          return getRSAPublicKey(keyInfo);
+        case "ed25519":
+          return getED25519PublicKey(keyInfo);
+        case "ecdsa":
+        case "ecdsa-sha2-nistp256":
+        case "ecdsa-sha2-nistp384":
+          return getECDCSAPublicKey(keyInfo);
+        default:
+          throw new error_1.UnsupportedAlgorithmError(`Unsupported key type: ${keyInfo.keyType}`);
+      }
+    }
+    function getRSAPublicKey(keyInfo) {
+      if (!keyInfo.keyVal.startsWith(PEM_HEADER)) {
+        throw new error_1.CryptoError("Invalid key format");
+      }
+      const key = crypto_1.default.createPublicKey(keyInfo.keyVal);
+      switch (keyInfo.scheme) {
+        case "rsassa-pss-sha256":
+        case "rsassa-pss-sha384":
+        case "rsassa-pss-sha512":
+          return {
+            key,
+            hashAlgorithm: keyInfo.scheme.slice("rsassa-pss-".length),
+            padding: crypto_1.default.constants.RSA_PKCS1_PSS_PADDING
+          };
+        default:
+          throw new error_1.UnsupportedAlgorithmError(`Unsupported RSA scheme: ${keyInfo.scheme}`);
+      }
+    }
+    function getED25519PublicKey(keyInfo) {
+      let key;
+      if (keyInfo.keyVal.startsWith(PEM_HEADER)) {
+        key = crypto_1.default.createPublicKey(keyInfo.keyVal);
+      } else {
+        if (!isHex(keyInfo.keyVal)) {
+          throw new error_1.CryptoError("Invalid key format");
+        }
+        key = crypto_1.default.createPublicKey({
+          key: ed25519.hexToDER(keyInfo.keyVal),
+          format: "der",
+          type: "spki"
+        });
+      }
+      return { key };
+    }
+    function getECDCSAPublicKey(keyInfo) {
+      let namedCurve;
+      let curveOID;
+      let hashAlgorithm;
+      switch (keyInfo.scheme) {
+        case "ecdsa-sha2-nistp256":
+          namedCurve = "prime256v1";
+          curveOID = OID_EC_CURVE_P256V1;
+          hashAlgorithm = "sha256";
+          break;
+        case "ecdsa-sha2-nistp384":
+          namedCurve = "secp384r1";
+          curveOID = OID_EC_CURVE_P384;
+          hashAlgorithm = "sha384";
+          break;
+        default:
+          throw new error_1.UnsupportedAlgorithmError(`Unsupported ECDSA scheme: ${keyInfo.scheme}`);
+      }
+      if (keyInfo.keyType !== "ecdsa" && keyInfo.keyType !== keyInfo.scheme) {
+        throw new error_1.CryptoError("ECDSA key type does not match scheme");
+      }
+      let key;
+      if (keyInfo.keyVal.startsWith(PEM_HEADER)) {
+        key = crypto_1.default.createPublicKey(keyInfo.keyVal);
+      } else {
+        if (!isHex(keyInfo.keyVal)) {
+          throw new error_1.CryptoError("Invalid key format");
+        }
+        key = crypto_1.default.createPublicKey({
+          key: ecdsa.hexToDER(keyInfo.keyVal, curveOID),
+          format: "der",
+          type: "spki"
+        });
+      }
+      if (key.asymmetricKeyType !== "ec" || key.asymmetricKeyDetails?.namedCurve !== namedCurve) {
+        throw new error_1.CryptoError("ECDSA key curve does not match scheme");
+      }
+      return { key, hashAlgorithm };
+    }
+    var ed25519 = {
+      // Translates a hex key into a crypto KeyObject
+      // https://keygen.sh/blog/how-to-use-hexadecimal-ed25519-keys-in-node/
+      hexToDER: (hex3) => {
+        const key = Buffer.from(hex3, "hex");
+        const oid = (0, oid_1.encodeOIDString)(OID_EDDSA);
+        const elements = Buffer.concat([
+          Buffer.concat([
+            Buffer.from([ASN1_TAG_SEQUENCE]),
+            Buffer.from([oid.length]),
+            oid
+          ]),
+          Buffer.concat([
+            Buffer.from([ANS1_TAG_BIT_STRING]),
+            Buffer.from([key.length + 1]),
+            Buffer.from([NULL_BYTE]),
+            key
+          ])
+        ]);
+        const der = Buffer.concat([
+          Buffer.from([ASN1_TAG_SEQUENCE]),
+          Buffer.from([elements.length]),
+          elements
+        ]);
+        return der;
+      }
+    };
+    var ecdsa = {
+      hexToDER: (hex3, curveOID) => {
+        const key = Buffer.from(hex3, "hex");
+        const bitString = Buffer.concat([
+          Buffer.from([ANS1_TAG_BIT_STRING]),
+          Buffer.from([key.length + 1]),
+          Buffer.from([NULL_BYTE]),
+          key
+        ]);
+        const oids = Buffer.concat([
+          (0, oid_1.encodeOIDString)(OID_EC_PUBLIC_KEY),
+          (0, oid_1.encodeOIDString)(curveOID)
+        ]);
+        const oidSequence = Buffer.concat([
+          Buffer.from([ASN1_TAG_SEQUENCE]),
+          Buffer.from([oids.length]),
+          oids
+        ]);
+        const der = Buffer.concat([
+          Buffer.from([ASN1_TAG_SEQUENCE]),
+          Buffer.from([oidSequence.length + bitString.length]),
+          oidSequence,
+          bitString
+        ]);
+        return der;
+      }
+    };
+    var isHex = (key) => /^[0-9a-fA-F]+$/.test(key);
+  }
+});
+
+// node_modules/.pnpm/@tufjs+models@5.0.2/node_modules/@tufjs/models/dist/key.js
+var require_key2 = __commonJS({
+  "node_modules/.pnpm/@tufjs+models@5.0.2/node_modules/@tufjs/models/dist/key.js"(exports2) {
+    "use strict";
+    var __importDefault = exports2 && exports2.__importDefault || function(mod) {
+      return mod && mod.__esModule ? mod : { "default": mod };
+    };
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.Key = void 0;
+    var util_1 = __importDefault(require("util"));
+    var error_1 = require_error();
+    var utils_1 = require_utils4();
+    var key_1 = require_key();
+    var Key = class _Key {
+      keyID;
+      keyType;
+      scheme;
+      keyVal;
+      unrecognizedFields;
+      constructor(options2) {
+        const { keyID, keyType, scheme, keyVal, unrecognizedFields } = options2;
+        this.keyID = keyID;
+        this.keyType = keyType;
+        this.scheme = scheme;
+        this.keyVal = keyVal;
+        this.unrecognizedFields = unrecognizedFields || {};
+      }
+      // Verifies the that the metadata.signatures contains a signature made with
+      // this key and is correctly signed.
+      verifySignature(metadata) {
+        const signature = metadata.signatures[this.keyID];
+        if (!signature)
+          throw new error_1.UnsignedMetadataError("no signature for key found in metadata");
+        if (!this.keyVal.public)
+          throw new error_1.UnsignedMetadataError("no public key found");
+        const publicKey = (0, key_1.getPublicKey)({
+          keyType: this.keyType,
+          scheme: this.scheme,
+          keyVal: this.keyVal.public
+        });
+        const signedData = metadata.signed.toJSON();
+        try {
+          if (!utils_1.crypto.verifySignature(signedData, publicKey, signature.sig)) {
+            throw new error_1.UnsignedMetadataError(`failed to verify ${this.keyID} signature`);
+          }
+        } catch (error62) {
+          if (error62 instanceof error_1.UnsignedMetadataError) {
+            throw error62;
+          }
+          throw new error_1.UnsignedMetadataError(`failed to verify ${this.keyID} signature`);
+        }
+      }
+      equals(other) {
+        if (!(other instanceof _Key)) {
+          return false;
+        }
+        return this.keyID === other.keyID && this.keyType === other.keyType && this.scheme === other.scheme && util_1.default.isDeepStrictEqual(this.keyVal, other.keyVal) && util_1.default.isDeepStrictEqual(this.unrecognizedFields, other.unrecognizedFields);
+      }
+      toJSON() {
+        return {
+          keytype: this.keyType,
+          scheme: this.scheme,
+          keyval: this.keyVal,
+          ...this.unrecognizedFields
+        };
+      }
+      static fromJSON(keyID, data) {
+        const { keytype, scheme, keyval, ...rest } = data;
+        if (typeof keytype !== "string") {
+          throw new TypeError("keytype must be a string");
+        }
+        if (typeof scheme !== "string") {
+          throw new TypeError("scheme must be a string");
+        }
+        if (!utils_1.guard.isStringRecord(keyval)) {
+          throw new TypeError("keyval must be a string record");
+        }
+        return new _Key({
+          keyID,
+          keyType: keytype,
+          scheme,
+          keyVal: keyval,
+          unrecognizedFields: rest
+        });
+      }
+    };
+    exports2.Key = Key;
+  }
+});
+
+// node_modules/.pnpm/balanced-match@4.0.4/node_modules/balanced-match/dist/commonjs/index.js
+var require_commonjs = __commonJS({
+  "node_modules/.pnpm/balanced-match@4.0.4/node_modules/balanced-match/dist/commonjs/index.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.range = exports2.balanced = void 0;
+    var balanced = (a, b, str2) => {
+      const ma = a instanceof RegExp ? maybeMatch(a, str2) : a;
+      const mb = b instanceof RegExp ? maybeMatch(b, str2) : b;
+      const r = ma !== null && mb != null && (0, exports2.range)(ma, mb, str2);
+      return r && {
+        start: r[0],
+        end: r[1],
+        pre: str2.slice(0, r[0]),
+        body: str2.slice(r[0] + ma.length, r[1]),
+        post: str2.slice(r[1] + mb.length)
+      };
+    };
+    exports2.balanced = balanced;
+    var maybeMatch = (reg, str2) => {
+      const m = str2.match(reg);
+      return m ? m[0] : null;
+    };
+    var range = (a, b, str2) => {
+      let begs, beg, left, right = void 0, result;
+      let ai = str2.indexOf(a);
+      let bi = str2.indexOf(b, ai + 1);
+      let i = ai;
+      if (ai >= 0 && bi > 0) {
+        if (a === b) {
+          return [ai, bi];
+        }
+        begs = [];
+        left = str2.length;
+        while (i >= 0 && !result) {
+          if (i === ai) {
+            begs.push(i);
+            ai = str2.indexOf(a, i + 1);
+          } else if (begs.length === 1) {
+            const r = begs.pop();
+            if (r !== void 0)
+              result = [r, bi];
+          } else {
+            beg = begs.pop();
+            if (beg !== void 0 && beg < left) {
+              left = beg;
+              right = bi;
+            }
+            bi = str2.indexOf(b, i + 1);
+          }
+          i = ai < bi && ai >= 0 ? ai : bi;
+        }
+        if (begs.length && right !== void 0) {
+          result = [left, right];
+        }
+      }
+      return result;
+    };
+    exports2.range = range;
+  }
+});
+
+// node_modules/.pnpm/brace-expansion@5.0.12/node_modules/brace-expansion/dist/commonjs/index.js
+var require_commonjs2 = __commonJS({
+  "node_modules/.pnpm/brace-expansion@5.0.12/node_modules/brace-expansion/dist/commonjs/index.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.EXPANSION_MAX_REWRITES = exports2.EXPANSION_MAX_DEPTH = exports2.EXPANSION_MAX_LENGTH = exports2.EXPANSION_MAX = void 0;
+    exports2.expand = expand;
+    var balanced_match_1 = require_commonjs();
+    var escSlash = "\0SLASH" + Math.random() + "\0";
+    var escOpen = "\0OPEN" + Math.random() + "\0";
+    var escClose = "\0CLOSE" + Math.random() + "\0";
+    var escComma = "\0COMMA" + Math.random() + "\0";
+    var escPeriod = "\0PERIOD" + Math.random() + "\0";
+    var escSlashPattern = new RegExp(escSlash, "g");
+    var escOpenPattern = new RegExp(escOpen, "g");
+    var escClosePattern = new RegExp(escClose, "g");
+    var escCommaPattern = new RegExp(escComma, "g");
+    var escPeriodPattern = new RegExp(escPeriod, "g");
+    var slashPattern = /\\\\/g;
+    var openPattern = /\\{/g;
+    var closePattern = /\\}/g;
+    var commaPattern = /\\,/g;
+    var periodPattern = /\\\./g;
+    exports2.EXPANSION_MAX = 1e5;
+    exports2.EXPANSION_MAX_LENGTH = 4e6;
+    exports2.EXPANSION_MAX_DEPTH = 1e3;
+    exports2.EXPANSION_MAX_REWRITES = 1e3;
+    function numeric(str2) {
+      return !isNaN(str2) ? parseInt(str2, 10) : str2.charCodeAt(0);
+    }
+    function escapeBraces(str2) {
+      return str2.replace(slashPattern, escSlash).replace(openPattern, escOpen).replace(closePattern, escClose).replace(commaPattern, escComma).replace(periodPattern, escPeriod);
+    }
+    function unescapeBraces(str2) {
+      return str2.replace(escSlashPattern, "\\").replace(escOpenPattern, "{").replace(escClosePattern, "}").replace(escCommaPattern, ",").replace(escPeriodPattern, ".");
+    }
+    function pushAll(target, items) {
+      for (let i = 0; i < items.length; i++) {
+        target.push(items[i]);
+      }
+    }
+    function parseCommaParts(str2) {
+      const parts = [];
+      let carry = "";
+      for (; ; ) {
+        const m = (0, balanced_match_1.balanced)("{", "}", str2);
+        if (!m) {
+          const tail = str2.split(",");
+          tail[0] = carry + tail[0];
+          pushAll(parts, tail);
+          return parts;
+        }
+        const { pre, body, post } = m;
+        const p = pre.split(",");
+        p[0] = carry + p[0];
+        p[p.length - 1] += "{" + body + "}";
+        if (!post.length) {
+          pushAll(parts, p);
+          return parts;
+        }
+        carry = p.pop();
+        pushAll(parts, p);
+        str2 = post;
+      }
+    }
+    function expand(str2, options2 = {}) {
+      if (!str2) {
+        return [];
+      }
+      const { max = exports2.EXPANSION_MAX, maxLength = exports2.EXPANSION_MAX_LENGTH, maxDepth = exports2.EXPANSION_MAX_DEPTH, maxRewrites = exports2.EXPANSION_MAX_REWRITES } = options2;
+      if (str2.slice(0, 2) === "{}") {
+        str2 = "\\{\\}" + str2.slice(2);
+      }
+      return expand_(escapeBraces(str2), max, maxLength, maxDepth, 0, maxRewrites, true).map(unescapeBraces);
+    }
+    function embrace(str2) {
+      return "{" + str2 + "}";
+    }
+    function isPadded(el) {
+      return /^-?0\d/.test(el);
+    }
+    function lte(i, y) {
+      return i <= y;
+    }
+    function gte(i, y) {
+      return i >= y;
+    }
+    function combine(acc, pre, values, max, maxLength, dropEmpties) {
+      const out = [];
+      let length = 0;
+      for (let a = 0; a < acc.length; a++) {
+        for (let v = 0; v < values.length; v++) {
+          if (out.length >= max)
+            return out;
+          const expansion = acc[a] + pre + values[v];
+          if (dropEmpties && !expansion)
+            continue;
+          if (length + expansion.length > maxLength)
+            return out;
+          out.push(expansion);
+          length += expansion.length;
+        }
+      }
+      return out;
+    }
+    function expandSequence(body, isAlphaSequence, max, maxLength) {
+      const n = body.split(/\.\./);
+      const N = [];
+      if (n[0] === void 0 || n[1] === void 0) {
+        return N;
+      }
+      const x = numeric(n[0]);
+      const y = numeric(n[1]);
+      const width = Math.max(n[0].length, n[1].length);
+      let incr = n.length === 3 && n[2] !== void 0 ? Math.max(Math.abs(numeric(n[2])), 1) : 1;
+      let test = lte;
+      const reverse = y < x;
+      if (reverse) {
+        incr *= -1;
+        test = gte;
+      }
+      const pad = n.some(isPadded);
+      let length = 0;
+      for (let i = x; test(i, y) && N.length < max; i += incr) {
+        let c;
+        if (isAlphaSequence) {
+          c = String.fromCharCode(i);
+          if (c === "\\") {
+            c = "";
+          }
+        } else {
+          c = String(i);
+          if (pad) {
+            const need = width - c.length;
+            if (need > 0) {
+              const z2 = new Array(need + 1).join("0");
+              if (i < 0) {
+                c = "-" + z2 + c.slice(1);
+              } else {
+                c = z2 + c;
+              }
+            }
+          }
+        }
+        if (length + c.length > maxLength)
+          break;
+        N.push(c);
+        length += c.length;
+      }
+      return N;
+    }
+    function expand_(str2, max, maxLength, maxDepth, depth, maxRewrites, isTop) {
+      if (depth > maxDepth) {
+        return [str2];
+      }
+      let acc = [""];
+      let rewrites = 0;
+      let dropEmpties = false;
+      let firstGroup = true;
+      for (; ; ) {
+        const m = (0, balanced_match_1.balanced)("{", "}", str2);
+        if (!m) {
+          return combine(acc, str2, [""], max, maxLength, dropEmpties);
+        }
+        const pre = m.pre;
+        if (/\$$/.test(pre)) {
+          acc = combine(acc, pre + "{" + m.body + "}", [""], max, maxLength, dropEmpties && !m.post.length);
+          firstGroup = false;
+          if (!m.post.length)
+            break;
+          str2 = m.post;
+          continue;
+        }
+        const isNumericSequence = /^-?\d+\.\.-?\d+(?:\.\.-?\d+)?$/.test(m.body);
+        const isAlphaSequence = /^[a-zA-Z]\.\.[a-zA-Z](?:\.\.-?\d+)?$/.test(m.body);
+        const isSequence = isNumericSequence || isAlphaSequence;
+        const isOptions = m.body.indexOf(",") >= 0;
+        if (!isSequence && !isOptions) {
+          if (rewrites < maxRewrites && m.post.match(/,(?!,).*\}/)) {
+            rewrites++;
+            str2 = m.pre + "{" + m.body + escClose + m.post;
+            isTop = true;
+            continue;
+          }
+          return combine(acc, pre + "{" + m.body + "}" + m.post, [""], max, maxLength, dropEmpties);
+        }
+        if (firstGroup) {
+          dropEmpties = isTop && !isSequence;
+          firstGroup = false;
+        }
+        let values;
+        if (isSequence) {
+          values = expandSequence(m.body, isAlphaSequence, max, maxLength);
+        } else {
+          let n = parseCommaParts(m.body);
+          if (n.length === 1 && n[0] !== void 0) {
+            n = expand_(n[0], max, maxLength, maxDepth, depth + 1, maxRewrites, false).map(embrace);
+            if (n.length === 1) {
+              acc = combine(acc, pre + n[0], [""], max, maxLength, dropEmpties && !m.post.length);
+              if (!m.post.length)
+                break;
+              str2 = m.post;
+              continue;
+            }
+          }
+          let dropsEmpties = dropEmpties && !m.post.length && !pre;
+          for (let d = 0; dropsEmpties && d < acc.length; d++) {
+            if (acc[d]) {
+              dropsEmpties = false;
+            }
+          }
+          values = [];
+          let valuesLength = 0;
+          outer: for (let j = 0; j < n.length; j++) {
+            const expanded = expand_(n[j], max, maxLength, maxDepth, depth + 1, maxRewrites, false);
+            for (let k = 0; k < expanded.length; k++) {
+              const v = expanded[k];
+              if (dropsEmpties && !v)
+                continue;
+              if (values.length >= max || valuesLength + v.length > maxLength) {
+                break outer;
+              }
+              values.push(v);
+              valuesLength += v.length;
+            }
+          }
+        }
+        acc = combine(acc, pre, values, max, maxLength, dropEmpties && !m.post.length);
+        if (!m.post.length)
+          break;
+        str2 = m.post;
+      }
+      return acc;
+    }
+  }
+});
+
+// node_modules/.pnpm/minimatch@10.2.6/node_modules/minimatch/dist/commonjs/assert-valid-pattern.js
+var require_assert_valid_pattern = __commonJS({
+  "node_modules/.pnpm/minimatch@10.2.6/node_modules/minimatch/dist/commonjs/assert-valid-pattern.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.assertValidPattern = void 0;
+    var MAX_PATTERN_LENGTH = 1024 * 64;
+    var assertValidPattern = (pattern) => {
+      if (typeof pattern !== "string") {
+        throw new TypeError("invalid pattern");
+      }
+      if (pattern.length > MAX_PATTERN_LENGTH) {
+        throw new TypeError("pattern is too long");
+      }
+    };
+    exports2.assertValidPattern = assertValidPattern;
+  }
+});
+
+// node_modules/.pnpm/minimatch@10.2.6/node_modules/minimatch/dist/commonjs/brace-expressions.js
+var require_brace_expressions = __commonJS({
+  "node_modules/.pnpm/minimatch@10.2.6/node_modules/minimatch/dist/commonjs/brace-expressions.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.parseClass = void 0;
+    var posixClasses = {
+      "[:alnum:]": ["\\p{L}\\p{Nl}\\p{Nd}", true],
+      "[:alpha:]": ["\\p{L}\\p{Nl}", true],
+      "[:ascii:]": ["\\x00-\\x7f", false],
+      "[:blank:]": ["\\p{Zs}\\t", true],
+      "[:cntrl:]": ["\\p{Cc}", true],
+      "[:digit:]": ["\\p{Nd}", true],
+      "[:graph:]": ["\\p{Z}\\p{C}", true, true],
+      "[:lower:]": ["\\p{Ll}", true],
+      "[:print:]": ["\\p{C}", true],
+      "[:punct:]": ["\\p{P}", true],
+      "[:space:]": ["\\p{Z}\\t\\r\\n\\v\\f", true],
+      "[:upper:]": ["\\p{Lu}", true],
+      "[:word:]": ["\\p{L}\\p{Nl}\\p{Nd}\\p{Pc}", true],
+      "[:xdigit:]": ["A-Fa-f0-9", false]
+    };
+    var braceEscape = (s) => s.replace(/[[\]\\-]/g, "\\$&");
+    var regexpEscape = (s) => s.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+    var rangesToString = (ranges) => ranges.join("");
+    var parseClass = (glob, position) => {
+      const pos = position;
+      if (glob.charAt(pos) !== "[") {
+        throw new Error("not in a brace expression");
+      }
+      const ranges = [];
+      const negs = [];
+      let i = pos + 1;
+      let sawStart = false;
+      let uflag = false;
+      let escaping = false;
+      let negate = false;
+      let endPos = pos;
+      let rangeStart = "";
+      WHILE: while (i < glob.length) {
+        const c = glob.charAt(i);
+        if ((c === "!" || c === "^") && i === pos + 1) {
+          negate = true;
+          i++;
+          continue;
+        }
+        if (c === "]" && sawStart && !escaping) {
+          endPos = i + 1;
+          break;
+        }
+        sawStart = true;
+        if (c === "\\") {
+          if (!escaping) {
+            escaping = true;
+            i++;
+            continue;
+          }
+        }
+        if (c === "[" && !escaping) {
+          for (const [cls, [unip, u, neg]] of Object.entries(posixClasses)) {
+            if (glob.startsWith(cls, i)) {
+              if (rangeStart) {
+                return ["$.", false, glob.length - pos, true];
+              }
+              i += cls.length;
+              if (neg)
+                negs.push(unip);
+              else
+                ranges.push(unip);
+              uflag = uflag || u;
+              continue WHILE;
+            }
+          }
+        }
+        escaping = false;
+        if (rangeStart) {
+          if (c > rangeStart) {
+            ranges.push(braceEscape(rangeStart) + "-" + braceEscape(c));
+          } else if (c === rangeStart) {
+            ranges.push(braceEscape(c));
+          }
+          rangeStart = "";
+          i++;
+          continue;
+        }
+        if (glob.startsWith("-]", i + 1)) {
+          ranges.push(braceEscape(c + "-"));
+          i += 2;
+          continue;
+        }
+        if (glob.startsWith("-", i + 1)) {
+          rangeStart = c;
+          i += 2;
+          continue;
+        }
+        ranges.push(braceEscape(c));
+        i++;
+      }
+      if (endPos < i) {
+        return ["", false, 0, false];
+      }
+      if (!ranges.length && !negs.length) {
+        return ["$.", false, glob.length - pos, true];
+      }
+      if (negs.length === 0 && ranges.length === 1 && /^\\?.$/.test(ranges[0]) && !negate) {
+        const r = ranges[0].length === 2 ? ranges[0].slice(-1) : ranges[0];
+        return [regexpEscape(r), false, endPos - pos, false];
+      }
+      const sranges = "[" + (negate ? "^" : "") + rangesToString(ranges) + "]";
+      const snegs = "[" + (negate ? "" : "^") + rangesToString(negs) + "]";
+      const comb = ranges.length && negs.length ? "(" + sranges + "|" + snegs + ")" : ranges.length ? sranges : snegs;
+      return [comb, uflag, endPos - pos, true];
+    };
+    exports2.parseClass = parseClass;
+  }
+});
+
+// node_modules/.pnpm/minimatch@10.2.6/node_modules/minimatch/dist/commonjs/unescape.js
+var require_unescape = __commonJS({
+  "node_modules/.pnpm/minimatch@10.2.6/node_modules/minimatch/dist/commonjs/unescape.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.unescape = void 0;
+    var unescape = (s, { windowsPathsNoEscape = false, magicalBraces = true } = {}) => {
+      if (magicalBraces) {
+        return windowsPathsNoEscape ? s.replace(/\[([^/\\])\]/g, "$1") : s.replace(/((?!\\).|^)\[([^/\\])\]/g, "$1$2").replace(/\\([^/])/g, "$1");
+      }
+      return windowsPathsNoEscape ? s.replace(/\[([^/\\{}])\]/g, "$1") : s.replace(/((?!\\).|^)\[([^/\\{}])\]/g, "$1$2").replace(/\\([^/{}])/g, "$1");
+    };
+    exports2.unescape = unescape;
+  }
+});
+
+// node_modules/.pnpm/minimatch@10.2.6/node_modules/minimatch/dist/commonjs/ast.js
+var require_ast = __commonJS({
+  "node_modules/.pnpm/minimatch@10.2.6/node_modules/minimatch/dist/commonjs/ast.js"(exports2) {
+    "use strict";
+    var _a3;
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.AST = void 0;
+    var brace_expressions_js_1 = require_brace_expressions();
+    var unescape_js_1 = require_unescape();
+    var types = /* @__PURE__ */ new Set(["!", "?", "+", "*", "@"]);
+    var isExtglobType = (c) => types.has(c);
+    var isExtglobAST = (c) => isExtglobType(c.type);
+    var adoptionMap = /* @__PURE__ */ new Map([
+      ["!", ["@"]],
+      ["?", ["?", "@"]],
+      ["@", ["@"]],
+      ["*", ["*", "+", "?", "@"]],
+      ["+", ["+", "@"]]
+    ]);
+    var adoptionWithSpaceMap = /* @__PURE__ */ new Map([
+      ["!", ["?"]],
+      ["@", ["?"]],
+      ["+", ["?", "*"]]
+    ]);
+    var adoptionAnyMap = /* @__PURE__ */ new Map([
+      ["!", ["?", "@"]],
+      ["?", ["?", "@"]],
+      ["@", ["?", "@"]],
+      ["*", ["*", "+", "?", "@"]],
+      ["+", ["+", "@", "?", "*"]]
+    ]);
+    var usurpMap = /* @__PURE__ */ new Map([
+      ["!", /* @__PURE__ */ new Map([["!", "@"]])],
+      [
+        "?",
+        /* @__PURE__ */ new Map([
+          ["*", "*"],
+          ["+", "*"]
+        ])
+      ],
+      [
+        "@",
+        /* @__PURE__ */ new Map([
+          ["!", "!"],
+          ["?", "?"],
+          ["@", "@"],
+          ["*", "*"],
+          ["+", "+"]
+        ])
+      ],
+      [
+        "+",
+        /* @__PURE__ */ new Map([
+          ["?", "*"],
+          ["*", "*"]
+        ])
+      ]
+    ]);
+    var startNoTraversal = "(?!(?:^|/)\\.\\.?(?:$|/))";
+    var startNoDot = "(?!\\.)";
+    var addPatternStart = /* @__PURE__ */ new Set(["[", "."]);
+    var justDots = /* @__PURE__ */ new Set(["..", "."]);
+    var reSpecials = new Set("().*{}+?[]^$\\!");
+    var regExpEscape = (s) => s.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+    var qmark = "[^/]";
+    var star = qmark + "*?";
+    var starNoEmpty = qmark + "+?";
+    var ID = 0;
+    var AST = class {
+      type;
+      #root;
+      #hasMagic;
+      #uflag = false;
+      #parts = [];
+      #parent;
+      #parentIndex;
+      #negs;
+      #filledNegs = false;
+      #options;
+      #toString;
+      // set to true if it's an extglob with no children
+      // (which really means one child of '')
+      #emptyExt = false;
+      id = ++ID;
+      get depth() {
+        return (this.#parent?.depth ?? -1) + 1;
+      }
+      [Symbol.for("nodejs.util.inspect.custom")]() {
+        return {
+          "@@type": "AST",
+          id: this.id,
+          type: this.type,
+          root: this.#root.id,
+          parent: this.#parent?.id,
+          depth: this.depth,
+          partsLength: this.#parts.length,
+          parts: this.#parts
+        };
+      }
+      constructor(type, parent, options2 = {}) {
+        this.type = type;
+        if (type)
+          this.#hasMagic = true;
+        this.#parent = parent;
+        this.#root = this.#parent ? this.#parent.#root : this;
+        this.#options = this.#root === this ? options2 : this.#root.#options;
+        this.#negs = this.#root === this ? [] : this.#root.#negs;
+        if (type === "!" && !this.#root.#filledNegs)
+          this.#negs.push(this);
+        this.#parentIndex = this.#parent ? this.#parent.#parts.length : 0;
+      }
+      get hasMagic() {
+        if (this.#hasMagic !== void 0)
+          return this.#hasMagic;
+        for (const p of this.#parts) {
+          if (typeof p === "string")
+            continue;
+          if (p.type || p.hasMagic)
+            return this.#hasMagic = true;
+        }
+        return this.#hasMagic;
+      }
+      // reconstructs the pattern
+      toString() {
+        return this.#toString !== void 0 ? this.#toString : !this.type ? this.#toString = this.#parts.map((p) => String(p)).join("") : this.#toString = this.type + "(" + this.#parts.map((p) => String(p)).join("|") + ")";
+      }
+      #fillNegs() {
+        if (this !== this.#root)
+          throw new Error("should only call on root");
+        if (this.#filledNegs)
+          return this;
+        this.toString();
+        this.#filledNegs = true;
+        let n;
+        while (n = this.#negs.pop()) {
+          if (n.type !== "!")
+            continue;
+          let p = n;
+          let pp = p.#parent;
+          while (pp) {
+            for (let i = p.#parentIndex + 1; !pp.type && i < pp.#parts.length; i++) {
+              for (const part of n.#parts) {
+                if (typeof part === "string") {
+                  throw new Error("string part in extglob AST??");
+                }
+                part.copyIn(pp.#parts[i]);
+              }
+            }
+            p = pp;
+            pp = p.#parent;
+          }
+        }
+        return this;
+      }
+      push(...parts) {
+        for (const p of parts) {
+          if (p === "")
+            continue;
+          if (typeof p !== "string" && !(p instanceof _a3 && p.#parent === this)) {
+            throw new Error("invalid part: " + p);
+          }
+          this.#parts.push(p);
+        }
+      }
+      toJSON() {
+        const ret = this.type === null ? this.#parts.slice().map((p) => typeof p === "string" ? p : p.toJSON()) : [this.type, ...this.#parts.map((p) => p.toJSON())];
+        if (this.isStart() && !this.type)
+          ret.unshift([]);
+        if (this.isEnd() && (this === this.#root || this.#root.#filledNegs && this.#parent?.type === "!")) {
+          ret.push({});
+        }
+        return ret;
+      }
+      isStart() {
+        if (this.#root === this)
+          return true;
+        if (!this.#parent?.isStart())
+          return false;
+        if (this.#parentIndex === 0)
+          return true;
+        const p = this.#parent;
+        for (let i = 0; i < this.#parentIndex; i++) {
+          const pp = p.#parts[i];
+          if (!(pp instanceof _a3 && pp.type === "!")) {
+            return false;
+          }
+        }
+        return true;
+      }
+      isEnd() {
+        if (this.#root === this)
+          return true;
+        if (this.#parent?.type === "!")
+          return true;
+        if (!this.#parent?.isEnd())
+          return false;
+        if (!this.type)
+          return this.#parent?.isEnd();
+        const pl = this.#parent ? this.#parent.#parts.length : 0;
+        return this.#parentIndex === pl - 1;
+      }
+      copyIn(part) {
+        if (typeof part === "string")
+          this.push(part);
+        else
+          this.push(part.clone(this));
+      }
+      clone(parent) {
+        const c = new _a3(this.type, parent);
+        for (const p of this.#parts) {
+          c.copyIn(p);
+        }
+        return c;
+      }
+      static #parseAST(str2, ast, pos, opt, extDepth) {
+        const maxDepth = opt.maxExtglobRecursion ?? 2;
+        let escaping = false;
+        let inBrace = false;
+        let braceStart = -1;
+        let braceNeg = false;
+        if (ast.type === null) {
+          let i2 = pos;
+          let acc2 = "";
+          while (i2 < str2.length) {
+            const c = str2.charAt(i2++);
+            if (escaping || c === "\\") {
+              escaping = !escaping;
+              acc2 += c;
+              continue;
+            }
+            if (inBrace) {
+              if (i2 === braceStart + 1) {
+                if (c === "^" || c === "!") {
+                  braceNeg = true;
+                }
+              } else if (c === "]" && !(i2 === braceStart + 2 && braceNeg)) {
+                inBrace = false;
+              }
+              acc2 += c;
+              continue;
+            } else if (c === "[") {
+              inBrace = true;
+              braceStart = i2;
+              braceNeg = false;
+              acc2 += c;
+              continue;
+            }
+            const doRecurse = !opt.noext && isExtglobType(c) && str2.charAt(i2) === "(" && extDepth <= maxDepth;
+            if (doRecurse) {
+              ast.push(acc2);
+              acc2 = "";
+              const ext = new _a3(c, ast);
+              i2 = _a3.#parseAST(str2, ext, i2, opt, extDepth + 1);
+              ast.push(ext);
+              continue;
+            }
+            acc2 += c;
+          }
+          ast.push(acc2);
+          return i2;
+        }
+        let i = pos + 1;
+        let part = new _a3(null, ast);
+        const parts = [];
+        let acc = "";
+        while (i < str2.length) {
+          const c = str2.charAt(i++);
+          if (escaping || c === "\\") {
+            escaping = !escaping;
+            acc += c;
+            continue;
+          }
+          if (inBrace) {
+            if (i === braceStart + 1) {
+              if (c === "^" || c === "!") {
+                braceNeg = true;
+              }
+            } else if (c === "]" && !(i === braceStart + 2 && braceNeg)) {
+              inBrace = false;
+            }
+            acc += c;
+            continue;
+          } else if (c === "[") {
+            inBrace = true;
+            braceStart = i;
+            braceNeg = false;
+            acc += c;
+            continue;
+          }
+          const doRecurse = !opt.noext && isExtglobType(c) && str2.charAt(i) === "(" && /* c8 ignore start - the maxDepth is sufficient here */
+          (extDepth <= maxDepth || ast && ast.#canAdoptType(c));
+          if (doRecurse) {
+            const depthAdd = ast && ast.#canAdoptType(c) ? 0 : 1;
+            part.push(acc);
+            acc = "";
+            const ext = new _a3(c, part);
+            part.push(ext);
+            i = _a3.#parseAST(str2, ext, i, opt, extDepth + depthAdd);
+            continue;
+          }
+          if (c === "|") {
+            part.push(acc);
+            acc = "";
+            parts.push(part);
+            part = new _a3(null, ast);
+            continue;
+          }
+          if (c === ")") {
+            if (acc === "" && ast.#parts.length === 0) {
+              ast.#emptyExt = true;
+            }
+            part.push(acc);
+            acc = "";
+            ast.push(...parts, part);
+            return i;
+          }
+          acc += c;
+        }
+        ast.type = null;
+        ast.#hasMagic = void 0;
+        ast.#parts = [str2.substring(pos - 1)];
+        return i;
+      }
+      #canAdoptWithSpace(child) {
+        return this.#canAdopt(child, adoptionWithSpaceMap);
+      }
+      #canAdopt(child, map2 = adoptionMap) {
+        if (!child || typeof child !== "object" || child.type !== null || child.#parts.length !== 1 || this.type === null) {
+          return false;
+        }
+        const gc = child.#parts[0];
+        if (!gc || typeof gc !== "object" || gc.type === null) {
+          return false;
+        }
+        return this.#canAdoptType(gc.type, map2);
+      }
+      #canAdoptType(c, map2 = adoptionAnyMap) {
+        return !!map2.get(this.type)?.includes(c);
+      }
+      #adoptWithSpace(child, index) {
+        const gc = child.#parts[0];
+        const blank = new _a3(null, gc, this.options);
+        blank.#parts.push("");
+        gc.push(blank);
+        this.#adopt(child, index);
+      }
+      #adopt(child, index) {
+        const gc = child.#parts[0];
+        this.#parts.splice(index, 1, ...gc.#parts);
+        for (const p of gc.#parts) {
+          if (typeof p === "object")
+            p.#parent = this;
+        }
+        this.#toString = void 0;
+      }
+      #canUsurpType(c) {
+        const m = usurpMap.get(this.type);
+        return !!m?.has(c);
+      }
+      #canUsurp(child) {
+        if (!child || typeof child !== "object" || child.type !== null || child.#parts.length !== 1 || this.type === null || this.#parts.length !== 1) {
+          return false;
+        }
+        const gc = child.#parts[0];
+        if (!gc || typeof gc !== "object" || gc.type === null) {
+          return false;
+        }
+        return this.#canUsurpType(gc.type);
+      }
+      #usurp(child) {
+        const m = usurpMap.get(this.type);
+        const gc = child.#parts[0];
+        const nt = m?.get(gc.type);
+        if (!nt)
+          return false;
+        this.#parts = gc.#parts;
+        for (const p of this.#parts) {
+          if (typeof p === "object") {
+            p.#parent = this;
+          }
+        }
+        this.type = nt;
+        this.#toString = void 0;
+        this.#emptyExt = false;
+      }
+      static fromGlob(pattern, options2 = {}) {
+        const ast = new _a3(null, void 0, options2);
+        _a3.#parseAST(pattern, ast, 0, options2, 0);
+        return ast;
+      }
+      // returns the regular expression if there's magic, or the unescaped
+      // string if not.
+      toMMPattern() {
+        if (this !== this.#root)
+          return this.#root.toMMPattern();
+        const glob = this.toString();
+        const [re2, body, hasMagic, uflag] = this.toRegExpSource();
+        const anyMagic = hasMagic || this.#hasMagic || this.#options.nocase && !this.#options.nocaseMagicOnly && glob.toUpperCase() !== glob.toLowerCase();
+        if (!anyMagic) {
+          return body;
+        }
+        const flags = (this.#options.nocase ? "i" : "") + (uflag ? "u" : "");
+        return Object.assign(new RegExp(`^${re2}$`, flags), {
+          _src: re2,
+          _glob: glob
+        });
+      }
+      get options() {
+        return this.#options;
+      }
+      // returns the string match, the regexp source, whether there's magic
+      // in the regexp (so a regular expression is required) and whether or
+      // not the uflag is needed for the regular expression (for posix classes)
+      // TODO: instead of injecting the start/end at this point, just return
+      // the BODY of the regexp, along with the start/end portions suitable
+      // for binding the start/end in either a joined full-path makeRe context
+      // (where we bind to (^|/), or a standalone matchPart context (where
+      // we bind to ^, and not /).  Otherwise slashes get duped!
+      //
+      // In part-matching mode, the start is:
+      // - if not isStart: nothing
+      // - if traversal possible, but not allowed: ^(?!\.\.?$)
+      // - if dots allowed or not possible: ^
+      // - if dots possible and not allowed: ^(?!\.)
+      // end is:
+      // - if not isEnd(): nothing
+      // - else: $
+      //
+      // In full-path matching mode, we put the slash at the START of the
+      // pattern, so start is:
+      // - if first pattern: same as part-matching mode
+      // - if not isStart(): nothing
+      // - if traversal possible, but not allowed: /(?!\.\.?(?:$|/))
+      // - if dots allowed or not possible: /
+      // - if dots possible and not allowed: /(?!\.)
+      // end is:
+      // - if last pattern, same as part-matching mode
+      // - else nothing
+      //
+      // Always put the (?:$|/) on negated tails, though, because that has to be
+      // there to bind the end of the negated pattern portion, and it's easier to
+      // just stick it in now rather than try to inject it later in the middle of
+      // the pattern.
+      //
+      // We can just always return the same end, and leave it up to the caller
+      // to know whether it's going to be used joined or in parts.
+      // And, if the start is adjusted slightly, can do the same there:
+      // - if not isStart: nothing
+      // - if traversal possible, but not allowed: (?:/|^)(?!\.\.?$)
+      // - if dots allowed or not possible: (?:/|^)
+      // - if dots possible and not allowed: (?:/|^)(?!\.)
+      //
+      // But it's better to have a simpler binding without a conditional, for
+      // performance, so probably better to return both start options.
+      //
+      // Then the caller just ignores the end if it's not the first pattern,
+      // and the start always gets applied.
+      //
+      // But that's always going to be $ if it's the ending pattern, or nothing,
+      // so the caller can just attach $ at the end of the pattern when building.
+      //
+      // So the todo is:
+      // - better detect what kind of start is needed
+      // - return both flavors of starting pattern
+      // - attach $ at the end of the pattern when creating the actual RegExp
+      //
+      // Ah, but wait, no, that all only applies to the root when the first pattern
+      // is not an extglob. If the first pattern IS an extglob, then we need all
+      // that dot prevention biz to live in the extglob portions, because eg
+      // +(*|.x*) can match .xy but not .yx.
+      //
+      // So, return the two flavors if it's #root and the first child is not an
+      // AST, otherwise leave it to the child AST to handle it, and there,
+      // use the (?:^|/) style of start binding.
+      //
+      // Even simplified further:
+      // - Since the start for a join is eg /(?!\.) and the start for a part
+      // is ^(?!\.), we can just prepend (?!\.) to the pattern (either root
+      // or start or whatever) and prepend ^ or / at the Regexp construction.
+      toRegExpSource(allowDot) {
+        const dot = allowDot ?? !!this.#options.dot;
+        if (this.#root === this) {
+          this.#flatten();
+          this.#fillNegs();
+        }
+        if (!isExtglobAST(this)) {
+          const noEmpty = this.isStart() && this.isEnd() && !this.#parts.some((s) => typeof s !== "string");
+          const src = this.#parts.map((p) => {
+            const [re2, _, hasMagic, uflag] = typeof p === "string" ? _a3.#parseGlob(p, this.#hasMagic, noEmpty) : p.toRegExpSource(allowDot);
+            this.#hasMagic = this.#hasMagic || hasMagic;
+            this.#uflag = this.#uflag || uflag;
+            return re2;
+          }).join("");
+          let start2 = "";
+          if (this.isStart()) {
+            if (typeof this.#parts[0] === "string") {
+              const dotTravAllowed = this.#parts.length === 1 && justDots.has(this.#parts[0]);
+              if (!dotTravAllowed) {
+                const aps = addPatternStart;
+                const needNoTrav = (
+                  // dots are allowed, and the pattern starts with [ or .
+                  dot && aps.has(src.charAt(0)) || // the pattern starts with \., and then [ or .
+                  src.startsWith("\\.") && aps.has(src.charAt(2)) || // the pattern starts with \.\., and then [ or .
+                  src.startsWith("\\.\\.") && aps.has(src.charAt(4))
+                );
+                const needNoDot = !dot && !allowDot && aps.has(src.charAt(0));
+                start2 = needNoTrav ? startNoTraversal : needNoDot ? startNoDot : "";
+              }
+            }
+          }
+          let end = "";
+          if (this.isEnd() && this.#root.#filledNegs && this.#parent?.type === "!") {
+            end = "(?:$|\\/)";
+          }
+          const final2 = start2 + src + end;
+          return [
+            final2,
+            (0, unescape_js_1.unescape)(src),
+            this.#hasMagic = !!this.#hasMagic,
+            this.#uflag
+          ];
+        }
+        const repeated = this.type === "*" || this.type === "+";
+        const start = this.type === "!" ? "(?:(?!(?:" : "(?:";
+        let body = this.#partsToRegExp(dot);
+        if (this.isStart() && this.isEnd() && !body && this.type !== "!") {
+          const s = this.toString();
+          const me = this;
+          me.#parts = [s];
+          me.type = null;
+          me.#hasMagic = void 0;
+          return [s, (0, unescape_js_1.unescape)(this.toString()), false, false];
+        }
+        let bodyDotAllowed = !repeated || allowDot || dot || !startNoDot ? "" : this.#partsToRegExp(true);
+        if (bodyDotAllowed === body) {
+          bodyDotAllowed = "";
+        }
+        if (bodyDotAllowed) {
+          body = `(?:${body})(?:${bodyDotAllowed})*?`;
+        }
+        let final = "";
+        if (this.type === "!" && this.#emptyExt) {
+          final = (this.isStart() && !dot ? startNoDot : "") + starNoEmpty;
+        } else {
+          const close = this.type === "!" ? (
+            // !() must match something,but !(x) can match ''
+            "))" + (this.isStart() && !dot && !allowDot ? startNoDot : "") + star + ")"
+          ) : this.type === "@" ? ")" : this.type === "?" ? ")?" : this.type === "+" && bodyDotAllowed ? ")" : this.type === "*" && bodyDotAllowed ? `)?` : `)${this.type}`;
+          final = start + body + close;
+        }
+        return [
+          final,
+          (0, unescape_js_1.unescape)(body),
+          this.#hasMagic = !!this.#hasMagic,
+          this.#uflag
+        ];
+      }
+      #flatten() {
+        if (!isExtglobAST(this)) {
+          for (const p of this.#parts) {
+            if (typeof p === "object") {
+              p.#flatten();
+            }
+          }
+        } else {
+          let iterations = 0;
+          let done = false;
+          do {
+            done = true;
+            for (let i = 0; i < this.#parts.length; i++) {
+              const c = this.#parts[i];
+              if (typeof c === "object") {
+                c.#flatten();
+                if (this.#canAdopt(c)) {
+                  done = false;
+                  this.#adopt(c, i);
+                } else if (this.#canAdoptWithSpace(c)) {
+                  done = false;
+                  this.#adoptWithSpace(c, i);
+                } else if (this.#canUsurp(c)) {
+                  done = false;
+                  this.#usurp(c);
+                }
+              }
+            }
+          } while (!done && ++iterations < 10);
+        }
+        this.#toString = void 0;
+      }
+      #partsToRegExp(dot) {
+        return this.#parts.map((p) => {
+          if (typeof p === "string") {
+            throw new Error("string type in extglob ast??");
+          }
+          const [re2, _, _hasMagic, uflag] = p.toRegExpSource(dot);
+          this.#uflag = this.#uflag || uflag;
+          return re2;
+        }).filter((p) => !(this.isStart() && this.isEnd()) || !!p).join("|");
+      }
+      static #parseGlob(glob, hasMagic, noEmpty = false) {
+        let escaping = false;
+        let re2 = "";
+        let uflag = false;
+        let inStar = false;
+        for (let i = 0; i < glob.length; i++) {
+          const c = glob.charAt(i);
+          if (escaping) {
+            escaping = false;
+            re2 += (reSpecials.has(c) ? "\\" : "") + c;
+            continue;
+          }
+          if (c === "*") {
+            if (inStar)
+              continue;
+            inStar = true;
+            re2 += noEmpty && /^[*]+$/.test(glob) ? starNoEmpty : star;
+            hasMagic = true;
+            continue;
+          } else {
+            inStar = false;
+          }
+          if (c === "\\") {
+            if (i === glob.length - 1) {
+              re2 += "\\\\";
+            } else {
+              escaping = true;
+            }
+            continue;
+          }
+          if (c === "[") {
+            const [src, needUflag, consumed, magic] = (0, brace_expressions_js_1.parseClass)(glob, i);
+            if (consumed) {
+              re2 += src;
+              uflag = uflag || needUflag;
+              i += consumed - 1;
+              hasMagic = hasMagic || magic;
+              continue;
+            }
+          }
+          if (c === "?") {
+            re2 += qmark;
+            hasMagic = true;
+            continue;
+          }
+          re2 += regExpEscape(c);
+        }
+        return [re2, (0, unescape_js_1.unescape)(glob), !!hasMagic, uflag];
+      }
+    };
+    exports2.AST = AST;
+    _a3 = AST;
+  }
+});
+
+// node_modules/.pnpm/minimatch@10.2.6/node_modules/minimatch/dist/commonjs/escape.js
+var require_escape = __commonJS({
+  "node_modules/.pnpm/minimatch@10.2.6/node_modules/minimatch/dist/commonjs/escape.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.escape = void 0;
+    var escape = (s, { windowsPathsNoEscape = false, magicalBraces = false } = {}) => {
+      if (magicalBraces) {
+        return windowsPathsNoEscape ? s.replace(/[?*()[\]{}]/g, "[$&]") : s.replace(/[?*()[\]\\{}]/g, "\\$&");
+      }
+      return windowsPathsNoEscape ? s.replace(/[?*()[\]]/g, "[$&]") : s.replace(/[?*()[\]\\]/g, "\\$&");
+    };
+    exports2.escape = escape;
+  }
+});
+
+// node_modules/.pnpm/minimatch@10.2.6/node_modules/minimatch/dist/commonjs/index.js
+var require_commonjs3 = __commonJS({
+  "node_modules/.pnpm/minimatch@10.2.6/node_modules/minimatch/dist/commonjs/index.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.unescape = exports2.escape = exports2.AST = exports2.Minimatch = exports2.match = exports2.makeRe = exports2.braceExpand = exports2.defaults = exports2.filter = exports2.GLOBSTAR = exports2.sep = exports2.minimatch = void 0;
+    var brace_expansion_1 = require_commonjs2();
+    var assert_valid_pattern_js_1 = require_assert_valid_pattern();
+    var ast_js_1 = require_ast();
+    var escape_js_1 = require_escape();
+    var unescape_js_1 = require_unescape();
+    var minimatch = (p, pattern, options2 = {}) => {
+      (0, assert_valid_pattern_js_1.assertValidPattern)(pattern);
+      if (!options2.nocomment && pattern.charAt(0) === "#") {
+        return false;
+      }
+      return new Minimatch(pattern, options2).match(p);
+    };
+    exports2.minimatch = minimatch;
+    var starDotExtRE = /^\*+([^+@!?*[(]*)$/;
+    var starDotExtTest = (ext2) => (f) => !f.startsWith(".") && f.endsWith(ext2);
+    var starDotExtTestDot = (ext2) => (f) => f.endsWith(ext2);
+    var starDotExtTestNocase = (ext2) => {
+      ext2 = ext2.toLowerCase();
+      return (f) => !f.startsWith(".") && f.toLowerCase().endsWith(ext2);
+    };
+    var starDotExtTestNocaseDot = (ext2) => {
+      ext2 = ext2.toLowerCase();
+      return (f) => f.toLowerCase().endsWith(ext2);
+    };
+    var starDotStarRE = /^\*+\.\*+$/;
+    var starDotStarTest = (f) => !f.startsWith(".") && f.includes(".");
+    var starDotStarTestDot = (f) => f !== "." && f !== ".." && f.includes(".");
+    var dotStarRE = /^\.\*+$/;
+    var dotStarTest = (f) => f !== "." && f !== ".." && f.startsWith(".");
+    var starRE = /^\*+$/;
+    var starTest = (f) => f.length !== 0 && !f.startsWith(".");
+    var starTestDot = (f) => f.length !== 0 && f !== "." && f !== "..";
+    var qmarksRE = /^\?+([^+@!?*[(]*)?$/;
+    var qmarksTestNocase = ([$0, ext2 = ""]) => {
+      const noext = qmarksTestNoExt([$0]);
+      if (!ext2)
+        return noext;
+      ext2 = ext2.toLowerCase();
+      return (f) => noext(f) && f.toLowerCase().endsWith(ext2);
+    };
+    var qmarksTestNocaseDot = ([$0, ext2 = ""]) => {
+      const noext = qmarksTestNoExtDot([$0]);
+      if (!ext2)
+        return noext;
+      ext2 = ext2.toLowerCase();
+      return (f) => noext(f) && f.toLowerCase().endsWith(ext2);
+    };
+    var qmarksTestDot = ([$0, ext2 = ""]) => {
+      const noext = qmarksTestNoExtDot([$0]);
+      return !ext2 ? noext : (f) => noext(f) && f.endsWith(ext2);
+    };
+    var qmarksTest = ([$0, ext2 = ""]) => {
+      const noext = qmarksTestNoExt([$0]);
+      return !ext2 ? noext : (f) => noext(f) && f.endsWith(ext2);
+    };
+    var qmarksTestNoExt = ([$0]) => {
+      const len = $0.length;
+      return (f) => f.length === len && !f.startsWith(".");
+    };
+    var qmarksTestNoExtDot = ([$0]) => {
+      const len = $0.length;
+      return (f) => f.length === len && f !== "." && f !== "..";
+    };
+    var defaultPlatform = typeof process === "object" && process ? typeof process.env === "object" && process.env && process.env.__MINIMATCH_TESTING_PLATFORM__ || process.platform : "posix";
+    var path = {
+      win32: { sep: "\\" },
+      posix: { sep: "/" }
+    };
+    exports2.sep = defaultPlatform === "win32" ? path.win32.sep : path.posix.sep;
+    exports2.minimatch.sep = exports2.sep;
+    exports2.GLOBSTAR = Symbol("globstar **");
+    exports2.minimatch.GLOBSTAR = exports2.GLOBSTAR;
+    var qmark = "[^/]";
+    var star = qmark + "*?";
+    var twoStarDot = "(?:(?!(?:\\/|^)(?:\\.{1,2})($|\\/)).)*?";
+    var twoStarNoDot = "(?:(?!(?:\\/|^)\\.).)*?";
+    var filter = (pattern, options2 = {}) => (p) => (0, exports2.minimatch)(p, pattern, options2);
+    exports2.filter = filter;
+    exports2.minimatch.filter = exports2.filter;
+    var ext = (a, b = {}) => Object.assign({}, a, b);
+    var defaults = (def) => {
+      if (!def || typeof def !== "object" || !Object.keys(def).length) {
+        return exports2.minimatch;
+      }
+      const orig = exports2.minimatch;
+      const m = (p, pattern, options2 = {}) => orig(p, pattern, ext(def, options2));
+      return Object.assign(m, {
+        Minimatch: class Minimatch extends orig.Minimatch {
+          constructor(pattern, options2 = {}) {
+            super(pattern, ext(def, options2));
+          }
+          static defaults(options2) {
+            return orig.defaults(ext(def, options2)).Minimatch;
+          }
+        },
+        AST: class AST extends orig.AST {
+          /* c8 ignore start */
+          constructor(type, parent, options2 = {}) {
+            super(type, parent, ext(def, options2));
+          }
+          /* c8 ignore stop */
+          static fromGlob(pattern, options2 = {}) {
+            return orig.AST.fromGlob(pattern, ext(def, options2));
+          }
+        },
+        unescape: (s, options2 = {}) => orig.unescape(s, ext(def, options2)),
+        escape: (s, options2 = {}) => orig.escape(s, ext(def, options2)),
+        filter: (pattern, options2 = {}) => orig.filter(pattern, ext(def, options2)),
+        defaults: (options2) => orig.defaults(ext(def, options2)),
+        makeRe: (pattern, options2 = {}) => orig.makeRe(pattern, ext(def, options2)),
+        braceExpand: (pattern, options2 = {}) => orig.braceExpand(pattern, ext(def, options2)),
+        match: (list, pattern, options2 = {}) => orig.match(list, pattern, ext(def, options2)),
+        sep: orig.sep,
+        GLOBSTAR: exports2.GLOBSTAR
+      });
+    };
+    exports2.defaults = defaults;
+    exports2.minimatch.defaults = exports2.defaults;
+    var braceExpand = (pattern, options2 = {}) => {
+      (0, assert_valid_pattern_js_1.assertValidPattern)(pattern);
+      if (options2.nobrace || !/\{(?:(?!\{).)*\}/.test(pattern)) {
+        return [pattern];
+      }
+      return (0, brace_expansion_1.expand)(pattern, { max: options2.braceExpandMax });
+    };
+    exports2.braceExpand = braceExpand;
+    exports2.minimatch.braceExpand = exports2.braceExpand;
+    var makeRe = (pattern, options2 = {}) => new Minimatch(pattern, options2).makeRe();
+    exports2.makeRe = makeRe;
+    exports2.minimatch.makeRe = exports2.makeRe;
+    var match = (list, pattern, options2 = {}) => {
+      const mm = new Minimatch(pattern, options2);
+      list = list.filter((f) => mm.match(f));
+      if (mm.options.nonull && !list.length) {
+        list.push(pattern);
+      }
+      return list;
+    };
+    exports2.match = match;
+    exports2.minimatch.match = exports2.match;
+    var globMagic = /[?*]|[+@!]\(.*?\)|\[|\]/;
+    var regExpEscape = (s) => s.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+    var Minimatch = class {
+      options;
+      set;
+      pattern;
+      windowsPathsNoEscape;
+      nonegate;
+      negate;
+      comment;
+      empty;
+      preserveMultipleSlashes;
+      partial;
+      globSet;
+      globParts;
+      nocase;
+      isWindows;
+      platform;
+      windowsNoMagicRoot;
+      maxGlobstarRecursion;
+      regexp;
+      constructor(pattern, options2 = {}) {
+        (0, assert_valid_pattern_js_1.assertValidPattern)(pattern);
+        options2 = options2 || {};
+        this.options = options2;
+        this.maxGlobstarRecursion = options2.maxGlobstarRecursion ?? 200;
+        this.pattern = pattern;
+        this.platform = options2.platform || defaultPlatform;
+        this.isWindows = this.platform === "win32";
+        const awe = "allowWindowsEscape";
+        this.windowsPathsNoEscape = !!options2.windowsPathsNoEscape || options2[awe] === false;
+        if (this.windowsPathsNoEscape) {
+          this.pattern = this.pattern.replace(/\\/g, "/");
+        }
+        this.preserveMultipleSlashes = !!options2.preserveMultipleSlashes;
+        this.regexp = null;
+        this.negate = false;
+        this.nonegate = !!options2.nonegate;
+        this.comment = false;
+        this.empty = false;
+        this.partial = !!options2.partial;
+        this.nocase = !!this.options.nocase;
+        this.windowsNoMagicRoot = options2.windowsNoMagicRoot !== void 0 ? options2.windowsNoMagicRoot : !!(this.isWindows && this.nocase);
+        this.globSet = [];
+        this.globParts = [];
+        this.set = [];
+        this.make();
+      }
+      hasMagic() {
+        if (this.options.magicalBraces && this.set.length > 1) {
+          return true;
+        }
+        for (const pattern of this.set) {
+          for (const part of pattern) {
+            if (typeof part !== "string")
+              return true;
+          }
+        }
+        return false;
+      }
+      debug(..._) {
+      }
+      make() {
+        const pattern = this.pattern;
+        const options2 = this.options;
+        if (!options2.nocomment && pattern.charAt(0) === "#") {
+          this.comment = true;
+          return;
+        }
+        if (!pattern) {
+          this.empty = true;
+          return;
+        }
+        this.parseNegate();
+        this.globSet = [...new Set(this.braceExpand())];
+        if (options2.debug) {
+          this.debug = (...args) => console.error(...args);
+        }
+        this.debug(this.pattern, this.globSet);
+        const rawGlobParts = this.globSet.map((s) => this.slashSplit(s));
+        this.globParts = this.preprocess(rawGlobParts);
+        this.debug(this.pattern, this.globParts);
+        let set2 = this.globParts.map((s, _, __) => {
+          if (this.isWindows && this.windowsNoMagicRoot) {
+            const isUNC = s[0] === "" && s[1] === "" && (s[2] === "?" || !globMagic.test(s[2])) && !globMagic.test(s[3]);
+            const isDrive = /^[a-z]:/i.test(s[0]);
+            if (isUNC) {
+              return [
+                ...s.slice(0, 4),
+                ...s.slice(4).map((ss) => this.parse(ss))
+              ];
+            } else if (isDrive) {
+              return [s[0], ...s.slice(1).map((ss) => this.parse(ss))];
+            }
+          }
+          return s.map((ss) => this.parse(ss));
+        });
+        this.debug(this.pattern, set2);
+        this.set = set2.filter((s) => s.indexOf(false) === -1);
+        if (this.isWindows) {
+          for (let i = 0; i < this.set.length; i++) {
+            const p = this.set[i];
+            if (p[0] === "" && p[1] === "" && this.globParts[i][2] === "?" && typeof p[3] === "string" && /^[a-z]:$/i.test(p[3])) {
+              p[2] = "?";
+            }
+          }
+        }
+        this.debug(this.pattern, this.set);
+      }
+      // various transforms to equivalent pattern sets that are
+      // faster to process in a filesystem walk.  The goal is to
+      // eliminate what we can, and push all ** patterns as far
+      // to the right as possible, even if it increases the number
+      // of patterns that we have to process.
+      preprocess(globParts) {
+        if (this.options.noglobstar) {
+          for (const partset of globParts) {
+            for (let j = 0; j < partset.length; j++) {
+              if (partset[j] === "**") {
+                partset[j] = "*";
+              }
+            }
+          }
+        }
+        const { optimizationLevel = 1 } = this.options;
+        if (optimizationLevel >= 2) {
+          globParts = this.firstPhasePreProcess(globParts);
+          globParts = this.secondPhasePreProcess(globParts);
+        } else if (optimizationLevel >= 1) {
+          globParts = this.levelOneOptimize(globParts);
+        } else {
+          globParts = this.adjascentGlobstarOptimize(globParts);
+        }
+        return globParts;
+      }
+      // just get rid of adjascent ** portions
+      adjascentGlobstarOptimize(globParts) {
+        return globParts.map((parts) => {
+          let gs = -1;
+          while (-1 !== (gs = parts.indexOf("**", gs + 1))) {
+            let i = gs;
+            while (parts[i + 1] === "**") {
+              i++;
+            }
+            if (i !== gs) {
+              parts.splice(gs, i - gs);
+            }
+          }
+          return parts;
+        });
+      }
+      // get rid of adjascent ** and resolve .. portions
+      levelOneOptimize(globParts) {
+        return globParts.map((parts) => {
+          parts = parts.reduce((set2, part) => {
+            const prev = set2[set2.length - 1];
+            if (part === "**" && prev === "**") {
+              return set2;
+            }
+            if (part === "..") {
+              if (prev && prev !== ".." && prev !== "." && prev !== "**") {
+                set2.pop();
+                return set2;
+              }
+            }
+            set2.push(part);
+            return set2;
+          }, []);
+          return parts.length === 0 ? [""] : parts;
+        });
+      }
+      levelTwoFileOptimize(parts) {
+        if (!Array.isArray(parts)) {
+          parts = this.slashSplit(parts);
+        }
+        let didSomething = false;
+        do {
+          didSomething = false;
+          if (!this.preserveMultipleSlashes) {
+            for (let i = 1; i < parts.length - 1; i++) {
+              const p = parts[i];
+              if (i === 1 && p === "" && parts[0] === "")
+                continue;
+              if (p === "." || p === "") {
+                didSomething = true;
+                parts.splice(i, 1);
+                i--;
+              }
+            }
+            if (parts[0] === "." && parts.length === 2 && (parts[1] === "." || parts[1] === "")) {
+              didSomething = true;
+              parts.pop();
+            }
+          }
+          let dd = 0;
+          while (-1 !== (dd = parts.indexOf("..", dd + 1))) {
+            const p = parts[dd - 1];
+            if (p && p !== "." && p !== ".." && p !== "**" && !(this.isWindows && /^[a-z]:$/i.test(p))) {
+              didSomething = true;
+              parts.splice(dd - 1, 2);
+              dd -= 2;
+            }
+          }
+        } while (didSomething);
+        return parts.length === 0 ? [""] : parts;
+      }
+      // First phase: single-pattern processing
+      // <pre> is 1 or more portions
+      // <rest> is 1 or more portions
+      // <p> is any portion other than ., .., '', or **
+      // <e> is . or ''
+      //
+      // **/.. is *brutal* for filesystem walking performance, because
+      // it effectively resets the recursive walk each time it occurs,
+      // and ** cannot be reduced out by a .. pattern part like a regexp
+      // or most strings (other than .., ., and '') can be.
+      //
+      // <pre>/**/../<p>/<p>/<rest> -> {<pre>/../<p>/<p>/<rest>,<pre>/**/<p>/<p>/<rest>}
+      // <pre>/<e>/<rest> -> <pre>/<rest>
+      // <pre>/<p>/../<rest> -> <pre>/<rest>
+      // **/**/<rest> -> **/<rest>
+      //
+      // **/*/<rest> -> */**/<rest> <== not valid because ** doesn't follow
+      // this WOULD be allowed if ** did follow symlinks, or * didn't
+      firstPhasePreProcess(globParts) {
+        let didSomething = false;
+        do {
+          didSomething = false;
+          for (let parts of globParts) {
+            let gs = -1;
+            while (-1 !== (gs = parts.indexOf("**", gs + 1))) {
+              let gss = gs;
+              while (parts[gss + 1] === "**") {
+                gss++;
+              }
+              if (gss > gs) {
+                parts.splice(gs + 1, gss - gs);
+              }
+              let next = parts[gs + 1];
+              const p = parts[gs + 2];
+              const p2 = parts[gs + 3];
+              if (next !== "..")
+                continue;
+              if (!p || p === "." || p === ".." || !p2 || p2 === "." || p2 === "..") {
+                continue;
+              }
+              didSomething = true;
+              parts.splice(gs, 1);
+              const other = parts.slice(0);
+              other[gs] = "**";
+              globParts.push(other);
+              gs--;
+            }
+            if (!this.preserveMultipleSlashes) {
+              for (let i = 1; i < parts.length - 1; i++) {
+                const p = parts[i];
+                if (i === 1 && p === "" && parts[0] === "")
+                  continue;
+                if (p === "." || p === "") {
+                  didSomething = true;
+                  parts.splice(i, 1);
+                  i--;
+                }
+              }
+              if (parts[0] === "." && parts.length === 2 && (parts[1] === "." || parts[1] === "")) {
+                didSomething = true;
+                parts.pop();
+              }
+            }
+            let dd = 0;
+            while (-1 !== (dd = parts.indexOf("..", dd + 1))) {
+              const p = parts[dd - 1];
+              if (p && p !== "." && p !== ".." && p !== "**") {
+                didSomething = true;
+                const needDot = dd === 1 && parts[dd + 1] === "**";
+                const splin = needDot ? ["."] : [];
+                parts.splice(dd - 1, 2, ...splin);
+                if (parts.length === 0)
+                  parts.push("");
+                dd -= 2;
+              }
+            }
+          }
+        } while (didSomething);
+        return globParts;
+      }
+      // second phase: multi-pattern dedupes
+      // {<pre>/*/<rest>,<pre>/<p>/<rest>} -> <pre>/*/<rest>
+      // {<pre>/<rest>,<pre>/<rest>} -> <pre>/<rest>
+      // {<pre>/**/<rest>,<pre>/<rest>} -> <pre>/**/<rest>
+      //
+      // {<pre>/**/<rest>,<pre>/**/<p>/<rest>} -> <pre>/**/<rest>
+      // ^-- not valid because ** doens't follow symlinks
+      secondPhasePreProcess(globParts) {
+        for (let i = 0; i < globParts.length - 1; i++) {
+          for (let j = i + 1; j < globParts.length; j++) {
+            const matched = this.partsMatch(globParts[i], globParts[j], !this.preserveMultipleSlashes);
+            if (matched) {
+              globParts[i] = [];
+              globParts[j] = matched;
+              break;
+            }
+          }
+        }
+        return globParts.filter((gs) => gs.length);
+      }
+      partsMatch(a, b, emptyGSMatch = false) {
+        let ai = 0;
+        let bi = 0;
+        let result = [];
+        let which = "";
+        while (ai < a.length && bi < b.length) {
+          if (a[ai] === b[bi]) {
+            result.push(which === "b" ? b[bi] : a[ai]);
+            ai++;
+            bi++;
+          } else if (emptyGSMatch && a[ai] === "**" && b[bi] === a[ai + 1]) {
+            result.push(a[ai]);
+            ai++;
+          } else if (emptyGSMatch && b[bi] === "**" && a[ai] === b[bi + 1]) {
+            result.push(b[bi]);
+            bi++;
+          } else if (a[ai] === "*" && b[bi] && (this.options.dot || !b[bi].startsWith(".")) && b[bi] !== "**") {
+            if (which === "b")
+              return false;
+            which = "a";
+            result.push(a[ai]);
+            ai++;
+            bi++;
+          } else if (b[bi] === "*" && a[ai] && (this.options.dot || !a[ai].startsWith(".")) && a[ai] !== "**") {
+            if (which === "a")
+              return false;
+            which = "b";
+            result.push(b[bi]);
+            ai++;
+            bi++;
+          } else {
+            return false;
+          }
+        }
+        return a.length === b.length && result;
+      }
+      parseNegate() {
+        if (this.nonegate)
+          return;
+        const pattern = this.pattern;
+        let negate = false;
+        let negateOffset = 0;
+        for (let i = 0; i < pattern.length && pattern.charAt(i) === "!"; i++) {
+          negate = !negate;
+          negateOffset++;
+        }
+        if (negateOffset)
+          this.pattern = pattern.slice(negateOffset);
+        this.negate = negate;
+      }
+      // set partial to true to test if, for example,
+      // "/a/b" matches the start of "/*/b/*/d"
+      // Partial means, if you run out of file before you run
+      // out of pattern, then that's fine, as long as all
+      // the parts match.
+      matchOne(file2, pattern, partial2 = false) {
+        let fileStartIndex = 0;
+        let patternStartIndex = 0;
+        if (this.isWindows) {
+          const fileDrive = typeof file2[0] === "string" && /^[a-z]:$/i.test(file2[0]);
+          const fileUNC = !fileDrive && file2[0] === "" && file2[1] === "" && file2[2] === "?" && /^[a-z]:$/i.test(file2[3]);
+          const patternDrive = typeof pattern[0] === "string" && /^[a-z]:$/i.test(pattern[0]);
+          const patternUNC = !patternDrive && pattern[0] === "" && pattern[1] === "" && pattern[2] === "?" && typeof pattern[3] === "string" && /^[a-z]:$/i.test(pattern[3]);
+          const fdi = fileUNC ? 3 : fileDrive ? 0 : void 0;
+          const pdi = patternUNC ? 3 : patternDrive ? 0 : void 0;
+          if (typeof fdi === "number" && typeof pdi === "number") {
+            const [fd, pd] = [
+              file2[fdi],
+              pattern[pdi]
+            ];
+            if (fd.toLowerCase() === pd.toLowerCase()) {
+              pattern[pdi] = fd;
+              patternStartIndex = pdi;
+              fileStartIndex = fdi;
+            }
+          }
+        }
+        const { optimizationLevel = 1 } = this.options;
+        if (optimizationLevel >= 2) {
+          file2 = this.levelTwoFileOptimize(file2);
+        }
+        if (pattern.includes(exports2.GLOBSTAR)) {
+          return this.#matchGlobstar(file2, pattern, partial2, fileStartIndex, patternStartIndex);
+        }
+        return this.#matchOne(file2, pattern, partial2, fileStartIndex, patternStartIndex);
+      }
+      #matchGlobstar(file2, pattern, partial2, fileIndex, patternIndex) {
+        const firstgs = pattern.indexOf(exports2.GLOBSTAR, patternIndex);
+        const lastgs = pattern.lastIndexOf(exports2.GLOBSTAR);
+        const [head, body, tail] = partial2 ? [
+          pattern.slice(patternIndex, firstgs),
+          pattern.slice(firstgs + 1),
+          []
+        ] : [
+          pattern.slice(patternIndex, firstgs),
+          pattern.slice(firstgs + 1, lastgs),
+          pattern.slice(lastgs + 1)
+        ];
+        if (head.length) {
+          const fileHead = file2.slice(fileIndex, fileIndex + head.length);
+          if (!this.#matchOne(fileHead, head, partial2, 0, 0)) {
+            return false;
+          }
+          fileIndex += head.length;
+          patternIndex += head.length;
+        }
+        let fileTailMatch = 0;
+        if (tail.length) {
+          if (tail.length + fileIndex > file2.length)
+            return false;
+          let tailStart = file2.length - tail.length;
+          if (this.#matchOne(file2, tail, partial2, tailStart, 0)) {
+            fileTailMatch = tail.length;
+          } else {
+            if (file2[file2.length - 1] !== "" || fileIndex + tail.length === file2.length) {
+              return false;
+            }
+            tailStart--;
+            if (!this.#matchOne(file2, tail, partial2, tailStart, 0)) {
+              return false;
+            }
+            fileTailMatch = tail.length + 1;
+          }
+        }
+        if (!body.length) {
+          let sawSome = !!fileTailMatch;
+          for (let i2 = fileIndex; i2 < file2.length - fileTailMatch; i2++) {
+            const f = String(file2[i2]);
+            sawSome = true;
+            if (f === "." || f === ".." || !this.options.dot && f.startsWith(".")) {
+              return false;
+            }
+          }
+          return partial2 || sawSome;
+        }
+        const bodySegments = [[[], 0]];
+        let currentBody = bodySegments[0];
+        let nonGsParts = 0;
+        const nonGsPartsSums = [0];
+        for (const b of body) {
+          if (b === exports2.GLOBSTAR) {
+            nonGsPartsSums.push(nonGsParts);
+            currentBody = [[], 0];
+            bodySegments.push(currentBody);
+          } else {
+            currentBody[0].push(b);
+            nonGsParts++;
+          }
+        }
+        let i = bodySegments.length - 1;
+        const fileLength = file2.length - fileTailMatch;
+        for (const b of bodySegments) {
+          b[1] = fileLength - (nonGsPartsSums[i--] + b[0].length);
+        }
+        return !!this.#matchGlobStarBodySections(file2, bodySegments, fileIndex, 0, partial2, 0, !!fileTailMatch);
+      }
+      // return false for "nope, not matching"
+      // return null for "not matching, cannot keep trying"
+      #matchGlobStarBodySections(file2, bodySegments, fileIndex, bodyIndex, partial2, globStarDepth, sawTail) {
+        const bs = bodySegments[bodyIndex];
+        if (!bs) {
+          for (let i = fileIndex; i < file2.length; i++) {
+            sawTail = true;
+            const f = file2[i];
+            if (f === "." || f === ".." || !this.options.dot && f.startsWith(".")) {
+              return false;
+            }
+          }
+          return sawTail;
+        }
+        const [body, after] = bs;
+        while (fileIndex <= after) {
+          const m = this.#matchOne(file2.slice(0, fileIndex + body.length), body, partial2, fileIndex, 0);
+          if (m && globStarDepth < this.maxGlobstarRecursion) {
+            const sub = this.#matchGlobStarBodySections(file2, bodySegments, fileIndex + body.length, bodyIndex + 1, partial2, globStarDepth + 1, sawTail);
+            if (sub !== false) {
+              return sub;
+            }
+          }
+          const f = file2[fileIndex];
+          if (f === "." || f === ".." || !this.options.dot && f.startsWith(".")) {
+            return false;
+          }
+          fileIndex++;
+        }
+        return partial2 || null;
+      }
+      #matchOne(file2, pattern, partial2, fileIndex, patternIndex) {
+        let fi;
+        let pi;
+        let pl;
+        let fl;
+        for (fi = fileIndex, pi = patternIndex, fl = file2.length, pl = pattern.length; fi < fl && pi < pl; fi++, pi++) {
+          this.debug("matchOne loop");
+          let p = pattern[pi];
+          let f = file2[fi];
+          this.debug(pattern, p, f);
+          if (p === false || p === exports2.GLOBSTAR) {
+            return false;
+          }
+          let hit;
+          if (typeof p === "string") {
+            hit = f === p;
+            this.debug("string match", p, f, hit);
+          } else {
+            hit = p.test(f);
+            this.debug("pattern match", p, f, hit);
+          }
+          if (!hit)
+            return false;
+        }
+        if (fi === fl && pi === pl) {
+          return true;
+        } else if (fi === fl) {
+          return partial2;
+        } else if (pi === pl) {
+          return fi === fl - 1 && file2[fi] === "";
+        } else {
+          throw new Error("wtf?");
+        }
+      }
+      braceExpand() {
+        return (0, exports2.braceExpand)(this.pattern, this.options);
+      }
+      parse(pattern) {
+        (0, assert_valid_pattern_js_1.assertValidPattern)(pattern);
+        const options2 = this.options;
+        if (pattern === "**")
+          return exports2.GLOBSTAR;
+        if (pattern === "")
+          return "";
+        let m;
+        let fastTest = null;
+        if (m = pattern.match(starRE)) {
+          fastTest = options2.dot ? starTestDot : starTest;
+        } else if (m = pattern.match(starDotExtRE)) {
+          fastTest = (options2.nocase ? options2.dot ? starDotExtTestNocaseDot : starDotExtTestNocase : options2.dot ? starDotExtTestDot : starDotExtTest)(m[1]);
+        } else if (m = pattern.match(qmarksRE)) {
+          fastTest = (options2.nocase ? options2.dot ? qmarksTestNocaseDot : qmarksTestNocase : options2.dot ? qmarksTestDot : qmarksTest)(m);
+        } else if (m = pattern.match(starDotStarRE)) {
+          fastTest = options2.dot ? starDotStarTestDot : starDotStarTest;
+        } else if (m = pattern.match(dotStarRE)) {
+          fastTest = dotStarTest;
+        }
+        const re2 = ast_js_1.AST.fromGlob(pattern, this.options).toMMPattern();
+        if (fastTest && typeof re2 === "object") {
+          Reflect.defineProperty(re2, "test", { value: fastTest });
+        }
+        return re2;
+      }
+      makeRe() {
+        if (this.regexp || this.regexp === false)
+          return this.regexp;
+        const set2 = this.set;
+        if (!set2.length) {
+          this.regexp = false;
+          return this.regexp;
+        }
+        const options2 = this.options;
+        const twoStar = options2.noglobstar ? star : options2.dot ? twoStarDot : twoStarNoDot;
+        const flags = new Set(options2.nocase ? ["i"] : []);
+        let re2 = set2.map((pattern) => {
+          const pp = pattern.map((p) => {
+            if (p instanceof RegExp) {
+              for (const f of p.flags.split(""))
+                flags.add(f);
+            }
+            return typeof p === "string" ? regExpEscape(p) : p === exports2.GLOBSTAR ? exports2.GLOBSTAR : p._src;
+          });
+          pp.forEach((p, i) => {
+            const next = pp[i + 1];
+            const prev = pp[i - 1];
+            if (p !== exports2.GLOBSTAR || prev === exports2.GLOBSTAR) {
+              return;
+            }
+            if (prev === void 0) {
+              if (next !== void 0 && next !== exports2.GLOBSTAR) {
+                pp[i + 1] = "(?:\\/|" + twoStar + "\\/)?" + next;
+              } else {
+                pp[i] = twoStar;
+              }
+            } else if (next === void 0) {
+              pp[i - 1] = prev + "(?:\\/|\\/" + twoStar + ")?";
+            } else if (next !== exports2.GLOBSTAR) {
+              pp[i - 1] = prev + "(?:\\/|\\/" + twoStar + "\\/)" + next;
+              pp[i + 1] = exports2.GLOBSTAR;
+            }
+          });
+          const filtered = pp.filter((p) => p !== exports2.GLOBSTAR);
+          if (this.partial && filtered.length >= 1) {
+            const prefixes = [];
+            for (let i = 1; i <= filtered.length; i++) {
+              prefixes.push(filtered.slice(0, i).join("/"));
+            }
+            return "(?:" + prefixes.join("|") + ")";
+          }
+          return filtered.join("/");
+        }).join("|");
+        const [open2, close] = set2.length > 1 ? ["(?:", ")"] : ["", ""];
+        re2 = "^" + open2 + re2 + close + "$";
+        if (this.partial) {
+          re2 = "^(?:\\/|" + open2 + re2.slice(1, -1) + close + ")$";
+        }
+        if (this.negate)
+          re2 = "^(?!" + re2 + ").+$";
+        try {
+          this.regexp = new RegExp(re2, [...flags].join(""));
+        } catch {
+          this.regexp = false;
+        }
+        return this.regexp;
+      }
+      slashSplit(p) {
+        if (this.preserveMultipleSlashes) {
+          return p.split("/");
+        } else if (this.isWindows && /^\/\/[^/]+/.test(p)) {
+          return ["", ...p.split(/\/+/)];
+        } else {
+          return p.split(/\/+/);
+        }
+      }
+      match(f, partial2 = this.partial) {
+        this.debug("match", f, this.pattern);
+        if (this.comment) {
+          return false;
+        }
+        if (this.empty) {
+          return f === "";
+        }
+        if (f === "/" && partial2) {
+          return true;
+        }
+        const options2 = this.options;
+        if (this.isWindows) {
+          f = f.split("\\").join("/");
+        }
+        const ff = this.slashSplit(f);
+        this.debug(this.pattern, "split", ff);
+        const set2 = this.set;
+        this.debug(this.pattern, "set", set2);
+        let filename = ff[ff.length - 1];
+        if (!filename) {
+          for (let i = ff.length - 2; !filename && i >= 0; i--) {
+            filename = ff[i];
+          }
+        }
+        for (const pattern of set2) {
+          let file2 = ff;
+          if (options2.matchBase && pattern.length === 1) {
+            file2 = [filename];
+          }
+          const hit = this.matchOne(file2, pattern, partial2);
+          if (hit) {
+            if (options2.flipNegate) {
+              return true;
+            }
+            return !this.negate;
+          }
+        }
+        if (options2.flipNegate) {
+          return false;
+        }
+        return this.negate;
+      }
+      static defaults(def) {
+        return exports2.minimatch.defaults(def).Minimatch;
+      }
+    };
+    exports2.Minimatch = Minimatch;
+    var ast_js_2 = require_ast();
+    Object.defineProperty(exports2, "AST", { enumerable: true, get: function() {
+      return ast_js_2.AST;
+    } });
+    var escape_js_2 = require_escape();
+    Object.defineProperty(exports2, "escape", { enumerable: true, get: function() {
+      return escape_js_2.escape;
+    } });
+    var unescape_js_2 = require_unescape();
+    Object.defineProperty(exports2, "unescape", { enumerable: true, get: function() {
+      return unescape_js_2.unescape;
+    } });
+    exports2.minimatch.AST = ast_js_1.AST;
+    exports2.minimatch.Minimatch = Minimatch;
+    exports2.minimatch.escape = escape_js_1.escape;
+    exports2.minimatch.unescape = unescape_js_1.unescape;
+  }
+});
+
+// node_modules/.pnpm/@tufjs+models@5.0.2/node_modules/@tufjs/models/dist/role.js
+var require_role = __commonJS({
+  "node_modules/.pnpm/@tufjs+models@5.0.2/node_modules/@tufjs/models/dist/role.js"(exports2) {
+    "use strict";
+    var __importDefault = exports2 && exports2.__importDefault || function(mod) {
+      return mod && mod.__esModule ? mod : { "default": mod };
+    };
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.SuccinctRoles = exports2.DelegatedRole = exports2.Role = exports2.TOP_LEVEL_ROLE_NAMES = void 0;
+    var crypto_1 = __importDefault(require("crypto"));
+    var minimatch_1 = require_commonjs3();
+    var util_1 = __importDefault(require("util"));
+    var error_1 = require_error();
+    var utils_1 = require_utils4();
+    exports2.TOP_LEVEL_ROLE_NAMES = [
+      "root",
+      "targets",
+      "snapshot",
+      "timestamp"
+    ];
+    var Role = class _Role {
+      keyIDs;
+      threshold;
+      unrecognizedFields;
+      constructor(options2) {
+        const { keyIDs, threshold, unrecognizedFields } = options2;
+        if (hasDuplicates(keyIDs)) {
+          throw new error_1.ValueError("duplicate key IDs found");
+        }
+        if (threshold < 1) {
+          throw new error_1.ValueError("threshold must be at least 1");
+        }
+        this.keyIDs = keyIDs;
+        this.threshold = threshold;
+        this.unrecognizedFields = unrecognizedFields || {};
+      }
+      equals(other) {
+        if (!(other instanceof _Role)) {
+          return false;
+        }
+        return this.threshold === other.threshold && util_1.default.isDeepStrictEqual(this.keyIDs, other.keyIDs) && util_1.default.isDeepStrictEqual(this.unrecognizedFields, other.unrecognizedFields);
+      }
+      toJSON() {
+        return {
+          keyids: this.keyIDs,
+          threshold: this.threshold,
+          ...this.unrecognizedFields
+        };
+      }
+      static fromJSON(data) {
+        const { keyids, threshold, ...rest } = data;
+        if (!utils_1.guard.isStringArray(keyids)) {
+          throw new TypeError("keyids must be an array");
+        }
+        if (typeof threshold !== "number") {
+          throw new TypeError("threshold must be a number");
+        }
+        return new _Role({
+          keyIDs: keyids,
+          threshold,
+          unrecognizedFields: rest
+        });
+      }
+    };
+    exports2.Role = Role;
+    function hasDuplicates(array2) {
+      return new Set(array2).size !== array2.length;
+    }
+    var DelegatedRole = class _DelegatedRole extends Role {
+      name;
+      terminating;
+      paths;
+      pathHashPrefixes;
+      constructor(opts) {
+        super(opts);
+        const { name, terminating, paths, pathHashPrefixes } = opts;
+        this.name = name;
+        this.terminating = terminating;
+        if (opts.paths && opts.pathHashPrefixes) {
+          throw new error_1.ValueError("paths and pathHashPrefixes are mutually exclusive");
+        }
+        this.paths = paths;
+        this.pathHashPrefixes = pathHashPrefixes;
+      }
+      equals(other) {
+        if (!(other instanceof _DelegatedRole)) {
+          return false;
+        }
+        return super.equals(other) && this.name === other.name && this.terminating === other.terminating && util_1.default.isDeepStrictEqual(this.paths, other.paths) && util_1.default.isDeepStrictEqual(this.pathHashPrefixes, other.pathHashPrefixes);
+      }
+      isDelegatedPath(targetFilepath) {
+        if (this.paths) {
+          return this.paths.some((pathPattern) => isTargetInPathPattern(targetFilepath, pathPattern));
+        }
+        if (this.pathHashPrefixes) {
+          const hasher = crypto_1.default.createHash("sha256");
+          const pathHash = hasher.update(targetFilepath).digest("hex");
+          return this.pathHashPrefixes.some((pathHashPrefix) => pathHash.startsWith(pathHashPrefix));
+        }
+        return false;
+      }
+      toJSON() {
+        const json2 = {
+          ...super.toJSON(),
+          name: this.name,
+          terminating: this.terminating
+        };
+        if (this.paths) {
+          json2.paths = this.paths;
+        }
+        if (this.pathHashPrefixes) {
+          json2.path_hash_prefixes = this.pathHashPrefixes;
+        }
+        return json2;
+      }
+      static fromJSON(data) {
+        const { keyids, threshold, name, terminating, paths, path_hash_prefixes, ...rest } = data;
+        if (!utils_1.guard.isStringArray(keyids)) {
+          throw new TypeError("keyids must be an array of strings");
+        }
+        if (typeof threshold !== "number") {
+          throw new TypeError("threshold must be a number");
+        }
+        if (typeof name !== "string") {
+          throw new TypeError("name must be a string");
+        }
+        if (typeof terminating !== "boolean") {
+          throw new TypeError("terminating must be a boolean");
+        }
+        if (utils_1.guard.isDefined(paths) && !utils_1.guard.isStringArray(paths)) {
+          throw new TypeError("paths must be an array of strings");
+        }
+        if (utils_1.guard.isDefined(path_hash_prefixes) && !utils_1.guard.isStringArray(path_hash_prefixes)) {
+          throw new TypeError("path_hash_prefixes must be an array of strings");
+        }
+        return new _DelegatedRole({
+          keyIDs: keyids,
+          threshold,
+          name,
+          terminating,
+          paths,
+          pathHashPrefixes: path_hash_prefixes,
+          unrecognizedFields: rest
+        });
+      }
+    };
+    exports2.DelegatedRole = DelegatedRole;
+    var zip = (a, b) => a.map((k, i) => [k, b[i]]);
+    function isTargetInPathPattern(target, pattern) {
+      const targetParts = target.split("/");
+      const patternParts = pattern.split("/");
+      if (patternParts.length != targetParts.length) {
+        return false;
+      }
+      return zip(targetParts, patternParts).every(([targetPart, patternPart]) => (0, minimatch_1.minimatch)(targetPart, patternPart));
+    }
+    var SuccinctRoles = class _SuccinctRoles extends Role {
+      bitLength;
+      namePrefix;
+      numberOfBins;
+      suffixLen;
+      constructor(opts) {
+        super(opts);
+        const { bitLength, namePrefix } = opts;
+        if (bitLength <= 0 || bitLength > 32) {
+          throw new error_1.ValueError("bitLength must be between 1 and 32");
+        }
+        this.bitLength = bitLength;
+        this.namePrefix = namePrefix;
+        this.numberOfBins = Math.pow(2, bitLength);
+        this.suffixLen = (this.numberOfBins - 1).toString(16).length;
+      }
+      equals(other) {
+        if (!(other instanceof _SuccinctRoles)) {
+          return false;
+        }
+        return super.equals(other) && this.bitLength === other.bitLength && this.namePrefix === other.namePrefix;
+      }
+      /***
+       * Calculates the name of the delegated role responsible for 'target_filepath'.
+       *
+       * The target at path ''target_filepath' is assigned to a bin by casting
+       * the left-most 'bit_length' of bits of the file path hash digest to
+       * int, using it as bin index between 0 and '2**bit_length - 1'.
+       *
+       * Args:
+       *  target_filepath: URL path to a target file, relative to a base
+       *  targets URL.
+       */
+      getRoleForTarget(targetFilepath) {
+        const hasher = crypto_1.default.createHash("sha256");
+        const hasherBuffer = hasher.update(targetFilepath).digest();
+        const hashBytes = hasherBuffer.subarray(0, 4);
+        const shiftValue = 32 - this.bitLength;
+        const binNumber = hashBytes.readUInt32BE() >>> shiftValue;
+        const suffix = binNumber.toString(16).padStart(this.suffixLen, "0");
+        return `${this.namePrefix}-${suffix}`;
+      }
+      *getRoles() {
+        for (let i = 0; i < this.numberOfBins; i++) {
+          const suffix = i.toString(16).padStart(this.suffixLen, "0");
+          yield `${this.namePrefix}-${suffix}`;
+        }
+      }
+      /***
+       * Determines whether the given ``role_name`` is in one of
+       * the delegated roles that ``SuccinctRoles`` represents.
+       *
+       * Args:
+       *  role_name: The name of the role to check against.
+       */
+      isDelegatedRole(roleName) {
+        const desiredPrefix = this.namePrefix + "-";
+        if (!roleName.startsWith(desiredPrefix)) {
+          return false;
+        }
+        const suffix = roleName.slice(desiredPrefix.length, roleName.length);
+        if (suffix.length != this.suffixLen) {
+          return false;
+        }
+        if (!suffix.match(/^[0-9a-fA-F]+$/)) {
+          return false;
+        }
+        const num = parseInt(suffix, 16);
+        return 0 <= num && num < this.numberOfBins;
+      }
+      toJSON() {
+        const json2 = {
+          ...super.toJSON(),
+          bit_length: this.bitLength,
+          name_prefix: this.namePrefix
+        };
+        return json2;
+      }
+      static fromJSON(data) {
+        const { keyids, threshold, bit_length, name_prefix, ...rest } = data;
+        if (!utils_1.guard.isStringArray(keyids)) {
+          throw new TypeError("keyids must be an array of strings");
+        }
+        if (typeof threshold !== "number") {
+          throw new TypeError("threshold must be a number");
+        }
+        if (typeof bit_length !== "number") {
+          throw new TypeError("bit_length must be a number");
+        }
+        if (typeof name_prefix !== "string") {
+          throw new TypeError("name_prefix must be a string");
+        }
+        return new _SuccinctRoles({
+          keyIDs: keyids,
+          threshold,
+          bitLength: bit_length,
+          namePrefix: name_prefix,
+          unrecognizedFields: rest
+        });
+      }
+    };
+    exports2.SuccinctRoles = SuccinctRoles;
+  }
+});
+
+// node_modules/.pnpm/@tufjs+models@5.0.2/node_modules/@tufjs/models/dist/root.js
+var require_root = __commonJS({
+  "node_modules/.pnpm/@tufjs+models@5.0.2/node_modules/@tufjs/models/dist/root.js"(exports2) {
+    "use strict";
+    var __importDefault = exports2 && exports2.__importDefault || function(mod) {
+      return mod && mod.__esModule ? mod : { "default": mod };
+    };
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.Root = void 0;
+    var util_1 = __importDefault(require("util"));
+    var base_1 = require_base();
+    var error_1 = require_error();
+    var key_1 = require_key2();
+    var role_1 = require_role();
+    var utils_1 = require_utils4();
+    var Root = class _Root extends base_1.Signed {
+      type = base_1.MetadataKind.Root;
+      keys;
+      roles;
+      consistentSnapshot;
+      constructor(options2) {
+        super(options2);
+        this.keys = options2.keys || {};
+        this.consistentSnapshot = options2.consistentSnapshot ?? true;
+        if (!options2.roles) {
+          this.roles = role_1.TOP_LEVEL_ROLE_NAMES.reduce((acc, role) => ({
+            ...acc,
+            [role]: new role_1.Role({ keyIDs: [], threshold: 1 })
+          }), {});
+        } else {
+          const roleNames = new Set(Object.keys(options2.roles));
+          if (!role_1.TOP_LEVEL_ROLE_NAMES.every((role) => roleNames.has(role))) {
+            throw new error_1.ValueError("missing top-level role");
+          }
+          this.roles = options2.roles;
+        }
+      }
+      addKey(key, role) {
+        if (!this.roles[role]) {
+          throw new error_1.ValueError(`role ${role} does not exist`);
+        }
+        if (!this.roles[role].keyIDs.includes(key.keyID)) {
+          this.roles[role].keyIDs.push(key.keyID);
+        }
+        this.keys[key.keyID] = key;
+      }
+      equals(other) {
+        if (!(other instanceof _Root)) {
+          return false;
+        }
+        return super.equals(other) && this.consistentSnapshot === other.consistentSnapshot && util_1.default.isDeepStrictEqual(this.keys, other.keys) && util_1.default.isDeepStrictEqual(this.roles, other.roles);
+      }
+      toJSON() {
+        return {
+          _type: this.type,
+          spec_version: this.specVersion,
+          version: this.version,
+          expires: this.expires,
+          keys: keysToJSON(this.keys),
+          roles: rolesToJSON(this.roles),
+          consistent_snapshot: this.consistentSnapshot,
+          ...this.unrecognizedFields
+        };
+      }
+      static fromJSON(data) {
+        const { unrecognizedFields, ...commonFields } = base_1.Signed.commonFieldsFromJSON(data);
+        const { keys, roles, consistent_snapshot, ...rest } = unrecognizedFields;
+        if (typeof consistent_snapshot !== "boolean") {
+          throw new TypeError("consistent_snapshot must be a boolean");
+        }
+        return new _Root({
+          ...commonFields,
+          keys: keysFromJSON(keys),
+          roles: rolesFromJSON(roles),
+          consistentSnapshot: consistent_snapshot,
+          unrecognizedFields: rest
+        });
+      }
+    };
+    exports2.Root = Root;
+    function keysToJSON(keys) {
+      return Object.entries(keys).reduce((acc, [keyID, key]) => ({ ...acc, [keyID]: key.toJSON() }), {});
+    }
+    function rolesToJSON(roles) {
+      return Object.entries(roles).reduce((acc, [roleName, role]) => ({ ...acc, [roleName]: role.toJSON() }), {});
+    }
+    function keysFromJSON(data) {
+      let keys;
+      if (utils_1.guard.isDefined(data)) {
+        if (!utils_1.guard.isObjectRecord(data)) {
+          throw new TypeError("keys must be an object");
+        }
+        keys = Object.entries(data).reduce((acc, [keyID, keyData]) => ({
+          ...acc,
+          [keyID]: key_1.Key.fromJSON(keyID, keyData)
+        }), {});
+      }
+      return keys;
+    }
+    function rolesFromJSON(data) {
+      let roles;
+      if (utils_1.guard.isDefined(data)) {
+        if (!utils_1.guard.isObjectRecord(data)) {
+          throw new TypeError("roles must be an object");
+        }
+        roles = Object.entries(data).reduce((acc, [roleName, roleData]) => ({
+          ...acc,
+          [roleName]: role_1.Role.fromJSON(roleData)
+        }), {});
+      }
+      return roles;
+    }
+  }
+});
+
+// node_modules/.pnpm/@tufjs+models@5.0.2/node_modules/@tufjs/models/dist/signature.js
+var require_signature = __commonJS({
+  "node_modules/.pnpm/@tufjs+models@5.0.2/node_modules/@tufjs/models/dist/signature.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.Signature = void 0;
+    var Signature = class _Signature {
+      keyID;
+      sig;
+      constructor(options2) {
+        const { keyID, sig } = options2;
+        this.keyID = keyID;
+        this.sig = sig;
+      }
+      toJSON() {
+        return {
+          keyid: this.keyID,
+          sig: this.sig
+        };
+      }
+      static fromJSON(data) {
+        const { keyid, sig } = data;
+        if (typeof keyid !== "string") {
+          throw new TypeError("keyid must be a string");
+        }
+        if (typeof sig !== "string") {
+          throw new TypeError("sig must be a string");
+        }
+        return new _Signature({
+          keyID: keyid,
+          sig
+        });
+      }
+    };
+    exports2.Signature = Signature;
+  }
+});
+
+// node_modules/.pnpm/@tufjs+models@5.0.2/node_modules/@tufjs/models/dist/snapshot.js
+var require_snapshot = __commonJS({
+  "node_modules/.pnpm/@tufjs+models@5.0.2/node_modules/@tufjs/models/dist/snapshot.js"(exports2) {
+    "use strict";
+    var __importDefault = exports2 && exports2.__importDefault || function(mod) {
+      return mod && mod.__esModule ? mod : { "default": mod };
+    };
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.Snapshot = void 0;
+    var util_1 = __importDefault(require("util"));
+    var base_1 = require_base();
+    var file_1 = require_file2();
+    var utils_1 = require_utils4();
+    var Snapshot = class _Snapshot extends base_1.Signed {
+      type = base_1.MetadataKind.Snapshot;
+      meta;
+      constructor(opts) {
+        super(opts);
+        this.meta = opts.meta || { "targets.json": new file_1.MetaFile({ version: 1 }) };
+      }
+      equals(other) {
+        if (!(other instanceof _Snapshot)) {
+          return false;
+        }
+        return super.equals(other) && util_1.default.isDeepStrictEqual(this.meta, other.meta);
+      }
+      toJSON() {
+        return {
+          _type: this.type,
+          meta: metaToJSON(this.meta),
+          spec_version: this.specVersion,
+          version: this.version,
+          expires: this.expires,
+          ...this.unrecognizedFields
+        };
+      }
+      static fromJSON(data) {
+        const { unrecognizedFields, ...commonFields } = base_1.Signed.commonFieldsFromJSON(data);
+        const { meta: meta3, ...rest } = unrecognizedFields;
+        return new _Snapshot({
+          ...commonFields,
+          meta: metaFromJSON(meta3),
+          unrecognizedFields: rest
+        });
+      }
+    };
+    exports2.Snapshot = Snapshot;
+    function metaToJSON(meta3) {
+      return Object.entries(meta3).reduce((acc, [path, metadata]) => ({
+        ...acc,
+        [path]: metadata.toJSON()
+      }), {});
+    }
+    function metaFromJSON(data) {
+      let meta3;
+      if (utils_1.guard.isDefined(data)) {
+        if (!utils_1.guard.isObjectRecord(data)) {
+          throw new TypeError("meta field is malformed");
+        } else {
+          meta3 = Object.entries(data).reduce((acc, [path, metadata]) => ({
+            ...acc,
+            [path]: file_1.MetaFile.fromJSON(metadata)
+          }), {});
+        }
+      }
+      return meta3;
+    }
+  }
+});
+
+// node_modules/.pnpm/@tufjs+models@5.0.2/node_modules/@tufjs/models/dist/delegations.js
+var require_delegations = __commonJS({
+  "node_modules/.pnpm/@tufjs+models@5.0.2/node_modules/@tufjs/models/dist/delegations.js"(exports2) {
+    "use strict";
+    var __importDefault = exports2 && exports2.__importDefault || function(mod) {
+      return mod && mod.__esModule ? mod : { "default": mod };
+    };
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.Delegations = void 0;
+    var util_1 = __importDefault(require("util"));
+    var error_1 = require_error();
+    var key_1 = require_key2();
+    var role_1 = require_role();
+    var utils_1 = require_utils4();
+    var Delegations = class _Delegations {
+      keys;
+      roles;
+      unrecognizedFields;
+      succinctRoles;
+      constructor(options2) {
+        this.keys = options2.keys;
+        this.unrecognizedFields = options2.unrecognizedFields || {};
+        if (options2.roles) {
+          if (Object.keys(options2.roles).some((roleName) => role_1.TOP_LEVEL_ROLE_NAMES.includes(roleName))) {
+            throw new error_1.ValueError("Delegated role name conflicts with top-level role name");
+          }
+        }
+        this.succinctRoles = options2.succinctRoles;
+        this.roles = options2.roles;
+      }
+      equals(other) {
+        if (!(other instanceof _Delegations)) {
+          return false;
+        }
+        return util_1.default.isDeepStrictEqual(this.keys, other.keys) && util_1.default.isDeepStrictEqual(this.roles, other.roles) && util_1.default.isDeepStrictEqual(this.unrecognizedFields, other.unrecognizedFields) && util_1.default.isDeepStrictEqual(this.succinctRoles, other.succinctRoles);
+      }
+      *rolesForTarget(targetPath) {
+        if (this.roles) {
+          for (const role of Object.values(this.roles)) {
+            if (role.isDelegatedPath(targetPath)) {
+              yield { role: role.name, terminating: role.terminating };
+            }
+          }
+        } else if (this.succinctRoles) {
+          yield {
+            role: this.succinctRoles.getRoleForTarget(targetPath),
+            terminating: true
+          };
+        }
+      }
+      toJSON() {
+        const json2 = {
+          keys: keysToJSON(this.keys),
+          ...this.unrecognizedFields
+        };
+        if (this.roles) {
+          json2.roles = rolesToJSON(this.roles);
+        } else if (this.succinctRoles) {
+          json2.succinct_roles = this.succinctRoles.toJSON();
+        }
+        return json2;
+      }
+      static fromJSON(data) {
+        const { keys, roles, succinct_roles, ...unrecognizedFields } = data;
+        let succinctRoles;
+        if (utils_1.guard.isObject(succinct_roles)) {
+          succinctRoles = role_1.SuccinctRoles.fromJSON(succinct_roles);
+        }
+        return new _Delegations({
+          keys: keysFromJSON(keys),
+          roles: rolesFromJSON(roles),
+          unrecognizedFields,
+          succinctRoles
+        });
+      }
+    };
+    exports2.Delegations = Delegations;
+    function keysToJSON(keys) {
+      return Object.entries(keys).reduce((acc, [keyId, key]) => ({
+        ...acc,
+        [keyId]: key.toJSON()
+      }), {});
+    }
+    function rolesToJSON(roles) {
+      return Object.values(roles).map((role) => role.toJSON());
+    }
+    function keysFromJSON(data) {
+      if (!utils_1.guard.isObjectRecord(data)) {
+        throw new TypeError("keys is malformed");
+      }
+      return Object.entries(data).reduce((acc, [keyID, keyData]) => ({
+        ...acc,
+        [keyID]: key_1.Key.fromJSON(keyID, keyData)
+      }), {});
+    }
+    function rolesFromJSON(data) {
+      let roleMap;
+      if (utils_1.guard.isDefined(data)) {
+        if (!utils_1.guard.isObjectArray(data)) {
+          throw new TypeError("roles is malformed");
+        }
+        roleMap = data.reduce((acc, role) => {
+          const delegatedRole = role_1.DelegatedRole.fromJSON(role);
+          if (Object.hasOwn(acc, delegatedRole.name)) {
+            throw new error_1.ValueError(`duplicate delegated role: ${delegatedRole.name}`);
+          }
+          return {
+            ...acc,
+            [delegatedRole.name]: delegatedRole
+          };
+        }, {});
+      }
+      return roleMap;
+    }
+  }
+});
+
+// node_modules/.pnpm/@tufjs+models@5.0.2/node_modules/@tufjs/models/dist/targets.js
+var require_targets = __commonJS({
+  "node_modules/.pnpm/@tufjs+models@5.0.2/node_modules/@tufjs/models/dist/targets.js"(exports2) {
+    "use strict";
+    var __importDefault = exports2 && exports2.__importDefault || function(mod) {
+      return mod && mod.__esModule ? mod : { "default": mod };
+    };
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.Targets = void 0;
+    var util_1 = __importDefault(require("util"));
+    var base_1 = require_base();
+    var delegations_1 = require_delegations();
+    var file_1 = require_file2();
+    var utils_1 = require_utils4();
+    var Targets = class _Targets extends base_1.Signed {
+      type = base_1.MetadataKind.Targets;
+      targets;
+      delegations;
+      constructor(options2) {
+        super(options2);
+        this.targets = options2.targets || {};
+        this.delegations = options2.delegations;
+      }
+      addTarget(target) {
+        this.targets[target.path] = target;
+      }
+      equals(other) {
+        if (!(other instanceof _Targets)) {
+          return false;
+        }
+        return super.equals(other) && util_1.default.isDeepStrictEqual(this.targets, other.targets) && util_1.default.isDeepStrictEqual(this.delegations, other.delegations);
+      }
+      toJSON() {
+        const json2 = {
+          _type: this.type,
+          spec_version: this.specVersion,
+          version: this.version,
+          expires: this.expires,
+          targets: targetsToJSON(this.targets),
+          ...this.unrecognizedFields
+        };
+        if (this.delegations) {
+          json2.delegations = this.delegations.toJSON();
+        }
+        return json2;
+      }
+      static fromJSON(data) {
+        const { unrecognizedFields, ...commonFields } = base_1.Signed.commonFieldsFromJSON(data);
+        const { targets, delegations, ...rest } = unrecognizedFields;
+        return new _Targets({
+          ...commonFields,
+          targets: targetsFromJSON(targets),
+          delegations: delegationsFromJSON(delegations),
+          unrecognizedFields: rest
+        });
+      }
+    };
+    exports2.Targets = Targets;
+    function targetsToJSON(targets) {
+      return Object.entries(targets).reduce((acc, [path, target]) => ({
+        ...acc,
+        [path]: target.toJSON()
+      }), {});
+    }
+    function targetsFromJSON(data) {
+      let targets;
+      if (utils_1.guard.isDefined(data)) {
+        if (!utils_1.guard.isObjectRecord(data)) {
+          throw new TypeError("targets must be an object");
+        } else {
+          targets = Object.entries(data).reduce((acc, [path, target]) => ({
+            ...acc,
+            [path]: file_1.TargetFile.fromJSON(path, target)
+          }), {});
+        }
+      }
+      return targets;
+    }
+    function delegationsFromJSON(data) {
+      let delegations;
+      if (utils_1.guard.isDefined(data)) {
+        if (!utils_1.guard.isObject(data)) {
+          throw new TypeError("delegations must be an object");
+        } else {
+          delegations = delegations_1.Delegations.fromJSON(data);
+        }
+      }
+      return delegations;
+    }
+  }
+});
+
+// node_modules/.pnpm/@tufjs+models@5.0.2/node_modules/@tufjs/models/dist/timestamp.js
+var require_timestamp4 = __commonJS({
+  "node_modules/.pnpm/@tufjs+models@5.0.2/node_modules/@tufjs/models/dist/timestamp.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.Timestamp = void 0;
+    var base_1 = require_base();
+    var file_1 = require_file2();
+    var utils_1 = require_utils4();
+    var Timestamp = class _Timestamp extends base_1.Signed {
+      type = base_1.MetadataKind.Timestamp;
+      snapshotMeta;
+      constructor(options2) {
+        super(options2);
+        this.snapshotMeta = options2.snapshotMeta || new file_1.MetaFile({ version: 1 });
+      }
+      equals(other) {
+        if (!(other instanceof _Timestamp)) {
+          return false;
+        }
+        return super.equals(other) && this.snapshotMeta.equals(other.snapshotMeta);
+      }
+      toJSON() {
+        return {
+          _type: this.type,
+          spec_version: this.specVersion,
+          version: this.version,
+          expires: this.expires,
+          meta: { "snapshot.json": this.snapshotMeta.toJSON() },
+          ...this.unrecognizedFields
+        };
+      }
+      static fromJSON(data) {
+        const { unrecognizedFields, ...commonFields } = base_1.Signed.commonFieldsFromJSON(data);
+        const { meta: meta3, ...rest } = unrecognizedFields;
+        return new _Timestamp({
+          ...commonFields,
+          snapshotMeta: snapshotMetaFromJSON(meta3),
+          unrecognizedFields: rest
+        });
+      }
+    };
+    exports2.Timestamp = Timestamp;
+    function snapshotMetaFromJSON(data) {
+      let snapshotMeta;
+      if (utils_1.guard.isDefined(data)) {
+        const snapshotData = data["snapshot.json"];
+        if (!utils_1.guard.isDefined(snapshotData) || !utils_1.guard.isObject(snapshotData)) {
+          throw new TypeError("missing snapshot.json in meta");
+        } else {
+          snapshotMeta = file_1.MetaFile.fromJSON(snapshotData);
+        }
+      }
+      return snapshotMeta;
+    }
+  }
+});
+
+// node_modules/.pnpm/@tufjs+models@5.0.2/node_modules/@tufjs/models/dist/metadata.js
+var require_metadata = __commonJS({
+  "node_modules/.pnpm/@tufjs+models@5.0.2/node_modules/@tufjs/models/dist/metadata.js"(exports2) {
+    "use strict";
+    var __importDefault = exports2 && exports2.__importDefault || function(mod) {
+      return mod && mod.__esModule ? mod : { "default": mod };
+    };
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.Metadata = void 0;
+    var canonical_json_1 = require_lib2();
+    var util_1 = __importDefault(require("util"));
+    var base_1 = require_base();
+    var error_1 = require_error();
+    var root_1 = require_root();
+    var signature_1 = require_signature();
+    var snapshot_1 = require_snapshot();
+    var targets_1 = require_targets();
+    var timestamp_1 = require_timestamp4();
+    var utils_1 = require_utils4();
+    var Metadata = class _Metadata {
+      signed;
+      signatures;
+      unrecognizedFields;
+      constructor(signed, signatures, unrecognizedFields) {
+        this.signed = signed;
+        this.signatures = signatures || {};
+        this.unrecognizedFields = unrecognizedFields || {};
+      }
+      sign(signer, append = true) {
+        const bytes = Buffer.from((0, canonical_json_1.canonicalize)(this.signed.toJSON()));
+        const signature = signer(bytes);
+        if (!append) {
+          this.signatures = {};
+        }
+        this.signatures[signature.keyID] = signature;
+      }
+      verifyDelegate(delegatedRole, delegatedMetadata) {
+        let role;
+        let keys = {};
+        switch (this.signed.type) {
+          case base_1.MetadataKind.Root:
+            keys = this.signed.keys;
+            role = this.signed.roles[delegatedRole];
+            break;
+          case base_1.MetadataKind.Targets:
+            if (!this.signed.delegations) {
+              throw new error_1.ValueError(`No delegations found for ${delegatedRole}`);
+            }
+            keys = this.signed.delegations.keys;
+            if (this.signed.delegations.roles) {
+              role = this.signed.delegations.roles[delegatedRole];
+            } else if (this.signed.delegations.succinctRoles) {
+              if (this.signed.delegations.succinctRoles.isDelegatedRole(delegatedRole)) {
+                role = this.signed.delegations.succinctRoles;
+              }
+            }
+            break;
+          default:
+            throw new TypeError("invalid metadata type");
+        }
+        if (!role) {
+          throw new error_1.ValueError(`no delegation found for ${delegatedRole}`);
+        }
+        const signingKeys = /* @__PURE__ */ new Set();
+        role.keyIDs.forEach((keyID) => {
+          const key = keys[keyID];
+          if (!key) {
+            return;
+          }
+          try {
+            key.verifySignature(delegatedMetadata);
+            signingKeys.add(key.keyID);
+          } catch (error62) {
+          }
+        });
+        if (signingKeys.size < role.threshold) {
+          throw new error_1.UnsignedMetadataError(`${delegatedRole} was signed by ${signingKeys.size}/${role.threshold} keys`);
+        }
+      }
+      equals(other) {
+        if (!(other instanceof _Metadata)) {
+          return false;
+        }
+        return (
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+          this.signed.equals(other.signed) && util_1.default.isDeepStrictEqual(this.signatures, other.signatures) && util_1.default.isDeepStrictEqual(this.unrecognizedFields, other.unrecognizedFields)
+        );
+      }
+      toJSON() {
+        const signatures = Object.values(this.signatures).map((signature) => {
+          return signature.toJSON();
+        });
+        return {
+          signatures,
+          signed: this.signed.toJSON(),
+          ...this.unrecognizedFields
+        };
+      }
+      static fromJSON(type, data) {
+        const { signed, signatures, ...rest } = data;
+        if (!utils_1.guard.isDefined(signed) || !utils_1.guard.isObject(signed)) {
+          throw new TypeError("signed is not defined");
+        }
+        if (type !== signed._type) {
+          throw new error_1.ValueError(`expected '${type}', got ${signed["_type"]}`);
+        }
+        if (!utils_1.guard.isObjectArray(signatures)) {
+          throw new TypeError("signatures is not an array");
+        }
+        let signedObj;
+        switch (type) {
+          case base_1.MetadataKind.Root:
+            signedObj = root_1.Root.fromJSON(signed);
+            break;
+          case base_1.MetadataKind.Timestamp:
+            signedObj = timestamp_1.Timestamp.fromJSON(signed);
+            break;
+          case base_1.MetadataKind.Snapshot:
+            signedObj = snapshot_1.Snapshot.fromJSON(signed);
+            break;
+          case base_1.MetadataKind.Targets:
+            signedObj = targets_1.Targets.fromJSON(signed);
+            break;
+          default:
+            throw new TypeError("invalid metadata type");
+        }
+        const sigMap = {};
+        signatures.forEach((sigData) => {
+          const sig = signature_1.Signature.fromJSON(sigData);
+          if (sigMap[sig.keyID]) {
+            throw new error_1.ValueError(`multiple signatures found for keyid: ${sig.keyID}`);
+          }
+          sigMap[sig.keyID] = sig;
+        });
+        return new _Metadata(signedObj, sigMap, rest);
+      }
+    };
+    exports2.Metadata = Metadata;
+  }
+});
+
+// node_modules/.pnpm/@tufjs+models@5.0.2/node_modules/@tufjs/models/dist/index.js
+var require_dist3 = __commonJS({
+  "node_modules/.pnpm/@tufjs+models@5.0.2/node_modules/@tufjs/models/dist/index.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.Timestamp = exports2.Targets = exports2.Snapshot = exports2.Signature = exports2.Root = exports2.Metadata = exports2.Key = exports2.TargetFile = exports2.MetaFile = exports2.ValueError = exports2.MetadataKind = void 0;
+    var base_1 = require_base();
+    Object.defineProperty(exports2, "MetadataKind", { enumerable: true, get: function() {
+      return base_1.MetadataKind;
+    } });
+    var error_1 = require_error();
+    Object.defineProperty(exports2, "ValueError", { enumerable: true, get: function() {
+      return error_1.ValueError;
+    } });
+    var file_1 = require_file2();
+    Object.defineProperty(exports2, "MetaFile", { enumerable: true, get: function() {
+      return file_1.MetaFile;
+    } });
+    Object.defineProperty(exports2, "TargetFile", { enumerable: true, get: function() {
+      return file_1.TargetFile;
+    } });
+    var key_1 = require_key2();
+    Object.defineProperty(exports2, "Key", { enumerable: true, get: function() {
+      return key_1.Key;
+    } });
+    var metadata_1 = require_metadata();
+    Object.defineProperty(exports2, "Metadata", { enumerable: true, get: function() {
+      return metadata_1.Metadata;
+    } });
+    var root_1 = require_root();
+    Object.defineProperty(exports2, "Root", { enumerable: true, get: function() {
+      return root_1.Root;
+    } });
+    var signature_1 = require_signature();
+    Object.defineProperty(exports2, "Signature", { enumerable: true, get: function() {
+      return signature_1.Signature;
+    } });
+    var snapshot_1 = require_snapshot();
+    Object.defineProperty(exports2, "Snapshot", { enumerable: true, get: function() {
+      return snapshot_1.Snapshot;
+    } });
+    var targets_1 = require_targets();
+    Object.defineProperty(exports2, "Targets", { enumerable: true, get: function() {
+      return targets_1.Targets;
+    } });
+    var timestamp_1 = require_timestamp4();
+    Object.defineProperty(exports2, "Timestamp", { enumerable: true, get: function() {
+      return timestamp_1.Timestamp;
+    } });
+  }
+});
+
+// node_modules/.pnpm/ms@2.1.3/node_modules/ms/index.js
+var require_ms = __commonJS({
+  "node_modules/.pnpm/ms@2.1.3/node_modules/ms/index.js"(exports2, module2) {
+    var s = 1e3;
+    var m = s * 60;
+    var h = m * 60;
+    var d = h * 24;
+    var w = d * 7;
+    var y = d * 365.25;
+    module2.exports = function(val, options2) {
+      options2 = options2 || {};
+      var type = typeof val;
+      if (type === "string" && val.length > 0) {
+        return parse4(val);
+      } else if (type === "number" && isFinite(val)) {
+        return options2.long ? fmtLong(val) : fmtShort(val);
+      }
+      throw new Error(
+        "val is not a non-empty string or a valid number. val=" + JSON.stringify(val)
+      );
+    };
+    function parse4(str2) {
+      str2 = String(str2);
+      if (str2.length > 100) {
+        return;
+      }
+      var match = /^(-?(?:\d+)?\.?\d+) *(milliseconds?|msecs?|ms|seconds?|secs?|s|minutes?|mins?|m|hours?|hrs?|h|days?|d|weeks?|w|years?|yrs?|y)?$/i.exec(
+        str2
+      );
+      if (!match) {
+        return;
+      }
+      var n = parseFloat(match[1]);
+      var type = (match[2] || "ms").toLowerCase();
+      switch (type) {
+        case "years":
+        case "year":
+        case "yrs":
+        case "yr":
+        case "y":
+          return n * y;
+        case "weeks":
+        case "week":
+        case "w":
+          return n * w;
+        case "days":
+        case "day":
+        case "d":
+          return n * d;
+        case "hours":
+        case "hour":
+        case "hrs":
+        case "hr":
+        case "h":
+          return n * h;
+        case "minutes":
+        case "minute":
+        case "mins":
+        case "min":
+        case "m":
+          return n * m;
+        case "seconds":
+        case "second":
+        case "secs":
+        case "sec":
+        case "s":
+          return n * s;
+        case "milliseconds":
+        case "millisecond":
+        case "msecs":
+        case "msec":
+        case "ms":
+          return n;
+        default:
+          return void 0;
+      }
+    }
+    function fmtShort(ms) {
+      var msAbs = Math.abs(ms);
+      if (msAbs >= d) {
+        return Math.round(ms / d) + "d";
+      }
+      if (msAbs >= h) {
+        return Math.round(ms / h) + "h";
+      }
+      if (msAbs >= m) {
+        return Math.round(ms / m) + "m";
+      }
+      if (msAbs >= s) {
+        return Math.round(ms / s) + "s";
+      }
+      return ms + "ms";
+    }
+    function fmtLong(ms) {
+      var msAbs = Math.abs(ms);
+      if (msAbs >= d) {
+        return plural2(ms, msAbs, d, "day");
+      }
+      if (msAbs >= h) {
+        return plural2(ms, msAbs, h, "hour");
+      }
+      if (msAbs >= m) {
+        return plural2(ms, msAbs, m, "minute");
+      }
+      if (msAbs >= s) {
+        return plural2(ms, msAbs, s, "second");
+      }
+      return ms + " ms";
+    }
+    function plural2(ms, msAbs, n, name) {
+      var isPlural = msAbs >= n * 1.5;
+      return Math.round(ms / n) + " " + name + (isPlural ? "s" : "");
+    }
+  }
+});
+
+// node_modules/.pnpm/debug@4.4.3/node_modules/debug/src/common.js
+var require_common2 = __commonJS({
+  "node_modules/.pnpm/debug@4.4.3/node_modules/debug/src/common.js"(exports2, module2) {
+    function setup(env) {
+      createDebug.debug = createDebug;
+      createDebug.default = createDebug;
+      createDebug.coerce = coerce;
+      createDebug.disable = disable;
+      createDebug.enable = enable;
+      createDebug.enabled = enabled;
+      createDebug.humanize = require_ms();
+      createDebug.destroy = destroy;
+      Object.keys(env).forEach((key) => {
+        createDebug[key] = env[key];
+      });
+      createDebug.names = [];
+      createDebug.skips = [];
+      createDebug.formatters = {};
+      function selectColor(namespace) {
+        let hash2 = 0;
+        for (let i = 0; i < namespace.length; i++) {
+          hash2 = (hash2 << 5) - hash2 + namespace.charCodeAt(i);
+          hash2 |= 0;
+        }
+        return createDebug.colors[Math.abs(hash2) % createDebug.colors.length];
+      }
+      createDebug.selectColor = selectColor;
+      function createDebug(namespace) {
+        let prevTime;
+        let enableOverride = null;
+        let namespacesCache;
+        let enabledCache;
+        function debug(...args) {
+          if (!debug.enabled) {
+            return;
+          }
+          const self2 = debug;
+          const curr = Number(/* @__PURE__ */ new Date());
+          const ms = curr - (prevTime || curr);
+          self2.diff = ms;
+          self2.prev = prevTime;
+          self2.curr = curr;
+          prevTime = curr;
+          args[0] = createDebug.coerce(args[0]);
+          if (typeof args[0] !== "string") {
+            args.unshift("%O");
+          }
+          let index = 0;
+          args[0] = args[0].replace(/%([a-zA-Z%])/g, (match, format) => {
+            if (match === "%%") {
+              return "%";
+            }
+            index++;
+            const formatter = createDebug.formatters[format];
+            if (typeof formatter === "function") {
+              const val = args[index];
+              match = formatter.call(self2, val);
+              args.splice(index, 1);
+              index--;
+            }
+            return match;
+          });
+          createDebug.formatArgs.call(self2, args);
+          const logFn = self2.log || createDebug.log;
+          logFn.apply(self2, args);
+        }
+        debug.namespace = namespace;
+        debug.useColors = createDebug.useColors();
+        debug.color = createDebug.selectColor(namespace);
+        debug.extend = extend2;
+        debug.destroy = createDebug.destroy;
+        Object.defineProperty(debug, "enabled", {
+          enumerable: true,
+          configurable: false,
+          get: () => {
+            if (enableOverride !== null) {
+              return enableOverride;
+            }
+            if (namespacesCache !== createDebug.namespaces) {
+              namespacesCache = createDebug.namespaces;
+              enabledCache = createDebug.enabled(namespace);
+            }
+            return enabledCache;
+          },
+          set: (v) => {
+            enableOverride = v;
+          }
+        });
+        if (typeof createDebug.init === "function") {
+          createDebug.init(debug);
+        }
+        return debug;
+      }
+      function extend2(namespace, delimiter) {
+        const newDebug = createDebug(this.namespace + (typeof delimiter === "undefined" ? ":" : delimiter) + namespace);
+        newDebug.log = this.log;
+        return newDebug;
+      }
+      function enable(namespaces) {
+        createDebug.save(namespaces);
+        createDebug.namespaces = namespaces;
+        createDebug.names = [];
+        createDebug.skips = [];
+        const split = (typeof namespaces === "string" ? namespaces : "").trim().replace(/\s+/g, ",").split(",").filter(Boolean);
+        for (const ns of split) {
+          if (ns[0] === "-") {
+            createDebug.skips.push(ns.slice(1));
+          } else {
+            createDebug.names.push(ns);
+          }
+        }
+      }
+      function matchesTemplate(search, template) {
+        let searchIndex = 0;
+        let templateIndex = 0;
+        let starIndex = -1;
+        let matchIndex = 0;
+        while (searchIndex < search.length) {
+          if (templateIndex < template.length && (template[templateIndex] === search[searchIndex] || template[templateIndex] === "*")) {
+            if (template[templateIndex] === "*") {
+              starIndex = templateIndex;
+              matchIndex = searchIndex;
+              templateIndex++;
+            } else {
+              searchIndex++;
+              templateIndex++;
+            }
+          } else if (starIndex !== -1) {
+            templateIndex = starIndex + 1;
+            matchIndex++;
+            searchIndex = matchIndex;
+          } else {
+            return false;
+          }
+        }
+        while (templateIndex < template.length && template[templateIndex] === "*") {
+          templateIndex++;
+        }
+        return templateIndex === template.length;
+      }
+      function disable() {
+        const namespaces = [
+          ...createDebug.names,
+          ...createDebug.skips.map((namespace) => "-" + namespace)
+        ].join(",");
+        createDebug.enable("");
+        return namespaces;
+      }
+      function enabled(name) {
+        for (const skip of createDebug.skips) {
+          if (matchesTemplate(name, skip)) {
+            return false;
+          }
+        }
+        for (const ns of createDebug.names) {
+          if (matchesTemplate(name, ns)) {
+            return true;
+          }
+        }
+        return false;
+      }
+      function coerce(val) {
+        if (val instanceof Error) {
+          return val.stack || val.message;
+        }
+        return val;
+      }
+      function destroy() {
+        console.warn("Instance method `debug.destroy()` is deprecated and no longer does anything. It will be removed in the next major version of `debug`.");
+      }
+      createDebug.enable(createDebug.load());
+      return createDebug;
+    }
+    module2.exports = setup;
+  }
+});
+
+// node_modules/.pnpm/debug@4.4.3/node_modules/debug/src/browser.js
+var require_browser = __commonJS({
+  "node_modules/.pnpm/debug@4.4.3/node_modules/debug/src/browser.js"(exports2, module2) {
+    exports2.formatArgs = formatArgs;
+    exports2.save = save;
+    exports2.load = load;
+    exports2.useColors = useColors;
+    exports2.storage = localstorage();
+    exports2.destroy = /* @__PURE__ */ (() => {
+      let warned = false;
+      return () => {
+        if (!warned) {
+          warned = true;
+          console.warn("Instance method `debug.destroy()` is deprecated and no longer does anything. It will be removed in the next major version of `debug`.");
+        }
+      };
+    })();
+    exports2.colors = [
+      "#0000CC",
+      "#0000FF",
+      "#0033CC",
+      "#0033FF",
+      "#0066CC",
+      "#0066FF",
+      "#0099CC",
+      "#0099FF",
+      "#00CC00",
+      "#00CC33",
+      "#00CC66",
+      "#00CC99",
+      "#00CCCC",
+      "#00CCFF",
+      "#3300CC",
+      "#3300FF",
+      "#3333CC",
+      "#3333FF",
+      "#3366CC",
+      "#3366FF",
+      "#3399CC",
+      "#3399FF",
+      "#33CC00",
+      "#33CC33",
+      "#33CC66",
+      "#33CC99",
+      "#33CCCC",
+      "#33CCFF",
+      "#6600CC",
+      "#6600FF",
+      "#6633CC",
+      "#6633FF",
+      "#66CC00",
+      "#66CC33",
+      "#9900CC",
+      "#9900FF",
+      "#9933CC",
+      "#9933FF",
+      "#99CC00",
+      "#99CC33",
+      "#CC0000",
+      "#CC0033",
+      "#CC0066",
+      "#CC0099",
+      "#CC00CC",
+      "#CC00FF",
+      "#CC3300",
+      "#CC3333",
+      "#CC3366",
+      "#CC3399",
+      "#CC33CC",
+      "#CC33FF",
+      "#CC6600",
+      "#CC6633",
+      "#CC9900",
+      "#CC9933",
+      "#CCCC00",
+      "#CCCC33",
+      "#FF0000",
+      "#FF0033",
+      "#FF0066",
+      "#FF0099",
+      "#FF00CC",
+      "#FF00FF",
+      "#FF3300",
+      "#FF3333",
+      "#FF3366",
+      "#FF3399",
+      "#FF33CC",
+      "#FF33FF",
+      "#FF6600",
+      "#FF6633",
+      "#FF9900",
+      "#FF9933",
+      "#FFCC00",
+      "#FFCC33"
+    ];
+    function useColors() {
+      if (typeof window !== "undefined" && window.process && (window.process.type === "renderer" || window.process.__nwjs)) {
+        return true;
+      }
+      if (typeof navigator !== "undefined" && navigator.userAgent && navigator.userAgent.toLowerCase().match(/(edge|trident)\/(\d+)/)) {
+        return false;
+      }
+      let m;
+      return typeof document !== "undefined" && document.documentElement && document.documentElement.style && document.documentElement.style.WebkitAppearance || // Is firebug? http://stackoverflow.com/a/398120/376773
+      typeof window !== "undefined" && window.console && (window.console.firebug || window.console.exception && window.console.table) || // Is firefox >= v31?
+      // https://developer.mozilla.org/en-US/docs/Tools/Web_Console#Styling_messages
+      typeof navigator !== "undefined" && navigator.userAgent && (m = navigator.userAgent.toLowerCase().match(/firefox\/(\d+)/)) && parseInt(m[1], 10) >= 31 || // Double check webkit in userAgent just in case we are in a worker
+      typeof navigator !== "undefined" && navigator.userAgent && navigator.userAgent.toLowerCase().match(/applewebkit\/(\d+)/);
+    }
+    function formatArgs(args) {
+      args[0] = (this.useColors ? "%c" : "") + this.namespace + (this.useColors ? " %c" : " ") + args[0] + (this.useColors ? "%c " : " ") + "+" + module2.exports.humanize(this.diff);
+      if (!this.useColors) {
+        return;
+      }
+      const c = "color: " + this.color;
+      args.splice(1, 0, c, "color: inherit");
+      let index = 0;
+      let lastC = 0;
+      args[0].replace(/%[a-zA-Z%]/g, (match) => {
+        if (match === "%%") {
+          return;
+        }
+        index++;
+        if (match === "%c") {
+          lastC = index;
+        }
+      });
+      args.splice(lastC, 0, c);
+    }
+    exports2.log = console.debug || console.log || (() => {
+    });
+    function save(namespaces) {
+      try {
+        if (namespaces) {
+          exports2.storage.setItem("debug", namespaces);
+        } else {
+          exports2.storage.removeItem("debug");
+        }
+      } catch (error62) {
+      }
+    }
+    function load() {
+      let r;
+      try {
+        r = exports2.storage.getItem("debug") || exports2.storage.getItem("DEBUG");
+      } catch (error62) {
+      }
+      if (!r && typeof process !== "undefined" && "env" in process) {
+        r = process.env.DEBUG;
+      }
+      return r;
+    }
+    function localstorage() {
+      try {
+        return localStorage;
+      } catch (error62) {
+      }
+    }
+    module2.exports = require_common2()(exports2);
+    var { formatters } = module2.exports;
+    formatters.j = function(v) {
+      try {
+        return JSON.stringify(v);
+      } catch (error62) {
+        return "[UnexpectedJSONParseError]: " + error62.message;
+      }
+    };
+  }
+});
+
+// node_modules/.pnpm/has-flag@4.0.0/node_modules/has-flag/index.js
+var require_has_flag = __commonJS({
+  "node_modules/.pnpm/has-flag@4.0.0/node_modules/has-flag/index.js"(exports2, module2) {
+    "use strict";
+    module2.exports = (flag, argv = process.argv) => {
+      const prefix = flag.startsWith("-") ? "" : flag.length === 1 ? "-" : "--";
+      const position = argv.indexOf(prefix + flag);
+      const terminatorPosition = argv.indexOf("--");
+      return position !== -1 && (terminatorPosition === -1 || position < terminatorPosition);
+    };
+  }
+});
+
+// node_modules/.pnpm/supports-color@7.2.0/node_modules/supports-color/index.js
+var require_supports_color = __commonJS({
+  "node_modules/.pnpm/supports-color@7.2.0/node_modules/supports-color/index.js"(exports2, module2) {
+    "use strict";
+    var os = require("os");
+    var tty = require("tty");
+    var hasFlag = require_has_flag();
+    var { env } = process;
+    var forceColor;
+    if (hasFlag("no-color") || hasFlag("no-colors") || hasFlag("color=false") || hasFlag("color=never")) {
+      forceColor = 0;
+    } else if (hasFlag("color") || hasFlag("colors") || hasFlag("color=true") || hasFlag("color=always")) {
+      forceColor = 1;
+    }
+    if ("FORCE_COLOR" in env) {
+      if (env.FORCE_COLOR === "true") {
+        forceColor = 1;
+      } else if (env.FORCE_COLOR === "false") {
+        forceColor = 0;
+      } else {
+        forceColor = env.FORCE_COLOR.length === 0 ? 1 : Math.min(parseInt(env.FORCE_COLOR, 10), 3);
+      }
+    }
+    function translateLevel(level) {
+      if (level === 0) {
+        return false;
+      }
+      return {
+        level,
+        hasBasic: true,
+        has256: level >= 2,
+        has16m: level >= 3
+      };
+    }
+    function supportsColor(haveStream, streamIsTTY) {
+      if (forceColor === 0) {
+        return 0;
+      }
+      if (hasFlag("color=16m") || hasFlag("color=full") || hasFlag("color=truecolor")) {
+        return 3;
+      }
+      if (hasFlag("color=256")) {
+        return 2;
+      }
+      if (haveStream && !streamIsTTY && forceColor === void 0) {
+        return 0;
+      }
+      const min = forceColor || 0;
+      if (env.TERM === "dumb") {
+        return min;
+      }
+      if (process.platform === "win32") {
+        const osRelease = os.release().split(".");
+        if (Number(osRelease[0]) >= 10 && Number(osRelease[2]) >= 10586) {
+          return Number(osRelease[2]) >= 14931 ? 3 : 2;
+        }
+        return 1;
+      }
+      if ("CI" in env) {
+        if (["TRAVIS", "CIRCLECI", "APPVEYOR", "GITLAB_CI", "GITHUB_ACTIONS", "BUILDKITE"].some((sign) => sign in env) || env.CI_NAME === "codeship") {
+          return 1;
+        }
+        return min;
+      }
+      if ("TEAMCITY_VERSION" in env) {
+        return /^(9\.(0*[1-9]\d*)\.|\d{2,}\.)/.test(env.TEAMCITY_VERSION) ? 1 : 0;
+      }
+      if (env.COLORTERM === "truecolor") {
+        return 3;
+      }
+      if ("TERM_PROGRAM" in env) {
+        const version2 = parseInt((env.TERM_PROGRAM_VERSION || "").split(".")[0], 10);
+        switch (env.TERM_PROGRAM) {
+          case "iTerm.app":
+            return version2 >= 3 ? 3 : 2;
+          case "Apple_Terminal":
+            return 2;
+        }
+      }
+      if (/-256(color)?$/i.test(env.TERM)) {
+        return 2;
+      }
+      if (/^screen|^xterm|^vt100|^vt220|^rxvt|color|ansi|cygwin|linux/i.test(env.TERM)) {
+        return 1;
+      }
+      if ("COLORTERM" in env) {
+        return 1;
+      }
+      return min;
+    }
+    function getSupportLevel(stream) {
+      const level = supportsColor(stream, stream && stream.isTTY);
+      return translateLevel(level);
+    }
+    module2.exports = {
+      supportsColor: getSupportLevel,
+      stdout: translateLevel(supportsColor(true, tty.isatty(1))),
+      stderr: translateLevel(supportsColor(true, tty.isatty(2)))
+    };
+  }
+});
+
+// node_modules/.pnpm/debug@4.4.3/node_modules/debug/src/node.js
+var require_node = __commonJS({
+  "node_modules/.pnpm/debug@4.4.3/node_modules/debug/src/node.js"(exports2, module2) {
+    var tty = require("tty");
+    var util = require("util");
+    exports2.init = init;
+    exports2.log = log;
+    exports2.formatArgs = formatArgs;
+    exports2.save = save;
+    exports2.load = load;
+    exports2.useColors = useColors;
+    exports2.destroy = util.deprecate(
+      () => {
+      },
+      "Instance method `debug.destroy()` is deprecated and no longer does anything. It will be removed in the next major version of `debug`."
+    );
+    exports2.colors = [6, 2, 3, 4, 5, 1];
+    try {
+      const supportsColor = require_supports_color();
+      if (supportsColor && (supportsColor.stderr || supportsColor).level >= 2) {
+        exports2.colors = [
+          20,
+          21,
+          26,
+          27,
+          32,
+          33,
+          38,
+          39,
+          40,
+          41,
+          42,
+          43,
+          44,
+          45,
+          56,
+          57,
+          62,
+          63,
+          68,
+          69,
+          74,
+          75,
+          76,
+          77,
+          78,
+          79,
+          80,
+          81,
+          92,
+          93,
+          98,
+          99,
+          112,
+          113,
+          128,
+          129,
+          134,
+          135,
+          148,
+          149,
+          160,
+          161,
+          162,
+          163,
+          164,
+          165,
+          166,
+          167,
+          168,
+          169,
+          170,
+          171,
+          172,
+          173,
+          178,
+          179,
+          184,
+          185,
+          196,
+          197,
+          198,
+          199,
+          200,
+          201,
+          202,
+          203,
+          204,
+          205,
+          206,
+          207,
+          208,
+          209,
+          214,
+          215,
+          220,
+          221
+        ];
+      }
+    } catch (error62) {
+    }
+    exports2.inspectOpts = Object.keys(process.env).filter((key) => {
+      return /^debug_/i.test(key);
+    }).reduce((obj, key) => {
+      const prop = key.substring(6).toLowerCase().replace(/_([a-z])/g, (_, k) => {
+        return k.toUpperCase();
+      });
+      let val = process.env[key];
+      if (/^(yes|on|true|enabled)$/i.test(val)) {
+        val = true;
+      } else if (/^(no|off|false|disabled)$/i.test(val)) {
+        val = false;
+      } else if (val === "null") {
+        val = null;
+      } else {
+        val = Number(val);
+      }
+      obj[prop] = val;
+      return obj;
+    }, {});
+    function useColors() {
+      return "colors" in exports2.inspectOpts ? Boolean(exports2.inspectOpts.colors) : tty.isatty(process.stderr.fd);
+    }
+    function formatArgs(args) {
+      const { namespace: name, useColors: useColors2 } = this;
+      if (useColors2) {
+        const c = this.color;
+        const colorCode = "\x1B[3" + (c < 8 ? c : "8;5;" + c);
+        const prefix = `  ${colorCode};1m${name} \x1B[0m`;
+        args[0] = prefix + args[0].split("\n").join("\n" + prefix);
+        args.push(colorCode + "m+" + module2.exports.humanize(this.diff) + "\x1B[0m");
+      } else {
+        args[0] = getDate() + name + " " + args[0];
+      }
+    }
+    function getDate() {
+      if (exports2.inspectOpts.hideDate) {
+        return "";
+      }
+      return (/* @__PURE__ */ new Date()).toISOString() + " ";
+    }
+    function log(...args) {
+      return process.stderr.write(util.formatWithOptions(exports2.inspectOpts, ...args) + "\n");
+    }
+    function save(namespaces) {
+      if (namespaces) {
+        process.env.DEBUG = namespaces;
+      } else {
+        delete process.env.DEBUG;
+      }
+    }
+    function load() {
+      return process.env.DEBUG;
+    }
+    function init(debug) {
+      debug.inspectOpts = {};
+      const keys = Object.keys(exports2.inspectOpts);
+      for (let i = 0; i < keys.length; i++) {
+        debug.inspectOpts[keys[i]] = exports2.inspectOpts[keys[i]];
+      }
+    }
+    module2.exports = require_common2()(exports2);
+    var { formatters } = module2.exports;
+    formatters.o = function(v) {
+      this.inspectOpts.colors = this.useColors;
+      return util.inspect(v, this.inspectOpts).split("\n").map((str2) => str2.trim()).join(" ");
+    };
+    formatters.O = function(v) {
+      this.inspectOpts.colors = this.useColors;
+      return util.inspect(v, this.inspectOpts);
+    };
+  }
+});
+
+// node_modules/.pnpm/debug@4.4.3/node_modules/debug/src/index.js
+var require_src = __commonJS({
+  "node_modules/.pnpm/debug@4.4.3/node_modules/debug/src/index.js"(exports2, module2) {
+    if (typeof process === "undefined" || process.type === "renderer" || process.browser === true || process.__nwjs) {
+      module2.exports = require_browser();
+    } else {
+      module2.exports = require_node();
+    }
+  }
+});
+
+// node_modules/.pnpm/tuf-js@6.0.2/node_modules/tuf-js/dist/error.js
+var require_error2 = __commonJS({
+  "node_modules/.pnpm/tuf-js@6.0.2/node_modules/tuf-js/dist/error.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.DownloadHTTPError = exports2.DownloadLengthMismatchError = exports2.DownloadError = exports2.ExpiredMetadataError = exports2.EqualVersionError = exports2.BadVersionError = exports2.RepositoryError = exports2.PersistError = exports2.RuntimeError = exports2.ValueError = void 0;
+    var ValueError = class extends Error {
+    };
+    exports2.ValueError = ValueError;
+    var RuntimeError = class extends Error {
+    };
+    exports2.RuntimeError = RuntimeError;
+    var PersistError = class extends Error {
+    };
+    exports2.PersistError = PersistError;
+    var RepositoryError = class extends Error {
+    };
+    exports2.RepositoryError = RepositoryError;
+    var BadVersionError = class extends RepositoryError {
+    };
+    exports2.BadVersionError = BadVersionError;
+    var EqualVersionError = class extends BadVersionError {
+    };
+    exports2.EqualVersionError = EqualVersionError;
+    var ExpiredMetadataError = class extends RepositoryError {
+    };
+    exports2.ExpiredMetadataError = ExpiredMetadataError;
+    var DownloadError = class extends Error {
+    };
+    exports2.DownloadError = DownloadError;
+    var DownloadLengthMismatchError = class extends DownloadError {
+    };
+    exports2.DownloadLengthMismatchError = DownloadLengthMismatchError;
+    var DownloadHTTPError = class extends DownloadError {
+      statusCode;
+      constructor(message, statusCode) {
+        super(message);
+        this.statusCode = statusCode;
+      }
+    };
+    exports2.DownloadHTTPError = DownloadHTTPError;
+  }
+});
+
+// node_modules/.pnpm/tuf-js@6.0.2/node_modules/tuf-js/dist/utils/tmpfile.js
+var require_tmpfile = __commonJS({
+  "node_modules/.pnpm/tuf-js@6.0.2/node_modules/tuf-js/dist/utils/tmpfile.js"(exports2) {
+    "use strict";
+    var __importDefault = exports2 && exports2.__importDefault || function(mod) {
+      return mod && mod.__esModule ? mod : { "default": mod };
+    };
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.withTempFile = void 0;
+    var promises_1 = __importDefault(require("fs/promises"));
+    var os_1 = __importDefault(require("os"));
+    var path_1 = __importDefault(require("path"));
+    var withTempFile = async (handler) => withTempDir(async (dir) => handler(path_1.default.join(dir, "tempfile")));
+    exports2.withTempFile = withTempFile;
+    var withTempDir = async (handler) => {
+      const tmpDir = await promises_1.default.realpath(os_1.default.tmpdir());
+      const dir = await promises_1.default.mkdtemp(tmpDir + path_1.default.sep);
+      try {
+        return await handler(dir);
+      } finally {
+        await promises_1.default.rm(dir, { force: true, recursive: true, maxRetries: 3 });
+      }
+    };
+  }
+});
+
+// node_modules/.pnpm/@gar+promise-retry@1.0.3/node_modules/@gar/promise-retry/lib/retry.js
+var require_retry = __commonJS({
+  "node_modules/.pnpm/@gar+promise-retry@1.0.3/node_modules/@gar/promise-retry/lib/retry.js"(exports2, module2) {
+    var RetryOperation = class {
+      #attempts = 1;
+      #cachedTimeouts = null;
+      #errors = [];
+      #fn = null;
+      #maxRetryTime;
+      #operationStart = null;
+      #originalTimeouts;
+      #timeouts;
+      #timer = null;
+      #unref;
+      constructor(timeouts, options2 = {}) {
+        this.#originalTimeouts = [...timeouts];
+        this.#timeouts = [...timeouts];
+        this.#unref = options2.unref;
+        this.#maxRetryTime = options2.maxRetryTime || Infinity;
+        if (options2.forever) {
+          this.#cachedTimeouts = [...this.#timeouts];
+        }
+      }
+      get timeouts() {
+        return [...this.#timeouts];
+      }
+      get errors() {
+        return [...this.#errors];
+      }
+      get attempts() {
+        return this.#attempts;
+      }
+      get mainError() {
+        let mainError = null;
+        if (this.#errors.length) {
+          let mainErrorCount = 0;
+          const counts = {};
+          for (let i = 0; i < this.#errors.length; i++) {
+            const error62 = this.#errors[i];
+            const { message } = error62;
+            if (!counts[message]) {
+              counts[message] = 0;
+            }
+            counts[message]++;
+            if (counts[message] >= mainErrorCount) {
+              mainError = error62;
+              mainErrorCount = counts[message];
+            }
+          }
+        }
+        return mainError;
+      }
+      reset() {
+        this.#attempts = 1;
+        this.#timeouts = [...this.#originalTimeouts];
+      }
+      stop() {
+        if (this.#timer) {
+          clearTimeout(this.#timer);
+        }
+        this.#timeouts = [];
+        this.#cachedTimeouts = null;
+      }
+      retry(err) {
+        this.#errors.push(err);
+        if ((/* @__PURE__ */ new Date()).getTime() - this.#operationStart >= this.#maxRetryTime) {
+          this.#errors.unshift(new Error("RetryOperation timeout occurred"));
+          return false;
+        }
+        let timeout = this.#timeouts.shift();
+        if (timeout === void 0) {
+          if (this.#cachedTimeouts) {
+            this.#errors.pop();
+            timeout = this.#cachedTimeouts.at(-1);
+          } else {
+            return false;
+          }
+        }
+        this.#timer = setTimeout(() => {
+          this.#attempts++;
+          this.#fn(this.#attempts);
+        }, timeout);
+        if (this.#unref) {
+          this.#timer.unref();
+        }
+        return true;
+      }
+      attempt(fn) {
+        this.#fn = fn;
+        this.#operationStart = (/* @__PURE__ */ new Date()).getTime();
+        this.#fn(this.#attempts);
+      }
+    };
+    module2.exports = { RetryOperation };
+  }
+});
+
+// node_modules/.pnpm/@gar+promise-retry@1.0.3/node_modules/@gar/promise-retry/lib/index.js
+var require_lib3 = __commonJS({
+  "node_modules/.pnpm/@gar+promise-retry@1.0.3/node_modules/@gar/promise-retry/lib/index.js"(exports2, module2) {
+    var { RetryOperation } = require_retry();
+    var createTimeout = (attempt, opts) => Math.min(Math.round((1 + (opts.randomize ? Math.random() : 0)) * Math.max(opts.minTimeout, 1) * Math.pow(opts.factor, attempt)), opts.maxTimeout);
+    var isRetryError = (err) => err?.code === "EPROMISERETRY" && Object.hasOwn(err, "retried");
+    var promiseRetry = async (fn, options2 = {}) => {
+      let timeouts = [];
+      if (options2 instanceof Array) {
+        timeouts = [...options2];
+      } else {
+        if (options2.retries === Infinity) {
+          options2.forever = true;
+          delete options2.retries;
+        }
+        const opts = {
+          retries: 10,
+          factor: 2,
+          minTimeout: 1 * 1e3,
+          maxTimeout: Infinity,
+          randomize: false,
+          ...options2
+        };
+        if (opts.minTimeout > opts.maxTimeout) {
+          throw new Error("minTimeout is greater than maxTimeout");
+        }
+        if (opts.retries) {
+          for (let i = 0; i < opts.retries; i++) {
+            timeouts.push(createTimeout(i, opts));
+          }
+          timeouts.sort((a, b) => a - b);
+        } else if (options2.forever) {
+          timeouts.push(createTimeout(0, opts));
+        }
+      }
+      const operation = new RetryOperation(timeouts, {
+        forever: options2.forever,
+        unref: options2.unref,
+        maxRetryTime: options2.maxRetryTime
+      });
+      return new Promise(function(resolve, reject) {
+        operation.attempt(async (number4) => {
+          try {
+            const result = await fn((err) => {
+              throw Object.assign(new Error("Retrying"), { code: "EPROMISERETRY", retried: err });
+            }, number4, operation);
+            return resolve(result);
+          } catch (err) {
+            if (!isRetryError(err)) {
+              return reject(err);
+            }
+            if (!operation.retry(err.retried || new Error())) {
+              return reject(err.retried);
+            }
+          }
+        });
+      });
+    };
+    module2.exports = { promiseRetry };
+  }
+});
+
+// node_modules/.pnpm/tuf-js@6.0.2/node_modules/tuf-js/dist/fetcher.js
+var require_fetcher = __commonJS({
+  "node_modules/.pnpm/tuf-js@6.0.2/node_modules/tuf-js/dist/fetcher.js"(exports2) {
+    "use strict";
+    var __importDefault = exports2 && exports2.__importDefault || function(mod) {
+      return mod && mod.__esModule ? mod : { "default": mod };
+    };
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.DefaultFetcher = exports2.BaseFetcher = void 0;
+    var debug_1 = __importDefault(require_src());
+    var fs_1 = __importDefault(require("fs"));
+    var util_1 = __importDefault(require("util"));
+    var error_1 = require_error2();
+    var tmpfile_1 = require_tmpfile();
+    var promise_retry_1 = require_lib3();
+    var log = (0, debug_1.default)("tuf:fetch");
+    var USER_AGENT_HEADER = "User-Agent";
+    var BaseFetcher = class {
+      // Download file from given URL. The file is downloaded to a temporary
+      // location and then passed to the given handler. The handler is responsible
+      // for moving the file to its final location. The temporary file is deleted
+      // after the handler returns.
+      async downloadFile(url2, maxLength, handler) {
+        return (0, tmpfile_1.withTempFile)(async (tmpFile) => {
+          const reader = await this.fetch(url2);
+          let numberOfBytesReceived = 0;
+          const fileStream = fs_1.default.createWriteStream(tmpFile);
+          const streamReader = reader.getReader();
+          try {
+            while (true) {
+              const { done, value: chunk } = await streamReader.read();
+              if (done) {
+                break;
+              }
+              numberOfBytesReceived += chunk.length;
+              if (numberOfBytesReceived > maxLength) {
+                throw new error_1.DownloadLengthMismatchError("Max length reached");
+              }
+              await writeBufferToStream(fileStream, Buffer.from(chunk));
+            }
+          } finally {
+            streamReader.releaseLock();
+            await util_1.default.promisify(fileStream.close).bind(fileStream)();
+          }
+          return handler(tmpFile);
+        });
+      }
+      // Download bytes from given URL.
+      async downloadBytes(url2, maxLength) {
+        return this.downloadFile(url2, maxLength, async (file2) => {
+          const stream = fs_1.default.createReadStream(file2);
+          const chunks = [];
+          for await (const chunk of stream) {
+            chunks.push(chunk);
+          }
+          return Buffer.concat(chunks);
+        });
+      }
+    };
+    exports2.BaseFetcher = BaseFetcher;
+    var DefaultFetcher = class extends BaseFetcher {
+      userAgent;
+      timeout;
+      retry;
+      constructor(options2 = {}) {
+        super();
+        this.userAgent = options2.userAgent;
+        this.timeout = options2.timeout;
+        if (options2.retry === true) {
+          this.retry = { forever: true };
+        } else if (options2.retry === false || options2.retry === void 0) {
+          this.retry = void 0;
+        } else if (typeof options2.retry === "number") {
+          if (options2.retry < 0) {
+            throw new Error("Retry count must be non-negative number");
+          }
+          this.retry = { retries: options2.retry };
+        } else {
+          this.retry = options2.retry;
+        }
+      }
+      async fetch(url2) {
+        const shouldRetry = this.retry !== void 0;
+        return (0, promise_retry_1.promiseRetry)(async (retry, number4) => {
+          log("GET %s (attempt %d)", url2, number4);
+          let response;
+          try {
+            response = await fetch(url2, {
+              headers: {
+                [USER_AGENT_HEADER]: this.userAgent || ""
+              },
+              signal: this.timeout ? AbortSignal.timeout(this.timeout) : void 0
+            });
+          } catch (error62) {
+            const err = error62 instanceof Error ? error62 : new Error(String(error62));
+            if (shouldRetry) {
+              return retry(err);
+            }
+            throw err;
+          }
+          if (!response.ok || !response.body) {
+            const err = new error_1.DownloadHTTPError("Failed to download", response.status);
+            if (shouldRetry && response.status >= 500 && response.status < 600) {
+              return retry(err);
+            }
+            throw err;
+          }
+          return response.body;
+        }, this.retry);
+      }
+    };
+    exports2.DefaultFetcher = DefaultFetcher;
+    var writeBufferToStream = async (stream, buffer) => {
+      return new Promise((resolve, reject) => {
+        stream.write(buffer, (err) => {
+          if (err) {
+            reject(err);
+          }
+          resolve(true);
+        });
+      });
+    };
+  }
+});
+
+// node_modules/.pnpm/tuf-js@6.0.2/node_modules/tuf-js/package.json
+var require_package = __commonJS({
+  "node_modules/.pnpm/tuf-js@6.0.2/node_modules/tuf-js/package.json"(exports2, module2) {
+    module2.exports = {
+      name: "tuf-js",
+      version: "6.0.2",
+      description: "JavaScript implementation of The Update Framework (TUF)",
+      main: "dist/index.js",
+      types: "dist/index.d.ts",
+      scripts: {
+        build: "tsc --build tsconfig.build.json",
+        clean: "rm -rf dist && rm tsconfig.build.tsbuildinfo",
+        test: "jest"
+      },
+      repository: {
+        type: "git",
+        url: "git+https://github.com/theupdateframework/tuf-js.git"
+      },
+      files: [
+        "dist"
+      ],
+      keywords: [
+        "tuf",
+        "security",
+        "update"
+      ],
+      author: "bdehamer@github.com",
+      license: "MIT",
+      bugs: {
+        url: "https://github.com/theupdateframework/tuf-js/issues"
+      },
+      homepage: "https://github.com/theupdateframework/tuf-js/tree/main/packages/client#readme",
+      devDependencies: {
+        "@tufjs/repo-mock": "5.0.2",
+        "@types/debug": "^4.1.13",
+        "@types/retry": "^0.12.5"
+      },
+      dependencies: {
+        "@gar/promise-retry": "^1.0.3",
+        "@tufjs/models": "5.0.2",
+        debug: "^4.4.3"
+      },
+      engines: {
+        node: "^22.22.2 || ^24.15.0 || >=26.0.0"
+      }
+    };
+  }
+});
+
+// node_modules/.pnpm/tuf-js@6.0.2/node_modules/tuf-js/dist/config.js
+var require_config = __commonJS({
+  "node_modules/.pnpm/tuf-js@6.0.2/node_modules/tuf-js/dist/config.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.defaultConfig = void 0;
+    exports2.defaultConfig = {
+      maxRootRotations: 256,
+      maxDelegations: 32,
+      rootMaxLength: 512e3,
+      //bytes
+      timestampMaxLength: 16384,
+      // bytes
+      snapshotMaxLength: 2e6,
+      // bytes
+      targetsMaxLength: 5e6,
+      // bytes
+      prefixTargetsWithHash: true,
+      fetchTimeout: 1e5,
+      // milliseconds
+      fetchRetries: void 0,
+      fetchRetry: 2,
+      userAgent: ""
+    };
+  }
+});
+
+// node_modules/.pnpm/tuf-js@6.0.2/node_modules/tuf-js/dist/store.js
+var require_store = __commonJS({
+  "node_modules/.pnpm/tuf-js@6.0.2/node_modules/tuf-js/dist/store.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.TrustedMetadataStore = void 0;
+    var models_1 = require_dist3();
+    var error_1 = require_error2();
+    var TrustedMetadataStore = class {
+      trustedSet = {};
+      referenceTime;
+      constructor(rootData) {
+        this.referenceTime = /* @__PURE__ */ new Date();
+        this.loadTrustedRoot(rootData);
+      }
+      get root() {
+        if (!this.trustedSet.root) {
+          throw new ReferenceError("No trusted root metadata");
+        }
+        return this.trustedSet.root;
+      }
+      get timestamp() {
+        return this.trustedSet.timestamp;
+      }
+      get snapshot() {
+        return this.trustedSet.snapshot;
+      }
+      get targets() {
+        return this.trustedSet.targets;
+      }
+      getRole(name) {
+        return this.trustedSet[name];
+      }
+      updateRoot(bytesBuffer) {
+        const data = JSON.parse(bytesBuffer.toString("utf8"));
+        const newRoot = models_1.Metadata.fromJSON(models_1.MetadataKind.Root, data);
+        if (newRoot.signed.type != models_1.MetadataKind.Root) {
+          throw new error_1.RepositoryError(`Expected 'root', got ${newRoot.signed.type}`);
+        }
+        this.root.verifyDelegate(models_1.MetadataKind.Root, newRoot);
+        if (newRoot.signed.version != this.root.signed.version + 1) {
+          throw new error_1.BadVersionError(`Expected version ${this.root.signed.version + 1}, got ${newRoot.signed.version}`);
+        }
+        newRoot.verifyDelegate(models_1.MetadataKind.Root, newRoot);
+        this.trustedSet.root = newRoot;
+        return newRoot;
+      }
+      updateTimestamp(bytesBuffer) {
+        if (this.snapshot) {
+          throw new error_1.RuntimeError("Cannot update timestamp after snapshot");
+        }
+        if (this.root.signed.isExpired(this.referenceTime)) {
+          throw new error_1.ExpiredMetadataError("Final root.json is expired");
+        }
+        const data = JSON.parse(bytesBuffer.toString("utf8"));
+        const newTimestamp = models_1.Metadata.fromJSON(models_1.MetadataKind.Timestamp, data);
+        if (newTimestamp.signed.type != models_1.MetadataKind.Timestamp) {
+          throw new error_1.RepositoryError(`Expected 'timestamp', got ${newTimestamp.signed.type}`);
+        }
+        this.root.verifyDelegate(models_1.MetadataKind.Timestamp, newTimestamp);
+        if (this.timestamp) {
+          if (newTimestamp.signed.version < this.timestamp.signed.version) {
+            throw new error_1.BadVersionError(`New timestamp version ${newTimestamp.signed.version} is less than current version ${this.timestamp.signed.version}`);
+          }
+          if (newTimestamp.signed.version === this.timestamp.signed.version) {
+            throw new error_1.EqualVersionError(`New timestamp version ${newTimestamp.signed.version} is equal to current version ${this.timestamp.signed.version}`);
+          }
+          const snapshotMeta = this.timestamp.signed.snapshotMeta;
+          const newSnapshotMeta = newTimestamp.signed.snapshotMeta;
+          if (newSnapshotMeta.version < snapshotMeta.version) {
+            throw new error_1.BadVersionError(`New snapshot version ${newSnapshotMeta.version} is less than current version ${snapshotMeta.version}`);
+          }
+        }
+        this.trustedSet.timestamp = newTimestamp;
+        this.checkFinalTimestamp();
+        return newTimestamp;
+      }
+      updateSnapshot(bytesBuffer, trusted = false) {
+        if (!this.timestamp) {
+          throw new error_1.RuntimeError("Cannot update snapshot before timestamp");
+        }
+        if (this.targets) {
+          throw new error_1.RuntimeError("Cannot update snapshot after targets");
+        }
+        this.checkFinalTimestamp();
+        const snapshotMeta = this.timestamp.signed.snapshotMeta;
+        if (!trusted) {
+          snapshotMeta.verify(bytesBuffer);
+        }
+        const data = JSON.parse(bytesBuffer.toString("utf8"));
+        const newSnapshot = models_1.Metadata.fromJSON(models_1.MetadataKind.Snapshot, data);
+        if (newSnapshot.signed.type != models_1.MetadataKind.Snapshot) {
+          throw new error_1.RepositoryError(`Expected 'snapshot', got ${newSnapshot.signed.type}`);
+        }
+        this.root.verifyDelegate(models_1.MetadataKind.Snapshot, newSnapshot);
+        if (this.snapshot) {
+          Object.entries(this.snapshot.signed.meta).forEach(([fileName, fileInfo]) => {
+            const newFileInfo = newSnapshot.signed.meta[fileName];
+            if (!newFileInfo) {
+              throw new error_1.RepositoryError(`Missing file ${fileName} in new snapshot`);
+            }
+            if (newFileInfo.version < fileInfo.version) {
+              throw new error_1.BadVersionError(`New version ${newFileInfo.version} of ${fileName} is less than current version ${fileInfo.version}`);
+            }
+          });
+        }
+        this.trustedSet.snapshot = newSnapshot;
+        this.checkFinalSnapsnot();
+        return newSnapshot;
+      }
+      updateDelegatedTargets(bytesBuffer, roleName, delegatorName) {
+        if (!this.snapshot) {
+          throw new error_1.RuntimeError("Cannot update delegated targets before snapshot");
+        }
+        this.checkFinalSnapsnot();
+        const delegator = this.trustedSet[delegatorName];
+        if (!delegator) {
+          throw new error_1.RuntimeError(`No trusted ${delegatorName} metadata`);
+        }
+        const meta3 = this.snapshot.signed.meta?.[`${roleName}.json`];
+        if (!meta3) {
+          throw new error_1.RepositoryError(`Missing ${roleName}.json in snapshot`);
+        }
+        meta3.verify(bytesBuffer);
+        const data = JSON.parse(bytesBuffer.toString("utf8"));
+        const newDelegate = models_1.Metadata.fromJSON(models_1.MetadataKind.Targets, data);
+        if (newDelegate.signed.type != models_1.MetadataKind.Targets) {
+          throw new error_1.RepositoryError(`Expected 'targets', got ${newDelegate.signed.type}`);
+        }
+        delegator.verifyDelegate(roleName, newDelegate);
+        const version2 = newDelegate.signed.version;
+        if (version2 != meta3.version) {
+          throw new error_1.BadVersionError(`Version ${version2} of ${roleName} does not match snapshot version ${meta3.version}`);
+        }
+        if (newDelegate.signed.isExpired(this.referenceTime)) {
+          throw new error_1.ExpiredMetadataError(`${roleName}.json is expired`);
+        }
+        this.trustedSet[roleName] = newDelegate;
+      }
+      // Verifies and loads data as trusted root metadata.
+      // Note that an expired initial root is still considered valid.
+      loadTrustedRoot(bytesBuffer) {
+        const data = JSON.parse(bytesBuffer.toString("utf8"));
+        const root = models_1.Metadata.fromJSON(models_1.MetadataKind.Root, data);
+        if (root.signed.type != models_1.MetadataKind.Root) {
+          throw new error_1.RepositoryError(`Expected 'root', got ${root.signed.type}`);
+        }
+        root.verifyDelegate(models_1.MetadataKind.Root, root);
+        this.trustedSet["root"] = root;
+      }
+      checkFinalTimestamp() {
+        if (!this.timestamp) {
+          throw new ReferenceError("No trusted timestamp metadata");
+        }
+        if (this.timestamp.signed.isExpired(this.referenceTime)) {
+          throw new error_1.ExpiredMetadataError("Final timestamp.json is expired");
+        }
+      }
+      checkFinalSnapsnot() {
+        if (!this.snapshot) {
+          throw new ReferenceError("No trusted snapshot metadata");
+        }
+        if (!this.timestamp) {
+          throw new ReferenceError("No trusted timestamp metadata");
+        }
+        if (this.snapshot.signed.isExpired(this.referenceTime)) {
+          throw new error_1.ExpiredMetadataError("snapshot.json is expired");
+        }
+        const snapshotMeta = this.timestamp.signed.snapshotMeta;
+        if (this.snapshot.signed.version !== snapshotMeta.version) {
+          throw new error_1.BadVersionError("Snapshot version doesn't match timestamp");
+        }
+      }
+    };
+    exports2.TrustedMetadataStore = TrustedMetadataStore;
+  }
+});
+
+// node_modules/.pnpm/tuf-js@6.0.2/node_modules/tuf-js/dist/utils/url.js
+var require_url = __commonJS({
+  "node_modules/.pnpm/tuf-js@6.0.2/node_modules/tuf-js/dist/utils/url.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.join = join;
+    var url_1 = require("url");
+    function join(base, path) {
+      return new url_1.URL(ensureTrailingSlash(base) + removeLeadingSlash(path)).toString();
+    }
+    function ensureTrailingSlash(path) {
+      return path.endsWith("/") ? path : path + "/";
+    }
+    function removeLeadingSlash(path) {
+      return path.startsWith("/") ? path.slice(1) : path;
+    }
+  }
+});
+
+// node_modules/.pnpm/tuf-js@6.0.2/node_modules/tuf-js/dist/updater.js
+var require_updater = __commonJS({
+  "node_modules/.pnpm/tuf-js@6.0.2/node_modules/tuf-js/dist/updater.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o, m, k, k2) {
+      if (k2 === void 0) k2 = k;
+      var desc = Object.getOwnPropertyDescriptor(m, k);
+      if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m[k];
+        } };
+      }
+      Object.defineProperty(o, k2, desc);
+    }) : (function(o, m, k, k2) {
+      if (k2 === void 0) k2 = k;
+      o[k2] = m[k];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o, v) {
+      Object.defineProperty(o, "default", { enumerable: true, value: v });
+    }) : function(o, v) {
+      o["default"] = v;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function(o2) {
+          var ar = [];
+          for (var k in o2) if (Object.prototype.hasOwnProperty.call(o2, k)) ar[ar.length] = k;
+          return ar;
+        };
+        return ownKeys(o);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    var __importDefault = exports2 && exports2.__importDefault || function(mod) {
+      return mod && mod.__esModule ? mod : { "default": mod };
+    };
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.Updater = void 0;
+    var models_1 = require_dist3();
+    var debug_1 = __importDefault(require_src());
+    var fs = __importStar(require("fs"));
+    var path = __importStar(require("path"));
+    var package_json_1 = require_package();
+    var config_1 = require_config();
+    var error_1 = require_error2();
+    var fetcher_1 = require_fetcher();
+    var store_1 = require_store();
+    var url2 = __importStar(require_url());
+    var log = (0, debug_1.default)("tuf:cache");
+    var Updater = class {
+      dir;
+      metadataBaseUrl;
+      targetDir;
+      targetBaseUrl;
+      forceCache;
+      trustedSet;
+      config;
+      fetcher;
+      constructor(options2) {
+        const { metadataDir, metadataBaseUrl, targetDir, targetBaseUrl, fetcher, config: config2 } = options2;
+        this.dir = metadataDir;
+        this.metadataBaseUrl = metadataBaseUrl;
+        this.targetDir = targetDir;
+        this.targetBaseUrl = targetBaseUrl;
+        this.forceCache = options2.forceCache ?? false;
+        const data = this.loadLocalMetadata(models_1.MetadataKind.Root);
+        this.trustedSet = new store_1.TrustedMetadataStore(data);
+        this.config = { ...config_1.defaultConfig, ...config2 };
+        const userAgent = config2?.userAgent ? `${config2.userAgent} tuf-js/${package_json_1.version}` : `tuf-js/${package_json_1.version}`;
+        this.fetcher = fetcher || new fetcher_1.DefaultFetcher({
+          userAgent,
+          timeout: this.config.fetchTimeout,
+          retry: this.config.fetchRetries ?? this.config.fetchRetry
+        });
+      }
+      // refresh and load the metadata before downloading the target
+      // refresh should be called once after the client is initialized
+      async refresh() {
+        if (this.forceCache) {
+          try {
+            await this.loadTimestamp({ checkRemote: false });
+          } catch (error62) {
+            await this.loadRoot();
+            await this.loadTimestamp();
+          }
+        } else {
+          await this.loadRoot();
+          await this.loadTimestamp();
+        }
+        await this.loadSnapshot();
+        await this.loadTargets(models_1.MetadataKind.Targets, models_1.MetadataKind.Root);
+      }
+      // Returns the TargetFile instance with information for the given target path.
+      //
+      // Implicitly calls refresh if it hasn't already been called.
+      async getTargetInfo(targetPath) {
+        if (!this.trustedSet.targets) {
+          await this.refresh();
+        }
+        return this.preorderDepthFirstWalk(targetPath);
+      }
+      async downloadTarget(targetInfo, filePath, targetBaseUrl) {
+        const targetPath = filePath || this.generateTargetPath(targetInfo);
+        if (!targetBaseUrl) {
+          if (!this.targetBaseUrl) {
+            throw new error_1.ValueError("Target base URL not set");
+          }
+          targetBaseUrl = this.targetBaseUrl;
+        }
+        let targetFilePath = targetInfo.path;
+        const consistentSnapshot = this.trustedSet.root.signed.consistentSnapshot;
+        if (consistentSnapshot && this.config.prefixTargetsWithHash) {
+          const hashes = Object.values(targetInfo.hashes);
+          const { dir, base } = path.parse(targetFilePath);
+          const filename = `${hashes[0]}.${base}`;
+          targetFilePath = dir ? `${dir}/${filename}` : filename;
+        }
+        const targetUrl = url2.join(targetBaseUrl, targetFilePath);
+        await this.fetcher.downloadFile(targetUrl, targetInfo.length, async (fileName) => {
+          await targetInfo.verify(fs.createReadStream(fileName));
+          log("WRITE %s", targetPath);
+          fs.copyFileSync(fileName, targetPath);
+        });
+        return targetPath;
+      }
+      async findCachedTarget(targetInfo, filePath) {
+        if (!filePath) {
+          filePath = this.generateTargetPath(targetInfo);
+        }
+        try {
+          if (fs.existsSync(filePath)) {
+            await targetInfo.verify(fs.createReadStream(filePath));
+            return filePath;
+          }
+        } catch (error62) {
+          return;
+        }
+        return;
+      }
+      loadLocalMetadata(fileName) {
+        const filePath = path.join(this.dir, `${fileName}.json`);
+        log("READ %s", filePath);
+        return fs.readFileSync(filePath);
+      }
+      // Sequentially load and persist on local disk every newer root metadata
+      // version available on the remote.
+      // Client workflow 5.3: update root role
+      async loadRoot() {
+        const rootVersion = this.trustedSet.root.signed.version;
+        const lowerBound = rootVersion + 1;
+        const upperBound = lowerBound + this.config.maxRootRotations;
+        for (let version2 = lowerBound; version2 < upperBound; version2++) {
+          const rootUrl = url2.join(this.metadataBaseUrl, `${version2}.root.json`);
+          try {
+            const bytesData = await this.fetcher.downloadBytes(rootUrl, this.config.rootMaxLength);
+            this.trustedSet.updateRoot(bytesData);
+            this.persistMetadata(models_1.MetadataKind.Root, bytesData);
+          } catch (error62) {
+            if (error62 instanceof error_1.DownloadHTTPError) {
+              if ([403, 404].includes(error62.statusCode)) {
+                break;
+              }
+            }
+            throw error62;
+          }
+        }
+      }
+      // Load local and remote timestamp metadata.
+      // Client workflow 5.4: update timestamp role
+      async loadTimestamp({ checkRemote } = { checkRemote: true }) {
+        try {
+          const data = this.loadLocalMetadata(models_1.MetadataKind.Timestamp);
+          this.trustedSet.updateTimestamp(data);
+          if (!checkRemote) {
+            return;
+          }
+        } catch (error62) {
+        }
+        const timestampUrl = url2.join(this.metadataBaseUrl, "timestamp.json");
+        const bytesData = await this.fetcher.downloadBytes(timestampUrl, this.config.timestampMaxLength);
+        try {
+          this.trustedSet.updateTimestamp(bytesData);
+        } catch (error62) {
+          if (error62 instanceof error_1.EqualVersionError) {
+            return;
+          }
+          throw error62;
+        }
+        this.persistMetadata(models_1.MetadataKind.Timestamp, bytesData);
+      }
+      // Load local and remote snapshot metadata.
+      // Client workflow 5.5: update snapshot role
+      async loadSnapshot() {
+        try {
+          const data = this.loadLocalMetadata(models_1.MetadataKind.Snapshot);
+          this.trustedSet.updateSnapshot(data, true);
+        } catch (error62) {
+          if (!this.trustedSet.timestamp) {
+            throw new ReferenceError("No timestamp metadata", { cause: error62 });
+          }
+          const snapshotMeta = this.trustedSet.timestamp.signed.snapshotMeta;
+          const maxLength = snapshotMeta.length || this.config.snapshotMaxLength;
+          const version2 = this.trustedSet.root.signed.consistentSnapshot ? snapshotMeta.version : void 0;
+          const snapshotUrl = url2.join(this.metadataBaseUrl, version2 ? `${version2}.snapshot.json` : "snapshot.json");
+          try {
+            const bytesData = await this.fetcher.downloadBytes(snapshotUrl, maxLength);
+            this.trustedSet.updateSnapshot(bytesData);
+            this.persistMetadata(models_1.MetadataKind.Snapshot, bytesData);
+          } catch (error63) {
+            throw new error_1.RuntimeError(`Unable to load snapshot metadata error ${error63}`);
+          }
+        }
+      }
+      // Load local and remote targets metadata.
+      // Client workflow 5.6: update targets role
+      async loadTargets(role, parentRole) {
+        const cachedRole = this.trustedSet.getRole(role);
+        if (cachedRole) {
+          const delegator = this.trustedSet.getRole(parentRole);
+          if (!delegator) {
+            throw new error_1.RuntimeError(`No trusted ${parentRole} metadata`);
+          }
+          delegator.verifyDelegate(role, cachedRole);
+          return cachedRole;
+        }
+        try {
+          const buffer = this.loadLocalMetadata(role);
+          this.trustedSet.updateDelegatedTargets(buffer, role, parentRole);
+        } catch (error62) {
+          if (!this.trustedSet.snapshot) {
+            throw new ReferenceError("No snapshot metadata", { cause: error62 });
+          }
+          const metaInfo = this.trustedSet.snapshot.signed.meta[`${role}.json`];
+          const maxLength = metaInfo.length || this.config.targetsMaxLength;
+          const version2 = this.trustedSet.root.signed.consistentSnapshot ? metaInfo.version : void 0;
+          const encodedRole = encodeURIComponent(role);
+          const metadataUrl = url2.join(this.metadataBaseUrl, version2 ? `${version2}.${encodedRole}.json` : `${encodedRole}.json`);
+          try {
+            const bytesData = await this.fetcher.downloadBytes(metadataUrl, maxLength);
+            this.trustedSet.updateDelegatedTargets(bytesData, role, parentRole);
+            this.persistMetadata(role, bytesData);
+          } catch (error63) {
+            throw new error_1.RuntimeError(`Unable to load targets error ${error63}`);
+          }
+        }
+        return this.trustedSet.getRole(role);
+      }
+      async preorderDepthFirstWalk(targetPath) {
+        const delegationsToVisit = [
+          {
+            roleName: models_1.MetadataKind.Targets,
+            parentRoleName: models_1.MetadataKind.Root
+          }
+        ];
+        const visitedRoleNames = /* @__PURE__ */ new Set();
+        while (visitedRoleNames.size <= this.config.maxDelegations && delegationsToVisit.length > 0) {
+          const { roleName, parentRoleName } = delegationsToVisit.pop();
+          if (visitedRoleNames.has(roleName)) {
+            continue;
+          }
+          const targets = (await this.loadTargets(roleName, parentRoleName))?.signed;
+          if (!targets) {
+            continue;
+          }
+          const target = targets.targets?.[targetPath];
+          if (target) {
+            return target;
+          }
+          visitedRoleNames.add(roleName);
+          if (targets.delegations) {
+            const childRolesToVisit = [];
+            const rolesForTarget = targets.delegations.rolesForTarget(targetPath);
+            for (const { role: childName, terminating } of rolesForTarget) {
+              childRolesToVisit.push({
+                roleName: childName,
+                parentRoleName: roleName
+              });
+              if (terminating) {
+                delegationsToVisit.splice(0);
+                break;
+              }
+            }
+            childRolesToVisit.reverse();
+            delegationsToVisit.push(...childRolesToVisit);
+          }
+        }
+        return;
+      }
+      generateTargetPath(targetInfo) {
+        if (!this.targetDir) {
+          throw new error_1.ValueError("Target directory not set");
+        }
+        const filePath = encodeURIComponent(targetInfo.path);
+        return path.join(this.targetDir, filePath);
+      }
+      persistMetadata(metaDataName, bytesData) {
+        const encodedName = encodeURIComponent(metaDataName);
+        try {
+          const filePath = path.join(this.dir, `${encodedName}.json`);
+          log("WRITE %s", filePath);
+          fs.writeFileSync(filePath, bytesData.toString("utf8"));
+        } catch (error62) {
+          throw new error_1.PersistError(`Failed to persist metadata ${encodedName} error: ${error62}`);
+        }
+      }
+    };
+    exports2.Updater = Updater;
+  }
+});
+
+// node_modules/.pnpm/tuf-js@6.0.2/node_modules/tuf-js/dist/index.js
+var require_dist4 = __commonJS({
+  "node_modules/.pnpm/tuf-js@6.0.2/node_modules/tuf-js/dist/index.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.Updater = exports2.BaseFetcher = exports2.TargetFile = void 0;
+    var models_1 = require_dist3();
+    Object.defineProperty(exports2, "TargetFile", { enumerable: true, get: function() {
+      return models_1.TargetFile;
+    } });
+    var fetcher_1 = require_fetcher();
+    Object.defineProperty(exports2, "BaseFetcher", { enumerable: true, get: function() {
+      return fetcher_1.BaseFetcher;
+    } });
+    var updater_1 = require_updater();
+    Object.defineProperty(exports2, "Updater", { enumerable: true, get: function() {
+      return updater_1.Updater;
+    } });
+  }
+});
+
+// node_modules/.pnpm/@sigstore+tuf@5.0.1/node_modules/@sigstore/tuf/package.json
+var require_package2 = __commonJS({
+  "node_modules/.pnpm/@sigstore+tuf@5.0.1/node_modules/@sigstore/tuf/package.json"(exports2, module2) {
+    module2.exports = {
+      name: "@sigstore/tuf",
+      version: "5.0.1",
+      description: "Client for the Sigstore TUF repository",
+      main: "dist/index.js",
+      types: "dist/index.d.ts",
+      scripts: {
+        clean: "shx rm -rf dist *.tsbuildinfo",
+        build: "tsc --build",
+        test: "jest"
+      },
+      files: [
+        "dist",
+        "seeds.json"
+      ],
+      author: "bdehamer@github.com",
+      license: "Apache-2.0",
+      repository: {
+        type: "git",
+        url: "git+https://github.com/sigstore/sigstore-js.git"
+      },
+      bugs: {
+        url: "https://github.com/sigstore/sigstore-js/issues"
+      },
+      homepage: "https://github.com/sigstore/sigstore-js/tree/main/packages/tuf#readme",
+      publishConfig: {
+        provenance: true
+      },
+      devDependencies: {
+        "@sigstore/jest": "^0.0.0",
+        "@tufjs/repo-mock": "^5.0.2",
+        "@types/make-fetch-happen": "^10.0.4"
+      },
+      dependencies: {
+        "@sigstore/protobuf-specs": "^0.5.2",
+        "tuf-js": "^6.0.2"
+      },
+      engines: {
+        node: "^22.22.2 || ^24.15.0 || >=26.0.0"
+      }
+    };
+  }
+});
+
+// node_modules/.pnpm/@sigstore+tuf@5.0.1/node_modules/@sigstore/tuf/dist/error.js
+var require_error3 = __commonJS({
+  "node_modules/.pnpm/@sigstore+tuf@5.0.1/node_modules/@sigstore/tuf/dist/error.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.TUFError = void 0;
+    var TUFError = class extends Error {
+      code;
+      cause;
+      constructor({ code, message, cause }) {
+        super(message);
+        this.code = code;
+        this.cause = cause;
+        this.name = this.constructor.name;
+      }
+    };
+    exports2.TUFError = TUFError;
+  }
+});
+
+// node_modules/.pnpm/@sigstore+tuf@5.0.1/node_modules/@sigstore/tuf/dist/target.js
+var require_target = __commonJS({
+  "node_modules/.pnpm/@sigstore+tuf@5.0.1/node_modules/@sigstore/tuf/dist/target.js"(exports2) {
+    "use strict";
+    var __importDefault = exports2 && exports2.__importDefault || function(mod) {
+      return mod && mod.__esModule ? mod : { "default": mod };
+    };
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.readTarget = readTarget;
+    var fs_1 = __importDefault(require("fs"));
+    var error_1 = require_error3();
+    async function readTarget(tuf, targetPath) {
+      const path = await getTargetPath(tuf, targetPath);
+      return new Promise((resolve, reject) => {
+        fs_1.default.readFile(path, "utf-8", (err, data) => {
+          if (err) {
+            reject(new error_1.TUFError({
+              code: "TUF_READ_TARGET_ERROR",
+              message: `error reading target ${path}`,
+              cause: err
+            }));
+          } else {
+            resolve(data);
+          }
+        });
+      });
+    }
+    async function getTargetPath(tuf, target) {
+      let targetInfo;
+      try {
+        targetInfo = await tuf.getTargetInfo(target);
+      } catch (err) {
+        throw new error_1.TUFError({
+          code: "TUF_REFRESH_METADATA_ERROR",
+          message: "error refreshing TUF metadata",
+          cause: err
+        });
+      }
+      if (!targetInfo) {
+        throw new error_1.TUFError({
+          code: "TUF_FIND_TARGET_ERROR",
+          message: `target ${target} not found`
+        });
+      }
+      let path = await tuf.findCachedTarget(targetInfo);
+      if (!path) {
+        try {
+          path = await tuf.downloadTarget(targetInfo);
+        } catch (err) {
+          throw new error_1.TUFError({
+            code: "TUF_DOWNLOAD_TARGET_ERROR",
+            message: `error downloading target ${path}`,
+            cause: err
+          });
+        }
+      }
+      return path;
+    }
+  }
+});
+
+// node_modules/.pnpm/@sigstore+tuf@5.0.1/node_modules/@sigstore/tuf/seeds.json
+var require_seeds = __commonJS({
+  "node_modules/.pnpm/@sigstore+tuf@5.0.1/node_modules/@sigstore/tuf/seeds.json"(exports2, module2) {
+    module2.exports = { "https://tuf-repo-cdn.sigstore.dev": { "root.json": "ewogInNpZ25hdHVyZXMiOiBbCiAgewogICAia2V5aWQiOiAiZTcxYTU0ZDU0MzgzNWJhODZhZGFkOTQ2MDM3OWM3NjQxZmI4NzI2ZDE2NGVhNzY2ODAxYTFjNTIyYWJhN2VhMiIsCiAgICJzaWciOiAiMzA0NTAyMjA2NWM2OGYyOGViZTQ0ZDBhNGUwNDdhNmUyODdmOTY2OWM4ZTNiMzFlMDg1MzYzOTZjNjdhMTQ4MzMyNmJlOGM2MDIyMTAwZTc1MjRhODg5ZTQwZGUwZGY4NDIzMWRkNDBlMWZjYzU3ZmJiYmY2MjA1NWMxNzA3NjU2ODMwN2RiYzUwOTA0NiIKICB9LAogIHsKICAgImtleWlkIjogIjIyZjRjYWVjNmQ4ZTZmOTU1NWFmNjZiM2Q0YzNjYjA2YTNiYjIzZmRjN2UzOWM5MTZjNjFmNDYyZTZmNTJiMDYiLAogICAic2lnIjogIjMwNDUwMjIwNmZlZGM0YTM4MmEwYzUxNTVlODEyYzliNzQ2MWZlMzg4ZWY3MDRmZWY5ZTA5M2M1YzIzNmUyMGFiYmY4ZTY2MjAyMjEwMDhiYmVjMzZiNjNiZjliYWViYzAzYTgzYzc3MGNmOTM4N2VmYzkwOTA3ZWI4MzA3MGI3YTg3NTEyOTUxMmQ2ODciCiAgfSwKICB7CiAgICJrZXlpZCI6ICI2MTY0MzgzODEyNWI0NDBiNDBkYjY5NDJmNWNiNWEzMWMwZGMwNDM2ODMxNmViMmFhYTU4Yjk1OTA0YTU4MjIyIiwKICAgInNpZyI6ICIzMDQ1MDIyMDQ2OGY0MjE5ZGI1MWM3ZTgxNWUxZTNkMzNkOTk4Nzg3OGFhMTJhZWFmMzMxNjA0ZDUxODBkZDYwYjE5ZGZiMzUwMjIxMDA5Zjc3OGVmNWU5NjY0N2MwOGJkMjNkNjNmNjljMGNjZTZmYzM1M2Q3NDdiOWQ1MWYzNWRjMGY4Njc4ZGU5ZmVmIgogIH0sCiAgewogICAia2V5aWQiOiAiYTY4N2U1YmY0ZmFiODJiMGVlNThkNDZlMDVjOTUzNTE0NWEyYzlhZmI0NThmNDNkNDJiNDVjYTBmZGNlMmE3MCIsCiAgICJzaWciOiAiMzA0NTAyMjAyOWUyNTE4YTdiY2FjMDVlYzBiMjI3ODA5Y2UwYzk2OTQwNjc0MzQxMmY5MGRjNTI1NTQwMWFmYjEzMzYzZjQ2MDIyMTAwODdhNjQxODIyNDllNDFkZDExZGU5MWM5ZjM4NWEzMzY1OWJkNjAxNDdhOTNkMTNjODZiN2E2NGU0NDdmOTgyNiIKICB9LAogIHsKICAgImtleWlkIjogIjE4M2U2NGYzNzY3MGRjMTNjYTBkMjg5OTVhMzA1M2YzNzQwOTU0ZGRjZTQ0MzIxYTQxZTQ2NTM0Y2Y0NGU2MzIiLAogICAic2lnIjogIjMwNDUwMjIxMDA4MDUxYzQ1NmVkMmJmNDhhYTVmYzU3NDI5MjhhYjA5MDQyNjZjMWQ2YmRkZTVmYzc1YWUyMGYxMmQwOThhOTU1MDIyMDNjYzY4M2JkODY3OTM4MDhlNmM5Zjg5ZTJjYTkzZjgwYjAwYzZlYTY0ODgwYWM0ZTM3ZGI2OWUyZTg2YjI0ZTMiCiAgfQogXSwKICJzaWduZWQiOiB7CiAgIl90eXBlIjogInJvb3QiLAogICJjb25zaXN0ZW50X3NuYXBzaG90IjogdHJ1ZSwKICAiZXhwaXJlcyI6ICIyMDI3LTA0LTIyVDE5OjI3OjMxWiIsCiAgImtleXMiOiB7CiAgICIwYzg3NDMyYzNiZjA5ZmQ5OTE4OWZkYzMyZmE1ZWFlZGY0ZTRhNWZhYzdiYWI3M2ZhMDRhMmUwZmM2NGFmNmY1IjogewogICAgImtleWlkX2hhc2hfYWxnb3JpdGhtcyI6IFsKICAgICAic2hhMjU2IiwKICAgICAic2hhNTEyIgogICAgXSwKICAgICJrZXl0eXBlIjogImVjZHNhIiwKICAgICJrZXl2YWwiOiB7CiAgICAgInB1YmxpYyI6ICItLS0tLUJFR0lOIFBVQkxJQyBLRVktLS0tLVxuTUZrd0V3WUhLb1pJemowQ0FRWUlLb1pJemowREFRY0RRZ0FFV1JpR3I1K2orM0o1U3NIK1p0cjVuRTJIMndPN1xuQlYrbk8zczkzZ0xjYTE4cVRPekhZMW9XeUFHRHlrTVNzR1RVQlN0OUQrQW4wS2ZLc0QybWZTTTQyUT09XG4tLS0tLUVORCBQVUJMSUMgS0VZLS0tLS1cbiIKICAgIH0sCiAgICAic2NoZW1lIjogImVjZHNhLXNoYTItbmlzdHAyNTYiLAogICAgIngtdHVmLW9uLWNpLW9ubGluZS11cmkiOiAiZ2Nwa21zOnByb2plY3RzL3NpZ3N0b3JlLXJvb3Qtc2lnbmluZy9sb2NhdGlvbnMvZ2xvYmFsL2tleVJpbmdzL3Jvb3QvY3J5cHRvS2V5cy90aW1lc3RhbXAvY3J5cHRvS2V5VmVyc2lvbnMvMSIKICAgfSwKICAgIjE4M2U2NGYzNzY3MGRjMTNjYTBkMjg5OTVhMzA1M2YzNzQwOTU0ZGRjZTQ0MzIxYTQxZTQ2NTM0Y2Y0NGU2MzIiOiB7CiAgICAia2V5dHlwZSI6ICJlY2RzYSIsCiAgICAia2V5dmFsIjogewogICAgICJwdWJsaWMiOiAiLS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS1cbk1Ga3dFd1lIS29aSXpqMENBUVlJS29aSXpqMERBUWNEUWdBRU14cFBPSkNJWjVvdEc0MTA2ZkdKc2VFUWkzVjlcbnBrTVlRNHV5VjlUajFNN1dIWEl5TEcramtmdnVHMGdsUTFKWmJSWlpCVjNnQVI0c29qZEdISVNlb3c9PVxuLS0tLS1FTkQgUFVCTElDIEtFWS0tLS0tXG4iCiAgICB9LAogICAgInNjaGVtZSI6ICJlY2RzYS1zaGEyLW5pc3RwMjU2IiwKICAgICJ4LXR1Zi1vbi1jaS1rZXlvd25lciI6ICJAbGFuY2UiCiAgIH0sCiAgICIyMmY0Y2FlYzZkOGU2Zjk1NTVhZjY2YjNkNGMzY2IwNmEzYmIyM2ZkYzdlMzljOTE2YzYxZjQ2MmU2ZjUyYjA2IjogewogICAgImtleWlkX2hhc2hfYWxnb3JpdGhtcyI6IFsKICAgICAic2hhMjU2IiwKICAgICAic2hhNTEyIgogICAgXSwKICAgICJrZXl0eXBlIjogImVjZHNhIiwKICAgICJrZXl2YWwiOiB7CiAgICAgInB1YmxpYyI6ICItLS0tLUJFR0lOIFBVQkxJQyBLRVktLS0tLVxuTUZrd0V3WUhLb1pJemowQ0FRWUlLb1pJemowREFRY0RRZ0FFekJ6Vk9tSENQb2pNVkxTSTM2NFdpaVY4TlByRFxuNklnUnhWbGlza3ovdit5M0pFUjVtY1ZHY09ObGlEY1dNQzVKMmxmSG1qUE5QaGI0SDd4bThMemZTQT09XG4tLS0tLUVORCBQVUJMSUMgS0VZLS0tLS1cbiIKICAgIH0sCiAgICAic2NoZW1lIjogImVjZHNhLXNoYTItbmlzdHAyNTYiLAogICAgIngtdHVmLW9uLWNpLWtleW93bmVyIjogIkBzYW50aWFnb3RvcnJlcyIKICAgfSwKICAgIjYxNjQzODM4MTI1YjQ0MGI0MGRiNjk0MmY1Y2I1YTMxYzBkYzA0MzY4MzE2ZWIyYWFhNThiOTU5MDRhNTgyMjIiOiB7CiAgICAia2V5aWRfaGFzaF9hbGdvcml0aG1zIjogWwogICAgICJzaGEyNTYiLAogICAgICJzaGE1MTIiCiAgICBdLAogICAgImtleXR5cGUiOiAiZWNkc2EiLAogICAgImtleXZhbCI6IHsKICAgICAicHVibGljIjogIi0tLS0tQkVHSU4gUFVCTElDIEtFWS0tLS0tXG5NRmt3RXdZSEtvWkl6ajBDQVFZSUtvWkl6ajBEQVFjRFFnQUVpbmlrU3NBUW1Za05lSDVlWXEvQ25JekxhYWNPXG54bFNhYXdRRE93cUt5L3RDcXhxNXh4UFNKYzIxSzRXSWhzOUd5T2tLZnp1ZVkzR0lMemNNSlo0Y1d3PT1cbi0tLS0tRU5EIFBVQkxJQyBLRVktLS0tLVxuIgogICAgfSwKICAgICJzY2hlbWUiOiAiZWNkc2Etc2hhMi1uaXN0cDI1NiIsCiAgICAieC10dWYtb24tY2kta2V5b3duZXIiOiAiQGJvYmNhbGxhd2F5IgogICB9LAogICAiYTY4N2U1YmY0ZmFiODJiMGVlNThkNDZlMDVjOTUzNTE0NWEyYzlhZmI0NThmNDNkNDJiNDVjYTBmZGNlMmE3MCI6IHsKICAgICJrZXlpZF9oYXNoX2FsZ29yaXRobXMiOiBbCiAgICAgInNoYTI1NiIsCiAgICAgInNoYTUxMiIKICAgIF0sCiAgICAia2V5dHlwZSI6ICJlY2RzYSIsCiAgICAia2V5dmFsIjogewogICAgICJwdWJsaWMiOiAiLS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS1cbk1Ga3dFd1lIS29aSXpqMENBUVlJS29aSXpqMERBUWNEUWdBRTBnaHJoOTJMdzFZcjNpZEdWNVdxQ3RNREI4Q3hcbitEOGhkQzR3MlpMTklwbFZSb1ZHTHNrWWEzZ2hlTXlPamlKOGtQaTE1YVEyLy83UCtvajdVdkpQR3c9PVxuLS0tLS1FTkQgUFVCTElDIEtFWS0tLS0tXG4iCiAgICB9LAogICAgInNjaGVtZSI6ICJlY2RzYS1zaGEyLW5pc3RwMjU2IiwKICAgICJ4LXR1Zi1vbi1jaS1rZXlvd25lciI6ICJAam9zaHVhZ2wiCiAgIH0sCiAgICJlNzFhNTRkNTQzODM1YmE4NmFkYWQ5NDYwMzc5Yzc2NDFmYjg3MjZkMTY0ZWE3NjY4MDFhMWM1MjJhYmE3ZWEyIjogewogICAgImtleWlkX2hhc2hfYWxnb3JpdGhtcyI6IFsKICAgICAic2hhMjU2IiwKICAgICAic2hhNTEyIgogICAgXSwKICAgICJrZXl0eXBlIjogImVjZHNhIiwKICAgICJrZXl2YWwiOiB7CiAgICAgInB1YmxpYyI6ICItLS0tLUJFR0lOIFBVQkxJQyBLRVktLS0tLVxuTUZrd0V3WUhLb1pJemowQ0FRWUlLb1pJemowREFRY0RRZ0FFRVhzejNTWlhGYjhqTVY0Mmo2cEpseWpialI4S1xuTjNCd29jZXhxNkxNSWI1cXNXS09RdkxOMTZOVWVmTGM0SHN3T291bVJzVlZhYWpTcFFTNmZvYmtSdz09XG4tLS0tLUVORCBQVUJMSUMgS0VZLS0tLS1cbiIKICAgIH0sCiAgICAic2NoZW1lIjogImVjZHNhLXNoYTItbmlzdHAyNTYiLAogICAgIngtdHVmLW9uLWNpLWtleW93bmVyIjogIkBtbm02NzgiCiAgIH0KICB9LAogICJyb2xlcyI6IHsKICAgInJvb3QiOiB7CiAgICAia2V5aWRzIjogWwogICAgICJlNzFhNTRkNTQzODM1YmE4NmFkYWQ5NDYwMzc5Yzc2NDFmYjg3MjZkMTY0ZWE3NjY4MDFhMWM1MjJhYmE3ZWEyIiwKICAgICAiMjJmNGNhZWM2ZDhlNmY5NTU1YWY2NmIzZDRjM2NiMDZhM2JiMjNmZGM3ZTM5YzkxNmM2MWY0NjJlNmY1MmIwNiIsCiAgICAgIjYxNjQzODM4MTI1YjQ0MGI0MGRiNjk0MmY1Y2I1YTMxYzBkYzA0MzY4MzE2ZWIyYWFhNThiOTU5MDRhNTgyMjIiLAogICAgICJhNjg3ZTViZjRmYWI4MmIwZWU1OGQ0NmUwNWM5NTM1MTQ1YTJjOWFmYjQ1OGY0M2Q0MmI0NWNhMGZkY2UyYTcwIiwKICAgICAiMTgzZTY0ZjM3NjcwZGMxM2NhMGQyODk5NWEzMDUzZjM3NDA5NTRkZGNlNDQzMjFhNDFlNDY1MzRjZjQ0ZTYzMiIKICAgIF0sCiAgICAidGhyZXNob2xkIjogMwogICB9LAogICAic25hcHNob3QiOiB7CiAgICAia2V5aWRzIjogWwogICAgICIwYzg3NDMyYzNiZjA5ZmQ5OTE4OWZkYzMyZmE1ZWFlZGY0ZTRhNWZhYzdiYWI3M2ZhMDRhMmUwZmM2NGFmNmY1IgogICAgXSwKICAgICJ0aHJlc2hvbGQiOiAxLAogICAgIngtdHVmLW9uLWNpLWV4cGlyeS1wZXJpb2QiOiAzNjUwLAogICAgIngtdHVmLW9uLWNpLXNpZ25pbmctcGVyaW9kIjogMzY1CiAgIH0sCiAgICJ0YXJnZXRzIjogewogICAgImtleWlkcyI6IFsKICAgICAiZTcxYTU0ZDU0MzgzNWJhODZhZGFkOTQ2MDM3OWM3NjQxZmI4NzI2ZDE2NGVhNzY2ODAxYTFjNTIyYWJhN2VhMiIsCiAgICAgIjIyZjRjYWVjNmQ4ZTZmOTU1NWFmNjZiM2Q0YzNjYjA2YTNiYjIzZmRjN2UzOWM5MTZjNjFmNDYyZTZmNTJiMDYiLAogICAgICI2MTY0MzgzODEyNWI0NDBiNDBkYjY5NDJmNWNiNWEzMWMwZGMwNDM2ODMxNmViMmFhYTU4Yjk1OTA0YTU4MjIyIiwKICAgICAiYTY4N2U1YmY0ZmFiODJiMGVlNThkNDZlMDVjOTUzNTE0NWEyYzlhZmI0NThmNDNkNDJiNDVjYTBmZGNlMmE3MCIsCiAgICAgIjE4M2U2NGYzNzY3MGRjMTNjYTBkMjg5OTVhMzA1M2YzNzQwOTU0ZGRjZTQ0MzIxYTQxZTQ2NTM0Y2Y0NGU2MzIiCiAgICBdLAogICAgInRocmVzaG9sZCI6IDMKICAgfSwKICAgInRpbWVzdGFtcCI6IHsKICAgICJrZXlpZHMiOiBbCiAgICAgIjBjODc0MzJjM2JmMDlmZDk5MTg5ZmRjMzJmYTVlYWVkZjRlNGE1ZmFjN2JhYjczZmEwNGEyZTBmYzY0YWY2ZjUiCiAgICBdLAogICAgInRocmVzaG9sZCI6IDEsCiAgICAieC10dWYtb24tY2ktZXhwaXJ5LXBlcmlvZCI6IDcsCiAgICAieC10dWYtb24tY2ktc2lnbmluZy1wZXJpb2QiOiA2CiAgIH0KICB9LAogICJzcGVjX3ZlcnNpb24iOiAiMS4wIiwKICAidmVyc2lvbiI6IDE2LAogICJ4LXR1Zi1vbi1jaS1leHBpcnktcGVyaW9kIjogMTk3LAogICJ4LXR1Zi1vbi1jaS1zaWduaW5nLXBlcmlvZCI6IDQ2CiB9Cn0=", targets: { "trusted_root.json": "ewogICJtZWRpYVR5cGUiOiAiYXBwbGljYXRpb24vdm5kLmRldi5zaWdzdG9yZS50cnVzdGVkcm9vdCtqc29uO3ZlcnNpb249MC4xIiwKICAidGxvZ3MiOiBbCiAgICB7CiAgICAgICJiYXNlVXJsIjogImh0dHBzOi8vcmVrb3Iuc2lnc3RvcmUuZGV2IiwKICAgICAgImhhc2hBbGdvcml0aG0iOiAiU0hBMl8yNTYiLAogICAgICAicHVibGljS2V5IjogewogICAgICAgICJyYXdCeXRlcyI6ICJNRmt3RXdZSEtvWkl6ajBDQVFZSUtvWkl6ajBEQVFjRFFnQUUyRzJZKzJ0YWJkVFY1QmNHaUJJeDBhOWZBRndya0JibUxTR3RrczRMM3FYNnlZWTB6dWZCbmhDOFVyL2l5NTVHaFdQLzlBL2JZMkxoQzMwTTkrUll0dz09IiwKICAgICAgICAia2V5RGV0YWlscyI6ICJQS0lYX0VDRFNBX1AyNTZfU0hBXzI1NiIsCiAgICAgICAgInZhbGlkRm9yIjogewogICAgICAgICAgInN0YXJ0IjogIjIwMjEtMDEtMTJUMTE6NTM6MjdaIgogICAgICAgIH0KICAgICAgfSwKICAgICAgImxvZ0lkIjogewogICAgICAgICJrZXlJZCI6ICJ3Tkk5YXRRR2x6K1ZXZk82TFJ5Z0g0UVVmWS84VzRSRndpVDVpNVdSZ0IwPSIKICAgICAgfQogICAgfSwKICAgIHsKICAgICAgImJhc2VVcmwiOiAiaHR0cHM6Ly9sb2cyMDI1LTEucmVrb3Iuc2lnc3RvcmUuZGV2IiwKICAgICAgImhhc2hBbGdvcml0aG0iOiAiU0hBMl8yNTYiLAogICAgICAicHVibGljS2V5IjogewogICAgICAgICJyYXdCeXRlcyI6ICJNQ293QlFZREsyVndBeUVBdDhybHAxa25Hd2pmYmNYQVlQWUFrbjBYaUx6MXg4TzR0MFlrRWhpZTI0ND0iLAogICAgICAgICJrZXlEZXRhaWxzIjogIlBLSVhfRUQyNTUxOSIsCiAgICAgICAgInZhbGlkRm9yIjogewogICAgICAgICAgInN0YXJ0IjogIjIwMjUtMDktMjNUMDA6MDA6MDBaIgogICAgICAgIH0KICAgICAgfSwKICAgICAgImxvZ0lkIjogewogICAgICAgICJrZXlJZCI6ICJ6eEdaRlZ2ZDBGRW1qUjhXckZ3TWRjQUo5dnRhWS9RWGY0NFkxd1VlUDZBPSIKICAgICAgfQogICAgfQogIF0sCiAgImNlcnRpZmljYXRlQXV0aG9yaXRpZXMiOiBbCiAgICB7CiAgICAgICJzdWJqZWN0IjogewogICAgICAgICJvcmdhbml6YXRpb24iOiAic2lnc3RvcmUuZGV2IiwKICAgICAgICAiY29tbW9uTmFtZSI6ICJzaWdzdG9yZSIKICAgICAgfSwKICAgICAgInVyaSI6ICJodHRwczovL2Z1bGNpby5zaWdzdG9yZS5kZXYiLAogICAgICAiY2VydENoYWluIjogewogICAgICAgICJjZXJ0aWZpY2F0ZXMiOiBbCiAgICAgICAgICB7CiAgICAgICAgICAgICJyYXdCeXRlcyI6ICJNSUlCK0RDQ0FYNmdBd0lCQWdJVE5Wa0Rab0Npb2ZQRHN5N2RmbTZnZUxidWh6QUtCZ2dxaGtqT1BRUURBekFxTVJVd0V3WURWUVFLRXd4emFXZHpkRzl5WlM1a1pYWXhFVEFQQmdOVkJBTVRDSE5wWjNOMGIzSmxNQjRYRFRJeE1ETXdOekF6TWpBeU9Wb1hEVE14TURJeU16QXpNakF5T1Zvd0tqRVZNQk1HQTFVRUNoTU1jMmxuYzNSdmNtVXVaR1YyTVJFd0R3WURWUVFERXdoemFXZHpkRzl5WlRCMk1CQUdCeXFHU000OUFnRUdCU3VCQkFBaUEySUFCTFN5QTdJaTVrK3BOTzhaRVdZMHlsZW1XRG93T2tOYTNrTCtHWkU1WjVHV2VoTDkvQTliUk5BM1JicnNaNWkwSmNhc3RhUkw3U3A1ZnAvakQ1ZHhxYy9VZFRWbmx2UzE2YW4rMllmc3dlL1F1TG9sUlVDcmNPRTIrMmlBNSt0emQ2Tm1NR1F3RGdZRFZSMFBBUUgvQkFRREFnRUdNQklHQTFVZEV3RUIvd1FJTUFZQkFmOENBUUV3SFFZRFZSME9CQllFRk1qRkhRQkJtaVFwTWxFazZ3MnVTdTFLQnRQc01COEdBMVVkSXdRWU1CYUFGTWpGSFFCQm1pUXBNbEVrNncydVN1MUtCdFBzTUFvR0NDcUdTTTQ5QkFNREEyZ0FNR1VDTUg4bGlXSmZNdWk2dlhYQmhqRGdZNE13c2xtTi9USnhWZS84M1dyRm9td21OZjA1NnkxWDQ4RjljNG0zYTNvelhBSXhBS2pSYXk1L2FqL2pzS0tHSWttUWF0akk4dXVwSHIvK0N4RnZhSldtcFlxTmtMREdSVSs5b3J6aDVoSTJScmN1YVE9PSIKICAgICAgICAgIH0KICAgICAgICBdCiAgICAgIH0sCiAgICAgICJ2YWxpZEZvciI6IHsKICAgICAgICAic3RhcnQiOiAiMjAyMS0wMy0wN1QwMzoyMDoyOVoiLAogICAgICAgICJlbmQiOiAiMjAyMi0xMi0zMVQyMzo1OTo1OS45OTlaIgogICAgICB9CiAgICB9LAogICAgewogICAgICAic3ViamVjdCI6IHsKICAgICAgICAib3JnYW5pemF0aW9uIjogInNpZ3N0b3JlLmRldiIsCiAgICAgICAgImNvbW1vbk5hbWUiOiAic2lnc3RvcmUiCiAgICAgIH0sCiAgICAgICJ1cmkiOiAiaHR0cHM6Ly9mdWxjaW8uc2lnc3RvcmUuZGV2IiwKICAgICAgImNlcnRDaGFpbiI6IHsKICAgICAgICAiY2VydGlmaWNhdGVzIjogWwogICAgICAgICAgewogICAgICAgICAgICAicmF3Qnl0ZXMiOiAiTUlJQ0dqQ0NBYUdnQXdJQkFnSVVBTG5WaVZmblUwYnJKYXNtUmtIcm4vVW5mYVF3Q2dZSUtvWkl6ajBFQXdNd0tqRVZNQk1HQTFVRUNoTU1jMmxuYzNSdmNtVXVaR1YyTVJFd0R3WURWUVFERXdoemFXZHpkRzl5WlRBZUZ3MHlNakEwTVRNeU1EQTJNVFZhRncwek1URXdNRFV4TXpVMk5UaGFNRGN4RlRBVEJnTlZCQW9UREhOcFozTjBiM0psTG1SbGRqRWVNQndHQTFVRUF4TVZjMmxuYzNSdmNtVXRhVzUwWlhKdFpXUnBZWFJsTUhZd0VBWUhLb1pJemowQ0FRWUZLNEVFQUNJRFlnQUU4UlZTL3lzSCtOT3Z1RFp5UEladGlsZ1VGOU5sYXJZcEFkOUhQMXZCQkgxVTVDVjc3TFNTN3MwWmlING5FN0h2N3B0UzZMdnZSL1NUazc5OExWZ016TGxKNEhlSWZGM3RIU2FleExjWXBTQVNyMWtTME4vUmdCSnovOWpXQ2lYbm8zc3dlVEFPQmdOVkhROEJBZjhFQkFNQ0FRWXdFd1lEVlIwbEJBd3dDZ1lJS3dZQkJRVUhBd013RWdZRFZSMFRBUUgvQkFnd0JnRUIvd0lCQURBZEJnTlZIUTRFRmdRVTM5UHB6MVlrRVpiNXFOanBLRldpeGk0WVpEOHdId1lEVlIwakJCZ3dGb0FVV01BZVg1RkZwV2FwZXN5UW9aTWkwQ3JGeGZvd0NnWUlLb1pJemowRUF3TURad0F3WkFJd1BDc1FLNERZaVpZRFBJYURpNUhGS25meFh4NkFTU1ZtRVJmc3luWUJpWDJYNlNKUm5aVTg0LzlEWmRuRnZ2eG1BakJPdDZRcEJsYzRKLzBEeHZrVENxcGNsdnppTDZCQ0NQbmpkbElCM1B1M0J4c1BteWdVWTdJaTJ6YmRDZGxpaW93PSIKICAgICAgICAgIH0sCiAgICAgICAgICB7CiAgICAgICAgICAgICJyYXdCeXRlcyI6ICJNSUlCOXpDQ0FYeWdBd0lCQWdJVUFMWk5BUEZkeEhQd2plRGxvRHd5WUNoQU8vNHdDZ1lJS29aSXpqMEVBd013S2pFVk1CTUdBMVVFQ2hNTWMybG5jM1J2Y21VdVpHVjJNUkV3RHdZRFZRUURFd2h6YVdkemRHOXlaVEFlRncweU1URXdNRGN4TXpVMk5UbGFGdzB6TVRFd01EVXhNelUyTlRoYU1Db3hGVEFUQmdOVkJBb1RESE5wWjNOMGIzSmxMbVJsZGpFUk1BOEdBMVVFQXhNSWMybG5jM1J2Y21Vd2RqQVFCZ2NxaGtqT1BRSUJCZ1VyZ1FRQUlnTmlBQVQ3WGVGVDRyYjNQUUd3UzRJYWp0TGszL09sbnBnYW5nYUJjbFlwc1lCcjVpKzR5bkIwN2NlYjNMUDBPSU9aZHhleFg2OWM1aVZ1eUpSUStIejA1eWkrVUYzdUJXQWxIcGlTNXNoMCtIMkdIRTdTWHJrMUVDNW0xVHIxOUw5Z2c5MmpZekJoTUE0R0ExVWREd0VCL3dRRUF3SUJCakFQQmdOVkhSTUJBZjhFQlRBREFRSC9NQjBHQTFVZERnUVdCQlJZd0I1ZmtVV2xacWw2ekpDaGt5TFFLc1hGK2pBZkJnTlZIU01FR0RBV2dCUll3QjVma1VXbFpxbDZ6SkNoa3lMUUtzWEYrakFLQmdncWhrak9QUVFEQXdOcEFEQm1BakVBajFuSGVYWnArMTNOV0JOYStFRHNEUDhHMVdXZzF0Q01XUC9XSFBxcGFWbzBqaHN3ZU5GWmdTczBlRTd3WUk0cUFqRUEyV0I5b3Q5OHNJa29GM3ZaWWRkMy9WdFdCNWI5VE5NZWE3SXgvc3RKNVRmY0xMZUFCTEU0Qk5KT3NRNHZuQkhKIgogICAgICAgICAgfQogICAgICAgIF0KICAgICAgfSwKICAgICAgInZhbGlkRm9yIjogewogICAgICAgICJzdGFydCI6ICIyMDIyLTA0LTEzVDIwOjA2OjE1WiIKICAgICAgfQogICAgfQogIF0sCiAgImN0bG9ncyI6IFsKICAgIHsKICAgICAgImJhc2VVcmwiOiAiaHR0cHM6Ly9jdGZlLnNpZ3N0b3JlLmRldi90ZXN0IiwKICAgICAgImhhc2hBbGdvcml0aG0iOiAiU0hBMl8yNTYiLAogICAgICAicHVibGljS2V5IjogewogICAgICAgICJyYXdCeXRlcyI6ICJNRmt3RXdZSEtvWkl6ajBDQVFZSUtvWkl6ajBEQVFjRFFnQUViZndSK1JKdWRYc2NnUkJScEtYMVhGRHkzUHl1ZER4ei9TZm5SaTFmVDhla3BmQmQyTzF1b3o3anIzWjhuS3p4QTY5RVVRK2VGQ0ZJM3pldWJQV1U3dz09IiwKICAgICAgICAia2V5RGV0YWlscyI6ICJQS0lYX0VDRFNBX1AyNTZfU0hBXzI1NiIsCiAgICAgICAgInZhbGlkRm9yIjogewogICAgICAgICAgInN0YXJ0IjogIjIwMjEtMDMtMTRUMDA6MDA6MDBaIiwKICAgICAgICAgICJlbmQiOiAiMjAyMi0xMC0zMVQyMzo1OTo1OS45OTlaIgogICAgICAgIH0KICAgICAgfSwKICAgICAgImxvZ0lkIjogewogICAgICAgICJrZXlJZCI6ICJDR0NTOENoUy8yaEYwZEZySjRTY1JXY1lyQlk5d3pqU2JlYThJZ1kyYjNJPSIKICAgICAgfQogICAgfSwKICAgIHsKICAgICAgImJhc2VVcmwiOiAiaHR0cHM6Ly9jdGZlLnNpZ3N0b3JlLmRldi8yMDIyIiwKICAgICAgImhhc2hBbGdvcml0aG0iOiAiU0hBMl8yNTYiLAogICAgICAicHVibGljS2V5IjogewogICAgICAgICJyYXdCeXRlcyI6ICJNRmt3RXdZSEtvWkl6ajBDQVFZSUtvWkl6ajBEQVFjRFFnQUVpUFNsRmkwQ21GVGZFakNVcUY5SHVDRWNZWE5LQWFZYWxJSm1CWjh5eWV6UGpUcWh4cktCcE1uYW9jVnRMSkJJMWVNM3VYblF6UUdBSmRKNGdzOUZ5dz09IiwKICAgICAgICAia2V5RGV0YWlscyI6ICJQS0lYX0VDRFNBX1AyNTZfU0hBXzI1NiIsCiAgICAgICAgInZhbGlkRm9yIjogewogICAgICAgICAgInN0YXJ0IjogIjIwMjItMTAtMjBUMDA6MDA6MDBaIgogICAgICAgIH0KICAgICAgfSwKICAgICAgImxvZ0lkIjogewogICAgICAgICJrZXlJZCI6ICIzVDB3YXNiSEVUSmpHUjRjbVdjM0FxSktYcmplUEszL2g0cHlnQzhwN280PSIKICAgICAgfQogICAgfQogIF0sCiAgInRpbWVzdGFtcEF1dGhvcml0aWVzIjogWwogICAgewogICAgICAic3ViamVjdCI6IHsKICAgICAgICAib3JnYW5pemF0aW9uIjogInNpZ3N0b3JlLmRldiIsCiAgICAgICAgImNvbW1vbk5hbWUiOiAic2lnc3RvcmUtdHNhLXNlbGZzaWduZWQiCiAgICAgIH0sCiAgICAgICJ1cmkiOiAiaHR0cHM6Ly90aW1lc3RhbXAuc2lnc3RvcmUuZGV2L2FwaS92MS90aW1lc3RhbXAiLAogICAgICAiY2VydENoYWluIjogewogICAgICAgICJjZXJ0aWZpY2F0ZXMiOiBbCiAgICAgICAgICB7CiAgICAgICAgICAgICJyYXdCeXRlcyI6ICJNSUlDRURDQ0FaYWdBd0lCQWdJVU9oTlVMd3lRWWU2OHdVTXZ5NHFPaXlvaml3d3dDZ1lJS29aSXpqMEVBd013T1RFVk1CTUdBMVVFQ2hNTWMybG5jM1J2Y21VdVpHVjJNU0F3SGdZRFZRUURFeGR6YVdkemRHOXlaUzEwYzJFdGMyVnNabk5wWjI1bFpEQWVGdzB5TlRBME1EZ3dOalU1TkROYUZ3MHpOVEEwTURZd05qVTVORE5hTUM0eEZUQVRCZ05WQkFvVERITnBaM04wYjNKbExtUmxkakVWTUJNR0ExVUVBeE1NYzJsbmMzUnZjbVV0ZEhOaE1IWXdFQVlIS29aSXpqMENBUVlGSzRFRUFDSURZZ0FFNHJhMlo4aEtOaWcyVDlrRmpDQVRvR0czMGpreStXUXYzQnpMK21LdmgxU0tOUi9Vd3V3c2ZOQ2c0c3J5b1lBZDhFNmlzb3ZWQTNNNGFvTmRtOVFEaTUwWjhuVEV5dnFnZkRQdFRJd1hJdGZpVy9BRmYxVjd1d2tia0FvajB4eGNvMm93YURBT0JnTlZIUThCQWY4RUJBTUNCNEF3SFFZRFZSME9CQllFRkluOWVVT0h6OUJsUnNNQ1JzY3NjMXQ5dE9zRE1COEdBMVVkSXdRWU1CYUFGSmpzQWU5L3UxSC8xSlVlYjRxSW1GTUhpYzYvTUJZR0ExVWRKUUVCL3dRTU1Bb0dDQ3NHQVFVRkJ3TUlNQW9HQ0NxR1NNNDlCQU1EQTJnQU1HVUNNRHRwc1YvNkthTzBxeUYvVU1zWDJhU1VYS1FGZG9HVHB0UUdjMGZ0cTFjc3VsSFBHRzZkc215TU5kM0pCK0czRVFJeEFPYWp2QmNqcEptS2I0TnYrMlRhb2o4VWM1K2I2aWg2RlhDQ0tyYVNxdXBlMDd6cXN3TWNYSlRlMWNFeHZIdnZsdz09IgogICAgICAgICAgfSwKICAgICAgICAgIHsKICAgICAgICAgICAgInJhd0J5dGVzIjogIk1JSUI5ekNDQVh5Z0F3SUJBZ0lVVjdmMEdMRE9vRXpJaDhMWFNXODBPSmlVcDE0d0NnWUlLb1pJemowRUF3TXdPVEVWTUJNR0ExVUVDaE1NYzJsbmMzUnZjbVV1WkdWMk1TQXdIZ1lEVlFRREV4ZHphV2R6ZEc5eVpTMTBjMkV0YzJWc1puTnBaMjVsWkRBZUZ3MHlOVEEwTURnd05qVTVORE5hRncwek5UQTBNRFl3TmpVNU5ETmFNRGt4RlRBVEJnTlZCQW9UREhOcFozTjBiM0psTG1SbGRqRWdNQjRHQTFVRUF4TVhjMmxuYzNSdmNtVXRkSE5oTFhObGJHWnphV2R1WldRd2RqQVFCZ2NxaGtqT1BRSUJCZ1VyZ1FRQUlnTmlBQVFVUU50ZlJUL291M1lBVGE2d0Iva0tUZTcwY2ZKd3lSSUJvdk1udDhSY0pwaC9DT0U4MnV5UzZGbXBwTExMMVZCUEdjUGZwUVBZSk5Yeld3aThpY3doS1E2Vy9RZTJoM29lYkJiMkZIcHdOSkRxbytUTWFDL3RkZmt2L0VsSkI3MmpSVEJETUE0R0ExVWREd0VCL3dRRUF3SUJCakFTQmdOVkhSTUJBZjhFQ0RBR0FRSC9BZ0VBTUIwR0ExVWREZ1FXQkJTWTdBSHZmN3RSLzlTVkhtK0tpSmhUQjRuT3Z6QUtCZ2dxaGtqT1BRUURBd05wQURCbUFqRUF3R0VHcmZHWlIxY2VuMVI4L0RUVk1JOTQzTHNzWm1KUnREcC9pN1NmR0htR1JQNmdSYnVqOXZPSzNiNjdaMFFRQWpFQXVUMkg2NzNMUUVhSFRjeVFTWnJrcDRtWDdXd2ttRitzVmJrWVk1bVhOK1JNSDEzS1VFSEhPcUFTYWVtWVdLL0UiCiAgICAgICAgICB9CiAgICAgICAgXQogICAgICB9LAogICAgICAidmFsaWRGb3IiOiB7CiAgICAgICAgInN0YXJ0IjogIjIwMjUtMDctMDRUMDA6MDA6MDBaIgogICAgICB9CiAgICB9CiAgXQp9Cg==", "registry.npmjs.org%2Fkeys.json": "ewogICAgImtleXMiOiBbCiAgICAgICAgewogICAgICAgICAgICAia2V5SWQiOiAiU0hBMjU2OmpsM2J3c3d1ODBQampva0NnaDBvMnc1YzJVNExoUUFFNTdnajljejFrekEiLAogICAgICAgICAgICAia2V5VXNhZ2UiOiAibnBtOnNpZ25hdHVyZXMiLAogICAgICAgICAgICAicHVibGljS2V5IjogewogICAgICAgICAgICAgICAgInJhd0J5dGVzIjogIk1Ga3dFd1lIS29aSXpqMENBUVlJS29aSXpqMERBUWNEUWdBRTFPbGIzek1BRkZ4WEtIaUlrUU81Y0ozWWhsNWk2VVBwK0lodXRlQkpidUhjQTVVb2dLbzBFV3RsV3dXNktTYUtvVE5FWUw3SmxDUWlWbmtoQmt0VWdnPT0iLAogICAgICAgICAgICAgICAgImtleURldGFpbHMiOiAiUEtJWF9FQ0RTQV9QMjU2X1NIQV8yNTYiLAogICAgICAgICAgICAgICAgInZhbGlkRm9yIjogewogICAgICAgICAgICAgICAgICAgICJzdGFydCI6ICIxOTk5LTAxLTAxVDAwOjAwOjAwLjAwMFoiLAogICAgICAgICAgICAgICAgICAgICJlbmQiOiAiMjAyNS0wMS0yOVQwMDowMDowMC4wMDBaIgogICAgICAgICAgICAgICAgfQogICAgICAgICAgICB9CiAgICAgICAgfSwKICAgICAgICB7CiAgICAgICAgICAgICJrZXlJZCI6ICJTSEEyNTY6amwzYndzd3U4MFBqam9rQ2doMG8ydzVjMlU0TGhRQUU1N2dqOWN6MWt6QSIsCiAgICAgICAgICAgICJrZXlVc2FnZSI6ICJucG06YXR0ZXN0YXRpb25zIiwKICAgICAgICAgICAgInB1YmxpY0tleSI6IHsKICAgICAgICAgICAgICAgICJyYXdCeXRlcyI6ICJNRmt3RXdZSEtvWkl6ajBDQVFZSUtvWkl6ajBEQVFjRFFnQUUxT2xiM3pNQUZGeFhLSGlJa1FPNWNKM1lobDVpNlVQcCtJaHV0ZUJKYnVIY0E1VW9nS28wRVd0bFd3VzZLU2FLb1RORVlMN0psQ1FpVm5raEJrdFVnZz09IiwKICAgICAgICAgICAgICAgICJrZXlEZXRhaWxzIjogIlBLSVhfRUNEU0FfUDI1Nl9TSEFfMjU2IiwKICAgICAgICAgICAgICAgICJ2YWxpZEZvciI6IHsKICAgICAgICAgICAgICAgICAgICAic3RhcnQiOiAiMjAyMi0xMi0wMVQwMDowMDowMC4wMDBaIiwKICAgICAgICAgICAgICAgICAgICAiZW5kIjogIjIwMjUtMDEtMjlUMDA6MDA6MDAuMDAwWiIKICAgICAgICAgICAgICAgIH0KICAgICAgICAgICAgfQogICAgICAgIH0sCiAgICAgICAgewogICAgICAgICAgICAia2V5SWQiOiAiU0hBMjU2OkRoUTh3UjVBUEJ2RkhMRi8rVGMrQVl2UE9kVHBjSURxT2h4c0JIUndDN1UiLAogICAgICAgICAgICAia2V5VXNhZ2UiOiAibnBtOnNpZ25hdHVyZXMiLAogICAgICAgICAgICAicHVibGljS2V5IjogewogICAgICAgICAgICAgICAgInJhd0J5dGVzIjogIk1Ga3dFd1lIS29aSXpqMENBUVlJS29aSXpqMERBUWNEUWdBRVk2WWE3VysrN2FVUHp2TVRyZXpINlljeDNjK0hPS1lDY05HeWJKWlNDSnEvZmQ3UWE4dXVBS3RkSWtVUXRRaUVLRVJoQW1FNWxNTUpoUDhPa0RPYTJnPT0iLAogICAgICAgICAgICAgICAgImtleURldGFpbHMiOiAiUEtJWF9FQ0RTQV9QMjU2X1NIQV8yNTYiLAogICAgICAgICAgICAgICAgInZhbGlkRm9yIjogewogICAgICAgICAgICAgICAgICAgICJzdGFydCI6ICIyMDI1LTAxLTEzVDAwOjAwOjAwLjAwMFoiCiAgICAgICAgICAgICAgICB9CiAgICAgICAgICAgIH0KICAgICAgICB9LAogICAgICAgIHsKICAgICAgICAgICAgImtleUlkIjogIlNIQTI1NjpEaFE4d1I1QVBCdkZITEYvK1RjK0FZdlBPZFRwY0lEcU9oeHNCSFJ3QzdVIiwKICAgICAgICAgICAgImtleVVzYWdlIjogIm5wbTphdHRlc3RhdGlvbnMiLAogICAgICAgICAgICAicHVibGljS2V5IjogewogICAgICAgICAgICAgICAgInJhd0J5dGVzIjogIk1Ga3dFd1lIS29aSXpqMENBUVlJS29aSXpqMERBUWNEUWdBRVk2WWE3VysrN2FVUHp2TVRyZXpINlljeDNjK0hPS1lDY05HeWJKWlNDSnEvZmQ3UWE4dXVBS3RkSWtVUXRRaUVLRVJoQW1FNWxNTUpoUDhPa0RPYTJnPT0iLAogICAgICAgICAgICAgICAgImtleURldGFpbHMiOiAiUEtJWF9FQ0RTQV9QMjU2X1NIQV8yNTYiLAogICAgICAgICAgICAgICAgInZhbGlkRm9yIjogewogICAgICAgICAgICAgICAgICAgICJzdGFydCI6ICIyMDI1LTAxLTEzVDAwOjAwOjAwLjAwMFoiCiAgICAgICAgICAgICAgICB9CiAgICAgICAgICAgIH0KICAgICAgICB9CiAgICBdCn0K" } } };
+  }
+});
+
+// node_modules/.pnpm/@sigstore+tuf@5.0.1/node_modules/@sigstore/tuf/dist/client.js
+var require_client2 = __commonJS({
+  "node_modules/.pnpm/@sigstore+tuf@5.0.1/node_modules/@sigstore/tuf/dist/client.js"(exports2) {
+    "use strict";
+    var __importDefault = exports2 && exports2.__importDefault || function(mod) {
+      return mod && mod.__esModule ? mod : { "default": mod };
+    };
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.TUFClient = void 0;
+    var fs_1 = __importDefault(require("fs"));
+    var path_1 = __importDefault(require("path"));
+    var tuf_js_1 = require_dist4();
+    var _1 = require_dist5();
+    var package_json_1 = require_package2();
+    var target_1 = require_target();
+    var TARGETS_DIR_NAME = "targets";
+    var TUFClient = class {
+      updater;
+      constructor(options2) {
+        const url2 = new URL(options2.mirrorURL);
+        const repoName = encodeURIComponent(url2.host + url2.pathname.replace(/\/$/, ""));
+        const cachePath = path_1.default.join(options2.cachePath, repoName);
+        initTufCache(cachePath);
+        seedCache({
+          cachePath,
+          mirrorURL: options2.mirrorURL,
+          tufRootPath: options2.rootPath,
+          forceInit: options2.forceInit
+        });
+        this.updater = initClient({
+          mirrorURL: options2.mirrorURL,
+          cachePath,
+          forceCache: options2.forceCache,
+          retry: options2.retry,
+          timeout: options2.timeout
+        });
+      }
+      async refresh() {
+        return this.updater.refresh();
+      }
+      getTarget(targetName) {
+        return (0, target_1.readTarget)(this.updater, targetName);
+      }
+    };
+    exports2.TUFClient = TUFClient;
+    function initTufCache(cachePath) {
+      const targetsPath = path_1.default.join(cachePath, TARGETS_DIR_NAME);
+      if (!fs_1.default.existsSync(cachePath)) {
+        fs_1.default.mkdirSync(cachePath, { recursive: true });
+      }
+      if (!fs_1.default.existsSync(targetsPath)) {
+        fs_1.default.mkdirSync(targetsPath);
+      }
+    }
+    function seedCache({ cachePath, mirrorURL, tufRootPath, forceInit }) {
+      const cachedRootPath = path_1.default.join(cachePath, "root.json");
+      if (!fs_1.default.existsSync(cachedRootPath) || forceInit) {
+        if (tufRootPath) {
+          fs_1.default.copyFileSync(tufRootPath, cachedRootPath);
+        } else {
+          const seeds = require_seeds();
+          const repoSeed = seeds[mirrorURL];
+          if (!repoSeed) {
+            throw new _1.TUFError({
+              code: "TUF_INIT_CACHE_ERROR",
+              message: `No root.json found for mirror: ${mirrorURL}`
+            });
+          }
+          fs_1.default.writeFileSync(cachedRootPath, Buffer.from(repoSeed["root.json"], "base64"));
+          Object.entries(repoSeed.targets).forEach(([targetName, target]) => {
+            fs_1.default.writeFileSync(path_1.default.join(cachePath, TARGETS_DIR_NAME, targetName), Buffer.from(target, "base64"));
+          });
+        }
+      }
+    }
+    function initClient(options2) {
+      const config2 = {
+        fetchTimeout: options2.timeout,
+        fetchRetry: options2.retry,
+        userAgent: `${encodeURIComponent(package_json_1.name)}/${package_json_1.version}`
+      };
+      return new tuf_js_1.Updater({
+        metadataBaseUrl: options2.mirrorURL,
+        targetBaseUrl: `${options2.mirrorURL}/targets`,
+        metadataDir: options2.cachePath,
+        targetDir: path_1.default.join(options2.cachePath, TARGETS_DIR_NAME),
+        forceCache: options2.forceCache,
+        config: config2
+      });
+    }
+  }
+});
+
+// node_modules/.pnpm/@sigstore+tuf@5.0.1/node_modules/@sigstore/tuf/dist/index.js
+var require_dist5 = __commonJS({
+  "node_modules/.pnpm/@sigstore+tuf@5.0.1/node_modules/@sigstore/tuf/dist/index.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.TUFError = exports2.DEFAULT_MIRROR_URL = void 0;
+    exports2.getTrustedRoot = getTrustedRoot2;
+    exports2.initTUF = initTUF;
+    var protobuf_specs_1 = require_dist2();
+    var appdata_1 = require_appdata();
+    var client_1 = require_client2();
+    exports2.DEFAULT_MIRROR_URL = "https://tuf-repo-cdn.sigstore.dev";
+    var DEFAULT_CACHE_DIR = "sigstore-js";
+    var DEFAULT_RETRY = { retries: 2 };
+    var DEFAULT_TIMEOUT = 5e3;
+    var TRUSTED_ROOT_TARGET = "trusted_root.json";
+    async function getTrustedRoot2(options2 = {}) {
+      const client = createClient(options2);
+      const trustedRoot = await client.getTarget(TRUSTED_ROOT_TARGET);
+      return protobuf_specs_1.TrustedRoot.fromJSON(JSON.parse(trustedRoot));
+    }
+    async function initTUF(options2 = {}) {
+      const client = createClient(options2);
+      return client.refresh().then(() => client);
+    }
+    function createClient(options2) {
+      return new client_1.TUFClient({
+        cachePath: options2.cachePath || (0, appdata_1.appDataPath)(DEFAULT_CACHE_DIR),
+        rootPath: options2.rootPath,
+        mirrorURL: options2.mirrorURL || exports2.DEFAULT_MIRROR_URL,
+        retry: options2.retry ?? DEFAULT_RETRY,
+        timeout: options2.timeout ?? DEFAULT_TIMEOUT,
+        forceCache: options2.forceCache ?? false,
+        forceInit: options2.forceInit ?? options2.force ?? false
+      });
+    }
+    var error_1 = require_error3();
+    Object.defineProperty(exports2, "TUFError", { enumerable: true, get: function() {
+      return error_1.TUFError;
+    } });
+  }
+});
+
+// node_modules/.pnpm/@sigstore+core@4.0.1/node_modules/@sigstore/core/dist/stream.js
+var require_stream = __commonJS({
+  "node_modules/.pnpm/@sigstore+core@4.0.1/node_modules/@sigstore/core/dist/stream.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.ByteStream = void 0;
+    var StreamError = class extends Error {
+    };
+    var ByteStream = class _ByteStream {
+      static BLOCK_SIZE = 1024;
+      buf;
+      view;
+      start = 0;
+      constructor(buffer) {
+        if (buffer) {
+          this.buf = buffer;
+          this.view = Buffer.from(buffer);
+        } else {
+          this.buf = Buffer.alloc(0);
+          this.view = Buffer.from(this.buf);
+        }
+      }
+      get buffer() {
+        return this.view.subarray(0, this.start);
+      }
+      get length() {
+        return this.view.byteLength;
+      }
+      get position() {
+        return this.start;
+      }
+      seek(position) {
+        this.start = position;
+      }
+      // Returns a Buffer containing the specified number of bytes starting at the
+      // given start position.
+      slice(start, len) {
+        const end = start + len;
+        if (end > this.length) {
+          throw new StreamError("request past end of buffer");
+        }
+        return this.view.subarray(start, end);
+      }
+      appendChar(char) {
+        this.ensureCapacity(1);
+        this.view[this.start] = char;
+        this.start += 1;
+      }
+      appendUint16(num) {
+        this.ensureCapacity(2);
+        const value = new Uint16Array([num]);
+        const view = new Uint8Array(value.buffer);
+        this.view[this.start] = view[1];
+        this.view[this.start + 1] = view[0];
+        this.start += 2;
+      }
+      appendUint24(num) {
+        this.ensureCapacity(3);
+        const value = new Uint32Array([num]);
+        const view = new Uint8Array(value.buffer);
+        this.view[this.start] = view[2];
+        this.view[this.start + 1] = view[1];
+        this.view[this.start + 2] = view[0];
+        this.start += 3;
+      }
+      appendView(view) {
+        this.ensureCapacity(view.length);
+        this.view.set(view, this.start);
+        this.start += view.length;
+      }
+      getBlock(size) {
+        if (size <= 0) {
+          return Buffer.alloc(0);
+        }
+        if (this.start + size > this.view.length) {
+          throw new Error("request past end of buffer");
+        }
+        const result = this.view.subarray(this.start, this.start + size);
+        this.start += size;
+        return result;
+      }
+      getUint8() {
+        return this.getBlock(1)[0];
+      }
+      getUint16() {
+        const block = this.getBlock(2);
+        return block[0] << 8 | block[1];
+      }
+      ensureCapacity(size) {
+        if (this.start + size > this.view.byteLength) {
+          const blockSize = _ByteStream.BLOCK_SIZE + (size > _ByteStream.BLOCK_SIZE ? size : 0);
+          this.realloc(this.view.byteLength + blockSize);
+        }
+      }
+      realloc(size) {
+        const newArray = Buffer.alloc(size);
+        const newView = Buffer.from(newArray);
+        newView.set(this.view);
+        this.buf = newArray;
+        this.view = newView;
+      }
+    };
+    exports2.ByteStream = ByteStream;
+  }
+});
+
+// node_modules/.pnpm/@sigstore+core@4.0.1/node_modules/@sigstore/core/dist/asn1/error.js
+var require_error4 = __commonJS({
+  "node_modules/.pnpm/@sigstore+core@4.0.1/node_modules/@sigstore/core/dist/asn1/error.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.ASN1TypeError = exports2.ASN1ParseError = void 0;
+    var ASN1ParseError = class extends Error {
+    };
+    exports2.ASN1ParseError = ASN1ParseError;
+    var ASN1TypeError = class extends Error {
+    };
+    exports2.ASN1TypeError = ASN1TypeError;
+  }
+});
+
+// node_modules/.pnpm/@sigstore+core@4.0.1/node_modules/@sigstore/core/dist/asn1/length.js
+var require_length = __commonJS({
+  "node_modules/.pnpm/@sigstore+core@4.0.1/node_modules/@sigstore/core/dist/asn1/length.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.decodeLength = decodeLength;
+    exports2.encodeLength = encodeLength;
+    var error_1 = require_error4();
+    function decodeLength(stream) {
+      const buf = stream.getUint8();
+      if ((buf & 128) === 0) {
+        return buf;
+      }
+      const byteCount = buf & 127;
+      if (byteCount > 6) {
+        throw new error_1.ASN1ParseError("length exceeds 6 byte limit");
+      }
+      let len = 0;
+      for (let i = 0; i < byteCount; i++) {
+        const byte = stream.getUint8();
+        if (i === 0 && byte === 0) {
+          throw new error_1.ASN1ParseError("non-minimal length encoding");
+        }
+        len = len * 256 + byte;
+      }
+      if (len === 0) {
+        throw new error_1.ASN1ParseError("indefinite length encoding not supported");
+      }
+      if (len < 128) {
+        throw new error_1.ASN1ParseError("non-minimal length encoding");
+      }
+      return len;
+    }
+    function encodeLength(len) {
+      if (len < 128) {
+        return Buffer.from([len]);
+      }
+      let val = BigInt(len);
+      const bytes = [];
+      while (val > 0n) {
+        bytes.unshift(Number(val & 255n));
+        val = val >> 8n;
+      }
+      return Buffer.from([128 | bytes.length, ...bytes]);
+    }
+  }
+});
+
+// node_modules/.pnpm/@sigstore+core@4.0.1/node_modules/@sigstore/core/dist/asn1/parse.js
+var require_parse3 = __commonJS({
+  "node_modules/.pnpm/@sigstore+core@4.0.1/node_modules/@sigstore/core/dist/asn1/parse.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.parseInteger = parseInteger;
+    exports2.parseStringASCII = parseStringASCII;
+    exports2.parseTime = parseTime;
+    exports2.parseOID = parseOID;
+    exports2.parseBoolean = parseBoolean;
+    exports2.parseBitString = parseBitString;
+    var error_1 = require_error4();
+    var RE_TIME_SHORT_YEAR = /^(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(\.\d{3})?Z$/;
+    var RE_TIME_LONG_YEAR = /^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(\.\d{3})?Z$/;
+    function parseInteger(buf) {
+      let pos = 0;
+      const end = buf.length;
+      let val = buf[pos];
+      const neg = val > 127;
+      const pad = neg ? 255 : 0;
+      while (val == pad && ++pos < end) {
+        val = buf[pos];
+      }
+      const len = end - pos;
+      if (len === 0)
+        return BigInt(neg ? -1 : 0);
+      val = neg ? val - 256 : val;
+      let n = BigInt(val);
+      for (let i = pos + 1; i < end; ++i) {
+        n = n * BigInt(256) + BigInt(buf[i]);
+      }
+      return n;
+    }
+    function parseStringASCII(buf) {
+      return buf.toString("ascii");
+    }
+    function parseTime(buf, shortYear) {
+      const timeStr = parseStringASCII(buf);
+      const m = shortYear ? RE_TIME_SHORT_YEAR.exec(timeStr) : RE_TIME_LONG_YEAR.exec(timeStr);
+      if (!m) {
+        throw new Error("invalid time");
+      }
+      if (shortYear) {
+        let year = Number(m[1]);
+        year += year >= 50 ? 1900 : 2e3;
+        m[1] = year.toString();
+      }
+      return /* @__PURE__ */ new Date(`${m[1]}-${m[2]}-${m[3]}T${m[4]}:${m[5]}:${m[6]}Z`);
+    }
+    function parseOID(buf) {
+      let pos = 0;
+      const end = buf.length;
+      let n = buf[pos++];
+      const first = Math.floor(n / 40);
+      const second = n % 40;
+      let oid = `${first}.${second}`;
+      let val = 0n;
+      for (; pos < end; ++pos) {
+        n = buf[pos];
+        val = (val << 7n) + BigInt(n & 127);
+        if ((n & 128) === 0) {
+          oid += `.${val}`;
+          val = 0n;
+        }
+      }
+      return oid;
+    }
+    function parseBoolean(buf) {
+      if (buf.length !== 1) {
+        throw new error_1.ASN1ParseError("invalid boolean");
+      }
+      switch (buf[0]) {
+        case 0:
+          return false;
+        case 255:
+          return true;
+        default:
+          throw new error_1.ASN1ParseError("invalid boolean");
+      }
+    }
+    function parseBitString(buf) {
+      const unused = buf[0];
+      if (unused > 7) {
+        throw new error_1.ASN1ParseError("invalid bit string");
+      }
+      const start = 1;
+      const end = buf.length;
+      const bits = [];
+      for (let i = start; i < end; ++i) {
+        const byte = buf[i];
+        const skip = i === end - 1 ? unused : 0;
+        for (let j = 7; j >= skip; --j) {
+          bits.push(byte >> j & 1);
+        }
+      }
+      return bits;
+    }
+  }
+});
+
+// node_modules/.pnpm/@sigstore+core@4.0.1/node_modules/@sigstore/core/dist/asn1/tag.js
+var require_tag = __commonJS({
+  "node_modules/.pnpm/@sigstore+core@4.0.1/node_modules/@sigstore/core/dist/asn1/tag.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.ASN1Tag = void 0;
+    var error_1 = require_error4();
+    var UNIVERSAL_TAG = {
+      BOOLEAN: 1,
+      INTEGER: 2,
+      BIT_STRING: 3,
+      OCTET_STRING: 4,
+      OBJECT_IDENTIFIER: 6,
+      SEQUENCE: 16,
+      SET: 17,
+      PRINTABLE_STRING: 19,
+      UTC_TIME: 23,
+      GENERALIZED_TIME: 24
+    };
+    var TAG_CLASS = {
+      UNIVERSAL: 0,
+      APPLICATION: 1,
+      CONTEXT_SPECIFIC: 2,
+      PRIVATE: 3
+    };
+    var ASN1Tag = class {
+      number;
+      constructed;
+      class;
+      constructor(enc) {
+        this.number = enc & 31;
+        this.constructed = (enc & 32) === 32;
+        this.class = enc >> 6;
+        if (this.number === 31) {
+          throw new error_1.ASN1ParseError("long form tags not supported");
+        }
+        if (this.class === TAG_CLASS.UNIVERSAL && this.number === 0) {
+          throw new error_1.ASN1ParseError("unsupported tag 0x00");
+        }
+      }
+      isUniversal() {
+        return this.class === TAG_CLASS.UNIVERSAL;
+      }
+      isContextSpecific(num) {
+        const res = this.class === TAG_CLASS.CONTEXT_SPECIFIC;
+        return num !== void 0 ? res && this.number === num : res;
+      }
+      isBoolean() {
+        return this.isUniversal() && this.number === UNIVERSAL_TAG.BOOLEAN;
+      }
+      isInteger() {
+        return this.isUniversal() && this.number === UNIVERSAL_TAG.INTEGER;
+      }
+      isBitString() {
+        return this.isUniversal() && this.number === UNIVERSAL_TAG.BIT_STRING;
+      }
+      isOctetString() {
+        return this.isUniversal() && this.number === UNIVERSAL_TAG.OCTET_STRING;
+      }
+      isOID() {
+        return this.isUniversal() && this.number === UNIVERSAL_TAG.OBJECT_IDENTIFIER;
+      }
+      isUTCTime() {
+        return this.isUniversal() && this.number === UNIVERSAL_TAG.UTC_TIME;
+      }
+      isGeneralizedTime() {
+        return this.isUniversal() && this.number === UNIVERSAL_TAG.GENERALIZED_TIME;
+      }
+      toDER() {
+        return this.number | (this.constructed ? 32 : 0) | this.class << 6;
+      }
+    };
+    exports2.ASN1Tag = ASN1Tag;
+  }
+});
+
+// node_modules/.pnpm/@sigstore+core@4.0.1/node_modules/@sigstore/core/dist/asn1/obj.js
+var require_obj = __commonJS({
+  "node_modules/.pnpm/@sigstore+core@4.0.1/node_modules/@sigstore/core/dist/asn1/obj.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.ASN1Obj = void 0;
+    var stream_1 = require_stream();
+    var error_1 = require_error4();
+    var length_1 = require_length();
+    var parse_1 = require_parse3();
+    var tag_1 = require_tag();
+    var ASN1Obj = class {
+      tag;
+      subs;
+      value;
+      constructor(tag, value, subs) {
+        this.tag = tag;
+        this.value = value;
+        this.subs = subs;
+      }
+      // Constructs an ASN.1 object from a Buffer of DER-encoded bytes.
+      static parseBuffer(buf) {
+        const stream = new stream_1.ByteStream(buf);
+        const obj = parseStream(stream);
+        if (stream.position !== stream.length) {
+          throw new error_1.ASN1ParseError("invalid trailing data");
+        }
+        return obj;
+      }
+      toDER() {
+        const valueStream = new stream_1.ByteStream();
+        if (this.subs.length > 0) {
+          for (const sub of this.subs) {
+            valueStream.appendView(sub.toDER());
+          }
+        } else {
+          valueStream.appendView(this.value);
+        }
+        const value = valueStream.buffer;
+        const obj = new stream_1.ByteStream();
+        obj.appendChar(this.tag.toDER());
+        obj.appendView((0, length_1.encodeLength)(value.length));
+        obj.appendView(value);
+        return obj.buffer;
+      }
+      /////////////////////////////////////////////////////////////////////////////
+      // Convenience methods for parsing ASN.1 primitives into JS types
+      // Returns the ASN.1 object's value as a boolean. Throws an error if the
+      // object is not a boolean.
+      toBoolean() {
+        if (!this.tag.isBoolean()) {
+          throw new error_1.ASN1TypeError("not a boolean");
+        }
+        return (0, parse_1.parseBoolean)(this.value);
+      }
+      // Returns the ASN.1 object's value as a BigInt. Throws an error if the
+      // object is not an integer.
+      toInteger() {
+        if (!this.tag.isInteger()) {
+          throw new error_1.ASN1TypeError("not an integer");
+        }
+        return (0, parse_1.parseInteger)(this.value);
+      }
+      // Returns the ASN.1 object's value as an OID string. Throws an error if the
+      // object is not an OID.
+      toOID() {
+        if (!this.tag.isOID()) {
+          throw new error_1.ASN1TypeError("not an OID");
+        }
+        return (0, parse_1.parseOID)(this.value);
+      }
+      // Returns the ASN.1 object's value as a Date. Throws an error if the object
+      // is not either a UTCTime or a GeneralizedTime.
+      toDate() {
+        switch (true) {
+          case this.tag.isUTCTime():
+            return (0, parse_1.parseTime)(this.value, true);
+          case this.tag.isGeneralizedTime():
+            return (0, parse_1.parseTime)(this.value, false);
+          default:
+            throw new error_1.ASN1TypeError("not a date");
+        }
+      }
+      // Returns the ASN.1 object's value as a number[] where each number is the
+      // value of a bit in the bit string. Throws an error if the object is not a
+      // bit string.
+      toBitString() {
+        if (!this.tag.isBitString()) {
+          throw new error_1.ASN1TypeError("not a bit string");
+        }
+        return (0, parse_1.parseBitString)(this.value);
+      }
+    };
+    exports2.ASN1Obj = ASN1Obj;
+    var MAX_DEPTH = 100;
+    function parseStream(stream, depth = 0) {
+      if (depth > MAX_DEPTH) {
+        throw new error_1.ASN1ParseError("maximum nesting depth exceeded");
+      }
+      const tag = new tag_1.ASN1Tag(stream.getUint8());
+      const len = (0, length_1.decodeLength)(stream);
+      const value = stream.slice(stream.position, len);
+      const start = stream.position;
+      let subs = [];
+      if (tag.constructed) {
+        subs = collectSubs(stream, len, depth);
+      } else if (tag.isOctetString()) {
+        try {
+          subs = collectSubs(stream, len, depth);
+        } catch (e) {
+        }
+      }
+      if (subs.length === 0) {
+        stream.seek(start + len);
+      }
+      return new ASN1Obj(tag, value, subs);
+    }
+    function collectSubs(stream, len, depth) {
+      const end = stream.position + len;
+      if (end > stream.length) {
+        throw new error_1.ASN1ParseError("invalid length");
+      }
+      const subs = [];
+      while (stream.position < end) {
+        subs.push(parseStream(stream, depth + 1));
+      }
+      if (stream.position !== end) {
+        throw new error_1.ASN1ParseError("invalid length");
+      }
+      return subs;
+    }
+  }
+});
+
+// node_modules/.pnpm/@sigstore+core@4.0.1/node_modules/@sigstore/core/dist/asn1/index.js
+var require_asn1 = __commonJS({
+  "node_modules/.pnpm/@sigstore+core@4.0.1/node_modules/@sigstore/core/dist/asn1/index.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.ASN1Obj = void 0;
+    var obj_1 = require_obj();
+    Object.defineProperty(exports2, "ASN1Obj", { enumerable: true, get: function() {
+      return obj_1.ASN1Obj;
+    } });
+  }
+});
+
+// node_modules/.pnpm/@sigstore+core@4.0.1/node_modules/@sigstore/core/dist/crypto.js
+var require_crypto = __commonJS({
+  "node_modules/.pnpm/@sigstore+core@4.0.1/node_modules/@sigstore/core/dist/crypto.js"(exports2) {
+    "use strict";
+    var __importDefault = exports2 && exports2.__importDefault || function(mod) {
+      return mod && mod.__esModule ? mod : { "default": mod };
+    };
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.createPublicKey = createPublicKey2;
+    exports2.digest = digest;
+    exports2.verify = verify;
+    exports2.bufferEqual = bufferEqual;
+    var crypto_1 = __importDefault(require("crypto"));
+    function createPublicKey2(key, type = "spki") {
+      if (typeof key === "string") {
+        if (key.startsWith("-----")) {
+          return crypto_1.default.createPublicKey(key);
+        } else {
+          return crypto_1.default.createPublicKey({
+            key: Buffer.from(key, "base64"),
+            format: "der",
+            type
+          });
+        }
+      } else {
+        return crypto_1.default.createPublicKey({ key, format: "der", type });
+      }
+    }
+    function digest(algorithm, ...data) {
+      const hash2 = crypto_1.default.createHash(algorithm);
+      for (const d of data) {
+        hash2.update(d);
+      }
+      return hash2.digest();
+    }
+    function verify(data, key, signature, algorithm) {
+      try {
+        return crypto_1.default.verify(algorithm, data, key, signature);
+      } catch (e) {
+        return false;
+      }
+    }
+    function bufferEqual(a, b) {
+      try {
+        return crypto_1.default.timingSafeEqual(a, b);
+      } catch {
+        return false;
+      }
+    }
+  }
+});
+
+// node_modules/.pnpm/@sigstore+core@4.0.1/node_modules/@sigstore/core/dist/dsse.js
+var require_dsse = __commonJS({
+  "node_modules/.pnpm/@sigstore+core@4.0.1/node_modules/@sigstore/core/dist/dsse.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.preAuthEncoding = preAuthEncoding;
+    var PAE_PREFIX = "DSSEv1";
+    function preAuthEncoding(payloadType, payload) {
+      const typeBytes = Buffer.from(payloadType, "utf-8");
+      return Buffer.concat([
+        Buffer.from(`${PAE_PREFIX} ${typeBytes.length} `, "ascii"),
+        typeBytes,
+        Buffer.from(` ${payload.length} `, "ascii"),
+        payload
+      ]);
+    }
+  }
+});
+
+// node_modules/.pnpm/@sigstore+core@4.0.1/node_modules/@sigstore/core/dist/encoding.js
+var require_encoding2 = __commonJS({
+  "node_modules/.pnpm/@sigstore+core@4.0.1/node_modules/@sigstore/core/dist/encoding.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.base64Encode = base64Encode;
+    exports2.base64Decode = base64Decode;
+    var BASE64_ENCODING = "base64";
+    var UTF8_ENCODING = "utf-8";
+    function base64Encode(str2) {
+      return Buffer.from(str2, UTF8_ENCODING).toString(BASE64_ENCODING);
+    }
+    function base64Decode(str2) {
+      return Buffer.from(str2, BASE64_ENCODING).toString(UTF8_ENCODING);
+    }
+  }
+});
+
+// node_modules/.pnpm/@sigstore+core@4.0.1/node_modules/@sigstore/core/dist/json.js
+var require_json2 = __commonJS({
+  "node_modules/.pnpm/@sigstore+core@4.0.1/node_modules/@sigstore/core/dist/json.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.canonicalize = canonicalize;
+    function canonicalize(object2) {
+      let buffer = "";
+      if (object2 === null || typeof object2 !== "object" || object2.toJSON != null) {
+        buffer += JSON.stringify(object2);
+      } else if (Array.isArray(object2)) {
+        buffer += "[";
+        let first = true;
+        object2.forEach((element) => {
+          if (!first) {
+            buffer += ",";
+          }
+          first = false;
+          buffer += canonicalize(element);
+        });
+        buffer += "]";
+      } else {
+        buffer += "{";
+        let first = true;
+        Object.keys(object2).sort().forEach((property) => {
+          if (!first) {
+            buffer += ",";
+          }
+          first = false;
+          buffer += JSON.stringify(property);
+          buffer += ":";
+          buffer += canonicalize(object2[property]);
+        });
+        buffer += "}";
+      }
+      return buffer;
+    }
+  }
+});
+
+// node_modules/.pnpm/@sigstore+core@4.0.1/node_modules/@sigstore/core/dist/pem.js
+var require_pem = __commonJS({
+  "node_modules/.pnpm/@sigstore+core@4.0.1/node_modules/@sigstore/core/dist/pem.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.toDER = toDER;
+    exports2.fromDER = fromDER;
+    var PEM_HEADER = /-----BEGIN (.*)-----/;
+    var PEM_FOOTER = /-----END (.*)-----/;
+    function toDER(certificate) {
+      let der = "";
+      certificate.split("\n").forEach((line) => {
+        if (line.match(PEM_HEADER) || line.match(PEM_FOOTER)) {
+          return;
+        }
+        der += line;
+      });
+      return Buffer.from(der, "base64");
+    }
+    function fromDER(certificate, type = "CERTIFICATE") {
+      const der = certificate.toString("base64");
+      const lines = der.match(/.{1,64}/g) || "";
+      return [`-----BEGIN ${type}-----`, ...lines, `-----END ${type}-----`].join("\n").concat("\n");
+    }
+  }
+});
+
+// node_modules/.pnpm/@sigstore+core@4.0.1/node_modules/@sigstore/core/dist/oid.js
+var require_oid2 = __commonJS({
+  "node_modules/.pnpm/@sigstore+core@4.0.1/node_modules/@sigstore/core/dist/oid.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.SHA2_HASH_ALGOS = exports2.RSA_SIGNATURE_ALGOS = exports2.ECDSA_SIGNATURE_ALGOS = void 0;
+    exports2.ECDSA_SIGNATURE_ALGOS = {
+      "1.2.840.10045.4.3.1": "sha224",
+      "1.2.840.10045.4.3.2": "sha256",
+      "1.2.840.10045.4.3.3": "sha384",
+      "1.2.840.10045.4.3.4": "sha512"
+    };
+    exports2.RSA_SIGNATURE_ALGOS = {
+      "1.2.840.113549.1.1.14": "sha224",
+      "1.2.840.113549.1.1.11": "sha256",
+      "1.2.840.113549.1.1.12": "sha384",
+      "1.2.840.113549.1.1.13": "sha512"
+    };
+    exports2.SHA2_HASH_ALGOS = {
+      "2.16.840.1.101.3.4.2.1": "sha256",
+      "2.16.840.1.101.3.4.2.2": "sha384",
+      "2.16.840.1.101.3.4.2.3": "sha512"
+    };
+  }
+});
+
+// node_modules/.pnpm/@sigstore+core@4.0.1/node_modules/@sigstore/core/dist/rfc3161/error.js
+var require_error5 = __commonJS({
+  "node_modules/.pnpm/@sigstore+core@4.0.1/node_modules/@sigstore/core/dist/rfc3161/error.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.RFC3161TimestampVerificationError = void 0;
+    var RFC3161TimestampVerificationError = class extends Error {
+    };
+    exports2.RFC3161TimestampVerificationError = RFC3161TimestampVerificationError;
+  }
+});
+
+// node_modules/.pnpm/@sigstore+core@4.0.1/node_modules/@sigstore/core/dist/rfc3161/tstinfo.js
+var require_tstinfo = __commonJS({
+  "node_modules/.pnpm/@sigstore+core@4.0.1/node_modules/@sigstore/core/dist/rfc3161/tstinfo.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o, m, k, k2) {
+      if (k2 === void 0) k2 = k;
+      var desc = Object.getOwnPropertyDescriptor(m, k);
+      if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m[k];
+        } };
+      }
+      Object.defineProperty(o, k2, desc);
+    }) : (function(o, m, k, k2) {
+      if (k2 === void 0) k2 = k;
+      o[k2] = m[k];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o, v) {
+      Object.defineProperty(o, "default", { enumerable: true, value: v });
+    }) : function(o, v) {
+      o["default"] = v;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function(o2) {
+          var ar = [];
+          for (var k in o2) if (Object.prototype.hasOwnProperty.call(o2, k)) ar[ar.length] = k;
+          return ar;
+        };
+        return ownKeys(o);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.TSTInfo = void 0;
+    var crypto = __importStar(require_crypto());
+    var oid_1 = require_oid2();
+    var error_1 = require_error5();
+    var TSTInfo = class {
+      root;
+      constructor(asn1) {
+        this.root = asn1;
+      }
+      get version() {
+        return this.root.subs[0].toInteger();
+      }
+      get genTime() {
+        return this.root.subs[4].toDate();
+      }
+      get messageImprintHashAlgorithm() {
+        const oid = this.messageImprintObj.subs[0].subs[0].toOID();
+        return oid_1.SHA2_HASH_ALGOS[oid];
+      }
+      get messageImprintHashedMessage() {
+        return this.messageImprintObj.subs[1].value;
+      }
+      get raw() {
+        return this.root.toDER();
+      }
+      verify(data) {
+        const digest = crypto.digest(this.messageImprintHashAlgorithm, data);
+        if (!crypto.bufferEqual(digest, this.messageImprintHashedMessage)) {
+          throw new error_1.RFC3161TimestampVerificationError("message imprint does not match artifact");
+        }
+      }
+      // https://www.rfc-editor.org/rfc/rfc3161#section-2.4.2
+      get messageImprintObj() {
+        return this.root.subs[2];
+      }
+    };
+    exports2.TSTInfo = TSTInfo;
+  }
+});
+
+// node_modules/.pnpm/@sigstore+core@4.0.1/node_modules/@sigstore/core/dist/rfc3161/timestamp.js
+var require_timestamp5 = __commonJS({
+  "node_modules/.pnpm/@sigstore+core@4.0.1/node_modules/@sigstore/core/dist/rfc3161/timestamp.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o, m, k, k2) {
+      if (k2 === void 0) k2 = k;
+      var desc = Object.getOwnPropertyDescriptor(m, k);
+      if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m[k];
+        } };
+      }
+      Object.defineProperty(o, k2, desc);
+    }) : (function(o, m, k, k2) {
+      if (k2 === void 0) k2 = k;
+      o[k2] = m[k];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o, v) {
+      Object.defineProperty(o, "default", { enumerable: true, value: v });
+    }) : function(o, v) {
+      o["default"] = v;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function(o2) {
+          var ar = [];
+          for (var k in o2) if (Object.prototype.hasOwnProperty.call(o2, k)) ar[ar.length] = k;
+          return ar;
+        };
+        return ownKeys(o);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.RFC3161Timestamp = void 0;
+    var asn1_1 = require_asn1();
+    var crypto = __importStar(require_crypto());
+    var oid_1 = require_oid2();
+    var error_1 = require_error5();
+    var tstinfo_1 = require_tstinfo();
+    var OID_PKCS9_CONTENT_TYPE_SIGNED_DATA = "1.2.840.113549.1.7.2";
+    var OID_PKCS9_CONTENT_TYPE_TSTINFO = "1.2.840.113549.1.9.16.1.4";
+    var OID_PKCS9_MESSAGE_DIGEST_KEY = "1.2.840.113549.1.9.4";
+    var RFC3161Timestamp = class _RFC3161Timestamp {
+      root;
+      constructor(asn1) {
+        this.root = asn1;
+      }
+      static parse(der) {
+        const asn1 = asn1_1.ASN1Obj.parseBuffer(der);
+        return new _RFC3161Timestamp(asn1);
+      }
+      get status() {
+        return this.pkiStatusInfoObj.subs[0].toInteger();
+      }
+      get contentType() {
+        return this.contentTypeObj.toOID();
+      }
+      get eContentType() {
+        return this.eContentTypeObj.toOID();
+      }
+      get signingTime() {
+        return this.tstInfo.genTime;
+      }
+      get signerIssuer() {
+        return this.signerSidObj.subs[0].value;
+      }
+      get signerSerialNumber() {
+        return this.signerSidObj.subs[1].value;
+      }
+      get signerDigestAlgorithm() {
+        const oid = this.signerDigestAlgorithmObj.subs[0].toOID();
+        return oid_1.SHA2_HASH_ALGOS[oid];
+      }
+      get signatureAlgorithm() {
+        const oid = this.signatureAlgorithmObj.subs[0].toOID();
+        return oid_1.ECDSA_SIGNATURE_ALGOS[oid];
+      }
+      get signatureValue() {
+        return this.signatureValueObj.value;
+      }
+      get tstInfo() {
+        return new tstinfo_1.TSTInfo(this.eContentObj.subs[0].subs[0]);
+      }
+      verify(data, publicKey) {
+        if (!this.timeStampTokenObj) {
+          throw new error_1.RFC3161TimestampVerificationError("timeStampToken is missing");
+        }
+        if (this.contentType !== OID_PKCS9_CONTENT_TYPE_SIGNED_DATA) {
+          throw new error_1.RFC3161TimestampVerificationError(`incorrect content type: ${this.contentType}`);
+        }
+        if (this.eContentType !== OID_PKCS9_CONTENT_TYPE_TSTINFO) {
+          throw new error_1.RFC3161TimestampVerificationError(`incorrect encapsulated content type: ${this.eContentType}`);
+        }
+        this.tstInfo.verify(data);
+        this.verifyMessageDigest();
+        this.verifySignature(publicKey);
+      }
+      verifyMessageDigest() {
+        const tstInfoDigest = crypto.digest(this.signerDigestAlgorithm, this.tstInfo.raw);
+        const expectedDigest = this.messageDigestAttributeObj.subs[1].subs[0].value;
+        if (!crypto.bufferEqual(tstInfoDigest, expectedDigest)) {
+          throw new error_1.RFC3161TimestampVerificationError("signed data does not match tstInfo");
+        }
+      }
+      verifySignature(key) {
+        const signedAttrs = this.signedAttrsObj.toDER();
+        signedAttrs[0] = 49;
+        const verified = crypto.verify(signedAttrs, key, this.signatureValue, this.signatureAlgorithm);
+        if (!verified) {
+          throw new error_1.RFC3161TimestampVerificationError("signature verification failed");
+        }
+      }
+      // https://www.rfc-editor.org/rfc/rfc3161#section-2.4.2
+      get pkiStatusInfoObj() {
+        return this.root.subs[0];
+      }
+      // https://www.rfc-editor.org/rfc/rfc3161#section-2.4.2
+      get timeStampTokenObj() {
+        return this.root.subs[1];
+      }
+      // https://datatracker.ietf.org/doc/html/rfc5652#section-3
+      get contentTypeObj() {
+        return this.timeStampTokenObj.subs[0];
+      }
+      // https://www.rfc-editor.org/rfc/rfc5652#section-3
+      get signedDataObj() {
+        const obj = this.timeStampTokenObj.subs.find((sub) => sub.tag.isContextSpecific(0));
+        return obj.subs[0];
+      }
+      // https://datatracker.ietf.org/doc/html/rfc5652#section-5.1
+      get encapContentInfoObj() {
+        return this.signedDataObj.subs[2];
+      }
+      // https://datatracker.ietf.org/doc/html/rfc5652#section-5.1
+      get signerInfosObj() {
+        const sd = this.signedDataObj;
+        return sd.subs[sd.subs.length - 1];
+      }
+      // https://www.rfc-editor.org/rfc/rfc5652#section-5.1
+      get signerInfoObj() {
+        return this.signerInfosObj.subs[0];
+      }
+      // https://datatracker.ietf.org/doc/html/rfc5652#section-5.2
+      get eContentTypeObj() {
+        return this.encapContentInfoObj.subs[0];
+      }
+      // https://datatracker.ietf.org/doc/html/rfc5652#section-5.2
+      get eContentObj() {
+        return this.encapContentInfoObj.subs[1];
+      }
+      // https://datatracker.ietf.org/doc/html/rfc5652#section-5.3
+      get signedAttrsObj() {
+        const signedAttrs = this.signerInfoObj.subs.find((sub) => sub.tag.isContextSpecific(0));
+        return signedAttrs;
+      }
+      // https://datatracker.ietf.org/doc/html/rfc5652#section-5.3
+      get messageDigestAttributeObj() {
+        const messageDigest = this.signedAttrsObj.subs.find((sub) => sub.subs[0].tag.isOID() && sub.subs[0].toOID() === OID_PKCS9_MESSAGE_DIGEST_KEY);
+        return messageDigest;
+      }
+      // https://datatracker.ietf.org/doc/html/rfc5652#section-5.3
+      get signerSidObj() {
+        return this.signerInfoObj.subs[1];
+      }
+      // https://datatracker.ietf.org/doc/html/rfc5652#section-5.3
+      get signerDigestAlgorithmObj() {
+        return this.signerInfoObj.subs[2];
+      }
+      // https://datatracker.ietf.org/doc/html/rfc5652#section-5.3
+      get signatureAlgorithmObj() {
+        return this.signerInfoObj.subs[4];
+      }
+      // https://datatracker.ietf.org/doc/html/rfc5652#section-5.3
+      get signatureValueObj() {
+        return this.signerInfoObj.subs[5];
+      }
+    };
+    exports2.RFC3161Timestamp = RFC3161Timestamp;
+  }
+});
+
+// node_modules/.pnpm/@sigstore+core@4.0.1/node_modules/@sigstore/core/dist/rfc3161/index.js
+var require_rfc3161 = __commonJS({
+  "node_modules/.pnpm/@sigstore+core@4.0.1/node_modules/@sigstore/core/dist/rfc3161/index.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.RFC3161Timestamp = void 0;
+    var timestamp_1 = require_timestamp5();
+    Object.defineProperty(exports2, "RFC3161Timestamp", { enumerable: true, get: function() {
+      return timestamp_1.RFC3161Timestamp;
+    } });
+  }
+});
+
+// node_modules/.pnpm/@sigstore+core@4.0.1/node_modules/@sigstore/core/dist/x509/sct.js
+var require_sct = __commonJS({
+  "node_modules/.pnpm/@sigstore+core@4.0.1/node_modules/@sigstore/core/dist/x509/sct.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o, m, k, k2) {
+      if (k2 === void 0) k2 = k;
+      var desc = Object.getOwnPropertyDescriptor(m, k);
+      if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m[k];
+        } };
+      }
+      Object.defineProperty(o, k2, desc);
+    }) : (function(o, m, k, k2) {
+      if (k2 === void 0) k2 = k;
+      o[k2] = m[k];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o, v) {
+      Object.defineProperty(o, "default", { enumerable: true, value: v });
+    }) : function(o, v) {
+      o["default"] = v;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function(o2) {
+          var ar = [];
+          for (var k in o2) if (Object.prototype.hasOwnProperty.call(o2, k)) ar[ar.length] = k;
+          return ar;
+        };
+        return ownKeys(o);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.SignedCertificateTimestamp = void 0;
+    var crypto = __importStar(require_crypto());
+    var stream_1 = require_stream();
+    var SignedCertificateTimestamp = class _SignedCertificateTimestamp {
+      version;
+      logID;
+      timestamp;
+      extensions;
+      hashAlgorithm;
+      signatureAlgorithm;
+      signature;
+      constructor(options2) {
+        this.version = options2.version;
+        this.logID = options2.logID;
+        this.timestamp = options2.timestamp;
+        this.extensions = options2.extensions;
+        this.hashAlgorithm = options2.hashAlgorithm;
+        this.signatureAlgorithm = options2.signatureAlgorithm;
+        this.signature = options2.signature;
+      }
+      get datetime() {
+        return new Date(Number(this.timestamp.readBigInt64BE()));
+      }
+      // Returns the hash algorithm used to generate the SCT's signature.
+      // https://www.rfc-editor.org/rfc/rfc5246#section-7.4.1.4.1
+      get algorithm() {
+        switch (this.hashAlgorithm) {
+          /* istanbul ignore next */
+          case 0:
+            return "none";
+          /* istanbul ignore next */
+          case 1:
+            return "md5";
+          /* istanbul ignore next */
+          case 2:
+            return "sha1";
+          /* istanbul ignore next */
+          case 3:
+            return "sha224";
+          case 4:
+            return "sha256";
+          /* istanbul ignore next */
+          case 5:
+            return "sha384";
+          /* istanbul ignore next */
+          case 6:
+            return "sha512";
+          /* istanbul ignore next */
+          default:
+            return "unknown";
+        }
+      }
+      verify(preCert, key) {
+        const stream = new stream_1.ByteStream();
+        stream.appendChar(this.version);
+        stream.appendChar(0);
+        stream.appendView(this.timestamp);
+        stream.appendUint16(1);
+        stream.appendView(preCert);
+        stream.appendUint16(this.extensions.byteLength);
+        if (this.extensions.byteLength > 0) {
+          stream.appendView(this.extensions);
+        }
+        return crypto.verify(stream.buffer, key, this.signature, this.algorithm);
+      }
+      // Parses a SignedCertificateTimestamp from a buffer. SCTs are encoded using
+      // TLS encoding which means the fields and lengths of most fields are
+      // specified as part of the SCT and TLS specs.
+      // https://www.rfc-editor.org/rfc/rfc6962#section-3.2
+      // https://www.rfc-editor.org/rfc/rfc5246#section-7.4.1.4.1
+      static parse(buf) {
+        const stream = new stream_1.ByteStream(buf);
+        const version2 = stream.getUint8();
+        const logID = stream.getBlock(32);
+        const timestamp = stream.getBlock(8);
+        const extenstionLength = stream.getUint16();
+        const extensions = stream.getBlock(extenstionLength);
+        const hashAlgorithm = stream.getUint8();
+        const signatureAlgorithm = stream.getUint8();
+        const sigLength = stream.getUint16();
+        const signature = stream.getBlock(sigLength);
+        if (stream.position !== buf.length) {
+          throw new Error("SCT buffer length mismatch");
+        }
+        return new _SignedCertificateTimestamp({
+          version: version2,
+          logID,
+          timestamp,
+          extensions,
+          hashAlgorithm,
+          signatureAlgorithm,
+          signature
+        });
+      }
+    };
+    exports2.SignedCertificateTimestamp = SignedCertificateTimestamp;
+  }
+});
+
+// node_modules/.pnpm/@sigstore+core@4.0.1/node_modules/@sigstore/core/dist/x509/ext.js
+var require_ext = __commonJS({
+  "node_modules/.pnpm/@sigstore+core@4.0.1/node_modules/@sigstore/core/dist/x509/ext.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.X509SCTExtension = exports2.X509SubjectKeyIDExtension = exports2.X509AuthorityKeyIDExtension = exports2.X509SubjectAlternativeNameExtension = exports2.X509KeyUsageExtension = exports2.X509BasicConstraintsExtension = exports2.X509Extension = void 0;
+    var stream_1 = require_stream();
+    var sct_1 = require_sct();
+    var X509Extension = class {
+      root;
+      constructor(asn1) {
+        this.root = asn1;
+      }
+      get oid() {
+        return this.root.subs[0].toOID();
+      }
+      get critical() {
+        return this.root.subs.length === 3 ? this.root.subs[1].toBoolean() : false;
+      }
+      get value() {
+        return this.extnValueObj.value;
+      }
+      get valueObj() {
+        return this.extnValueObj;
+      }
+      get extnValueObj() {
+        return this.root.subs[this.root.subs.length - 1];
+      }
+    };
+    exports2.X509Extension = X509Extension;
+    var X509BasicConstraintsExtension = class extends X509Extension {
+      get isCA() {
+        return this.sequence.subs[0]?.toBoolean() ?? false;
+      }
+      get pathLenConstraint() {
+        return this.sequence.subs.length > 1 ? this.sequence.subs[1].toInteger() : void 0;
+      }
+      // The extnValue field contains a single sequence wrapping the isCA and
+      // pathLenConstraint.
+      get sequence() {
+        return this.extnValueObj.subs[0];
+      }
+    };
+    exports2.X509BasicConstraintsExtension = X509BasicConstraintsExtension;
+    var X509KeyUsageExtension = class extends X509Extension {
+      get digitalSignature() {
+        return this.bitString[0] === 1;
+      }
+      get keyCertSign() {
+        return this.bitString[5] === 1;
+      }
+      get crlSign() {
+        return this.bitString[6] === 1;
+      }
+      // The extnValue field contains a single bit string which is a bit mask
+      // indicating which key usages are enabled.
+      get bitString() {
+        return this.extnValueObj.subs[0].toBitString();
+      }
+    };
+    exports2.X509KeyUsageExtension = X509KeyUsageExtension;
+    var X509SubjectAlternativeNameExtension = class extends X509Extension {
+      get rfc822Name() {
+        return this.findGeneralName(1)?.value.toString("ascii");
+      }
+      get uri() {
+        return this.findGeneralName(6)?.value.toString("ascii");
+      }
+      // Retrieve the value of an otherName with the given OID.
+      otherName(oid) {
+        const otherName = this.findGeneralName(0);
+        if (otherName === void 0) {
+          return void 0;
+        }
+        const otherNameOID = otherName.subs[0].toOID();
+        if (otherNameOID !== oid) {
+          return void 0;
+        }
+        const otherNameValue = otherName.subs[1];
+        return otherNameValue.subs[0].value.toString("ascii");
+      }
+      findGeneralName(tag) {
+        return this.generalNames.find((gn) => gn.tag.isContextSpecific(tag));
+      }
+      // The extnValue field contains a sequence of GeneralNames.
+      get generalNames() {
+        return this.extnValueObj.subs[0].subs;
+      }
+    };
+    exports2.X509SubjectAlternativeNameExtension = X509SubjectAlternativeNameExtension;
+    var X509AuthorityKeyIDExtension = class extends X509Extension {
+      get keyIdentifier() {
+        return this.findSequenceMember(0)?.value;
+      }
+      findSequenceMember(tag) {
+        return this.sequence.subs.find((el) => el.tag.isContextSpecific(tag));
+      }
+      // The extnValue field contains a single sequence wrapping the keyIdentifier
+      get sequence() {
+        return this.extnValueObj.subs[0];
+      }
+    };
+    exports2.X509AuthorityKeyIDExtension = X509AuthorityKeyIDExtension;
+    var X509SubjectKeyIDExtension = class extends X509Extension {
+      get keyIdentifier() {
+        return this.extnValueObj.subs[0].value;
+      }
+    };
+    exports2.X509SubjectKeyIDExtension = X509SubjectKeyIDExtension;
+    var X509SCTExtension = class extends X509Extension {
+      constructor(asn1) {
+        super(asn1);
+      }
+      get signedCertificateTimestamps() {
+        const buf = this.extnValueObj.subs[0].value;
+        const stream = new stream_1.ByteStream(buf);
+        const end = stream.getUint16() + 2;
+        const sctList = [];
+        while (stream.position < end) {
+          const sctLength = stream.getUint16();
+          const sct = stream.getBlock(sctLength);
+          sctList.push(sct_1.SignedCertificateTimestamp.parse(sct));
+        }
+        if (stream.position !== end) {
+          throw new Error("SCT list length does not match actual length");
+        }
+        return sctList;
+      }
+    };
+    exports2.X509SCTExtension = X509SCTExtension;
+  }
+});
+
+// node_modules/.pnpm/@sigstore+core@4.0.1/node_modules/@sigstore/core/dist/x509/cert.js
+var require_cert = __commonJS({
+  "node_modules/.pnpm/@sigstore+core@4.0.1/node_modules/@sigstore/core/dist/x509/cert.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o, m, k, k2) {
+      if (k2 === void 0) k2 = k;
+      var desc = Object.getOwnPropertyDescriptor(m, k);
+      if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m[k];
+        } };
+      }
+      Object.defineProperty(o, k2, desc);
+    }) : (function(o, m, k, k2) {
+      if (k2 === void 0) k2 = k;
+      o[k2] = m[k];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o, v) {
+      Object.defineProperty(o, "default", { enumerable: true, value: v });
+    }) : function(o, v) {
+      o["default"] = v;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function(o2) {
+          var ar = [];
+          for (var k in o2) if (Object.prototype.hasOwnProperty.call(o2, k)) ar[ar.length] = k;
+          return ar;
+        };
+        return ownKeys(o);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.X509Certificate = exports2.EXTENSION_OID_SCT = void 0;
+    var asn1_1 = require_asn1();
+    var crypto = __importStar(require_crypto());
+    var oid_1 = require_oid2();
+    var pem = __importStar(require_pem());
+    var ext_1 = require_ext();
+    var EXTENSION_OID_SUBJECT_KEY_ID = "2.5.29.14";
+    var EXTENSION_OID_KEY_USAGE = "2.5.29.15";
+    var EXTENSION_OID_SUBJECT_ALT_NAME = "2.5.29.17";
+    var EXTENSION_OID_BASIC_CONSTRAINTS = "2.5.29.19";
+    var EXTENSION_OID_AUTHORITY_KEY_ID = "2.5.29.35";
+    exports2.EXTENSION_OID_SCT = "1.3.6.1.4.1.11129.2.4.2";
+    var X509Certificate = class _X509Certificate {
+      root;
+      constructor(asn1) {
+        this.root = asn1;
+      }
+      static parse(cert) {
+        const der = typeof cert === "string" ? pem.toDER(cert) : cert;
+        const asn1 = asn1_1.ASN1Obj.parseBuffer(der);
+        return new _X509Certificate(asn1);
+      }
+      get tbsCertificate() {
+        return this.tbsCertificateObj;
+      }
+      get version() {
+        const ver = this.versionObj.subs[0].toInteger();
+        return `v${(ver + BigInt(1)).toString()}`;
+      }
+      get serialNumber() {
+        return this.serialNumberObj.value;
+      }
+      get notBefore() {
+        return this.validityObj.subs[0].toDate();
+      }
+      get notAfter() {
+        return this.validityObj.subs[1].toDate();
+      }
+      get issuer() {
+        return this.issuerObj.value;
+      }
+      get subject() {
+        return this.subjectObj.value;
+      }
+      get publicKey() {
+        return this.subjectPublicKeyInfoObj.toDER();
+      }
+      get signatureAlgorithm() {
+        const oid = this.signatureAlgorithmObj.subs[0].toOID();
+        if (oid_1.RSA_SIGNATURE_ALGOS[oid]) {
+          return oid_1.RSA_SIGNATURE_ALGOS[oid];
+        }
+        return oid_1.ECDSA_SIGNATURE_ALGOS[oid];
+      }
+      get signatureValue() {
+        return this.signatureValueObj.value.subarray(1);
+      }
+      get subjectAltName() {
+        const ext = this.extSubjectAltName;
+        return ext?.uri || /* istanbul ignore next */
+        ext?.rfc822Name;
+      }
+      get extensions() {
+        const extSeq = this.extensionsObj?.subs[0];
+        return extSeq?.subs || [];
+      }
+      get extKeyUsage() {
+        const ext = this.findExtension(EXTENSION_OID_KEY_USAGE);
+        return ext ? new ext_1.X509KeyUsageExtension(ext) : void 0;
+      }
+      get extBasicConstraints() {
+        const ext = this.findExtension(EXTENSION_OID_BASIC_CONSTRAINTS);
+        return ext ? new ext_1.X509BasicConstraintsExtension(ext) : void 0;
+      }
+      get extSubjectAltName() {
+        const ext = this.findExtension(EXTENSION_OID_SUBJECT_ALT_NAME);
+        return ext ? new ext_1.X509SubjectAlternativeNameExtension(ext) : void 0;
+      }
+      get extAuthorityKeyID() {
+        const ext = this.findExtension(EXTENSION_OID_AUTHORITY_KEY_ID);
+        return ext ? new ext_1.X509AuthorityKeyIDExtension(ext) : void 0;
+      }
+      get extSubjectKeyID() {
+        const ext = this.findExtension(EXTENSION_OID_SUBJECT_KEY_ID);
+        return ext ? new ext_1.X509SubjectKeyIDExtension(ext) : (
+          /* istanbul ignore next */
+          void 0
+        );
+      }
+      get extSCT() {
+        const ext = this.findExtension(exports2.EXTENSION_OID_SCT);
+        return ext ? new ext_1.X509SCTExtension(ext) : void 0;
+      }
+      get isCA() {
+        const ca = this.extBasicConstraints?.isCA || false;
+        if (this.extKeyUsage) {
+          return ca && this.extKeyUsage.keyCertSign;
+        }
+        return ca;
+      }
+      extension(oid) {
+        const ext = this.findExtension(oid);
+        return ext ? new ext_1.X509Extension(ext) : void 0;
+      }
+      verify(issuerCertificate) {
+        const publicKey = issuerCertificate?.publicKey || this.publicKey;
+        const key = crypto.createPublicKey(publicKey);
+        return crypto.verify(this.tbsCertificate.toDER(), key, this.signatureValue, this.signatureAlgorithm);
+      }
+      validForDate(date5) {
+        return this.notBefore <= date5 && date5 <= this.notAfter;
+      }
+      equals(other) {
+        return this.root.toDER().equals(other.root.toDER());
+      }
+      // Creates a copy of the certificate with a new buffer
+      clone() {
+        const der = this.root.toDER();
+        const clone2 = Buffer.alloc(der.length);
+        der.copy(clone2);
+        return _X509Certificate.parse(clone2);
+      }
+      findExtension(oid) {
+        return this.extensions.find((ext) => ext.subs[0].toOID() === oid);
+      }
+      /////////////////////////////////////////////////////////////////////////////
+      // The following properties use the documented x509 structure to locate the
+      // desired ASN.1 object
+      // https://www.rfc-editor.org/rfc/rfc5280#section-4.1
+      // https://www.rfc-editor.org/rfc/rfc5280#section-4.1.1.1
+      get tbsCertificateObj() {
+        return this.root.subs[0];
+      }
+      // https://www.rfc-editor.org/rfc/rfc5280#section-4.1.1.2
+      get signatureAlgorithmObj() {
+        return this.root.subs[1];
+      }
+      // https://www.rfc-editor.org/rfc/rfc5280#section-4.1.1.3
+      get signatureValueObj() {
+        return this.root.subs[2];
+      }
+      // https://www.rfc-editor.org/rfc/rfc5280#section-4.1.2.1
+      get versionObj() {
+        return this.tbsCertificateObj.subs[0];
+      }
+      // https://www.rfc-editor.org/rfc/rfc5280#section-4.1.2.2
+      get serialNumberObj() {
+        return this.tbsCertificateObj.subs[1];
+      }
+      // https://www.rfc-editor.org/rfc/rfc5280#section-4.1.2.4
+      get issuerObj() {
+        return this.tbsCertificateObj.subs[3];
+      }
+      // https://www.rfc-editor.org/rfc/rfc5280#section-4.1.2.5
+      get validityObj() {
+        return this.tbsCertificateObj.subs[4];
+      }
+      // https://www.rfc-editor.org/rfc/rfc5280#section-4.1.2.6
+      get subjectObj() {
+        return this.tbsCertificateObj.subs[5];
+      }
+      // https://www.rfc-editor.org/rfc/rfc5280#section-4.1.2.7
+      get subjectPublicKeyInfoObj() {
+        return this.tbsCertificateObj.subs[6];
+      }
+      // Extensions can't be located by index because their position varies. Instead,
+      // we need to find the extensions context specific tag
+      // https://www.rfc-editor.org/rfc/rfc5280#section-4.1.2.9
+      get extensionsObj() {
+        return this.tbsCertificateObj.subs.find((sub) => sub.tag.isContextSpecific(3));
+      }
+    };
+    exports2.X509Certificate = X509Certificate;
+  }
+});
+
+// node_modules/.pnpm/@sigstore+core@4.0.1/node_modules/@sigstore/core/dist/x509/index.js
+var require_x509 = __commonJS({
+  "node_modules/.pnpm/@sigstore+core@4.0.1/node_modules/@sigstore/core/dist/x509/index.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.X509SCTExtension = exports2.X509Certificate = exports2.EXTENSION_OID_SCT = void 0;
+    var cert_1 = require_cert();
+    Object.defineProperty(exports2, "EXTENSION_OID_SCT", { enumerable: true, get: function() {
+      return cert_1.EXTENSION_OID_SCT;
+    } });
+    Object.defineProperty(exports2, "X509Certificate", { enumerable: true, get: function() {
+      return cert_1.X509Certificate;
+    } });
+    var ext_1 = require_ext();
+    Object.defineProperty(exports2, "X509SCTExtension", { enumerable: true, get: function() {
+      return ext_1.X509SCTExtension;
+    } });
+  }
+});
+
+// node_modules/.pnpm/@sigstore+core@4.0.1/node_modules/@sigstore/core/dist/index.js
+var require_dist6 = __commonJS({
+  "node_modules/.pnpm/@sigstore+core@4.0.1/node_modules/@sigstore/core/dist/index.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o, m, k, k2) {
+      if (k2 === void 0) k2 = k;
+      var desc = Object.getOwnPropertyDescriptor(m, k);
+      if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m[k];
+        } };
+      }
+      Object.defineProperty(o, k2, desc);
+    }) : (function(o, m, k, k2) {
+      if (k2 === void 0) k2 = k;
+      o[k2] = m[k];
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o, v) {
+      Object.defineProperty(o, "default", { enumerable: true, value: v });
+    }) : function(o, v) {
+      o["default"] = v;
+    });
+    var __importStar = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function(o2) {
+          var ar = [];
+          for (var k in o2) if (Object.prototype.hasOwnProperty.call(o2, k)) ar[ar.length] = k;
+          return ar;
+        };
+        return ownKeys(o);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+    })();
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.X509SCTExtension = exports2.X509Certificate = exports2.EXTENSION_OID_SCT = exports2.ByteStream = exports2.RFC3161Timestamp = exports2.pem = exports2.json = exports2.encoding = exports2.dsse = exports2.crypto = exports2.ASN1Obj = void 0;
+    var asn1_1 = require_asn1();
+    Object.defineProperty(exports2, "ASN1Obj", { enumerable: true, get: function() {
+      return asn1_1.ASN1Obj;
+    } });
+    exports2.crypto = __importStar(require_crypto());
+    exports2.dsse = __importStar(require_dsse());
+    exports2.encoding = __importStar(require_encoding2());
+    exports2.json = __importStar(require_json2());
+    exports2.pem = __importStar(require_pem());
+    var rfc3161_1 = require_rfc3161();
+    Object.defineProperty(exports2, "RFC3161Timestamp", { enumerable: true, get: function() {
+      return rfc3161_1.RFC3161Timestamp;
+    } });
+    var stream_1 = require_stream();
+    Object.defineProperty(exports2, "ByteStream", { enumerable: true, get: function() {
+      return stream_1.ByteStream;
+    } });
+    var x509_1 = require_x509();
+    Object.defineProperty(exports2, "EXTENSION_OID_SCT", { enumerable: true, get: function() {
+      return x509_1.EXTENSION_OID_SCT;
+    } });
+    Object.defineProperty(exports2, "X509Certificate", { enumerable: true, get: function() {
+      return x509_1.X509Certificate;
+    } });
+    Object.defineProperty(exports2, "X509SCTExtension", { enumerable: true, get: function() {
+      return x509_1.X509SCTExtension;
+    } });
+  }
+});
+
+// node_modules/.pnpm/@sigstore+verify@4.1.3/node_modules/@sigstore/verify/dist/bundle/dsse.js
+var require_dsse2 = __commonJS({
+  "node_modules/.pnpm/@sigstore+verify@4.1.3/node_modules/@sigstore/verify/dist/bundle/dsse.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.DSSESignatureContent = void 0;
+    var core_1 = require_dist6();
+    var DSSESignatureContent = class {
+      env;
+      constructor(env) {
+        this.env = env;
+      }
+      compareDigest(digest) {
+        return core_1.crypto.bufferEqual(digest, core_1.crypto.digest("sha256", this.env.payload));
+      }
+      // For a DSSE envelope the signature is computed over the pre-authentication
+      // encoding (PAE), so the digest of the signed bytes is the digest of the PAE.
+      // This is what a Rekor v2 hashedrekord entry records for a DSSE envelope.
+      compareSignedDigest(digest) {
+        return core_1.crypto.bufferEqual(digest, core_1.crypto.digest("sha256", this.preAuthEncoding));
+      }
+      compareSignature(signature) {
+        return core_1.crypto.bufferEqual(signature, this.signature);
+      }
+      verifySignature(key) {
+        return core_1.crypto.verify(this.preAuthEncoding, key, this.signature);
+      }
+      get signature() {
+        return this.env.signatures.length > 0 ? this.env.signatures[0].sig : Buffer.from("");
+      }
+      // DSSE Pre-Authentication Encoding
+      get preAuthEncoding() {
+        return core_1.dsse.preAuthEncoding(this.env.payloadType, this.env.payload);
+      }
+    };
+    exports2.DSSESignatureContent = DSSESignatureContent;
+  }
+});
+
+// node_modules/.pnpm/@sigstore+verify@4.1.3/node_modules/@sigstore/verify/dist/bundle/message.js
+var require_message = __commonJS({
+  "node_modules/.pnpm/@sigstore+verify@4.1.3/node_modules/@sigstore/verify/dist/bundle/message.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.MessageSignatureContent = void 0;
+    var core_1 = require_dist6();
+    var protobuf_specs_1 = require_dist2();
+    var HASH_ALGORITHM_MAP = {
+      [protobuf_specs_1.HashAlgorithm.HASH_ALGORITHM_UNSPECIFIED]: "sha256",
+      [protobuf_specs_1.HashAlgorithm.SHA2_256]: "sha256",
+      [protobuf_specs_1.HashAlgorithm.SHA2_384]: "sha384",
+      [protobuf_specs_1.HashAlgorithm.SHA2_512]: "sha512",
+      [protobuf_specs_1.HashAlgorithm.SHA3_256]: "sha3-256",
+      [protobuf_specs_1.HashAlgorithm.SHA3_384]: "sha3-384"
+    };
+    var MessageSignatureContent = class {
+      signature;
+      messageDigest;
+      artifact;
+      hashAlgorithm;
+      constructor(messageSignature, artifact) {
+        this.signature = messageSignature.signature;
+        this.messageDigest = messageSignature.messageDigest.digest;
+        this.artifact = artifact;
+        this.hashAlgorithm = HASH_ALGORITHM_MAP[messageSignature.messageDigest.algorithm] ?? /* istanbul ignore next */
+        "sha256";
+      }
+      compareSignature(signature) {
+        return core_1.crypto.bufferEqual(signature, this.signature);
+      }
+      compareDigest(digest) {
+        return core_1.crypto.bufferEqual(digest, this.messageDigest);
+      }
+      // For a message signature the signature is computed over the artifact, so the
+      // digest of the signed bytes is the artifact's message digest.
+      compareSignedDigest(digest) {
+        return this.compareDigest(digest);
+      }
+      verifySignature(key) {
+        return core_1.crypto.verify(this.artifact, key, this.signature, this.hashAlgorithm);
+      }
+    };
+    exports2.MessageSignatureContent = MessageSignatureContent;
+  }
+});
+
+// node_modules/.pnpm/@sigstore+verify@4.1.3/node_modules/@sigstore/verify/dist/bundle/index.js
+var require_bundle = __commonJS({
+  "node_modules/.pnpm/@sigstore+verify@4.1.3/node_modules/@sigstore/verify/dist/bundle/index.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.toSignedEntity = toSignedEntity2;
+    exports2.signatureContent = signatureContent;
+    var core_1 = require_dist6();
+    var dsse_1 = require_dsse2();
+    var message_1 = require_message();
+    function toSignedEntity2(bundle, artifact) {
+      const { tlogEntries, timestampVerificationData } = bundle.verificationMaterial;
+      const timestamps = [];
+      for (const entry of tlogEntries) {
+        if (entry.integratedTime && entry.integratedTime !== "0") {
+          timestamps.push({
+            $case: "transparency-log",
+            tlogEntry: entry
+          });
+        }
+      }
+      for (const ts of timestampVerificationData?.rfc3161Timestamps ?? []) {
+        timestamps.push({
+          $case: "timestamp-authority",
+          timestamp: core_1.RFC3161Timestamp.parse(Buffer.from(ts.signedTimestamp))
+        });
+      }
+      return {
+        signature: signatureContent(bundle, artifact),
+        key: key(bundle),
+        tlogEntries,
+        timestamps
+      };
+    }
+    function signatureContent(bundle, artifact) {
+      switch (bundle.content.$case) {
+        case "dsseEnvelope":
+          return new dsse_1.DSSESignatureContent(bundle.content.dsseEnvelope);
+        case "messageSignature":
+          return new message_1.MessageSignatureContent(bundle.content.messageSignature, artifact);
+      }
+    }
+    function key(bundle) {
+      switch (bundle.verificationMaterial.content.$case) {
+        case "publicKey":
+          return {
+            $case: "public-key",
+            hint: bundle.verificationMaterial.content.publicKey.hint
+          };
+        case "x509CertificateChain":
+          return {
+            $case: "certificate",
+            certificate: core_1.X509Certificate.parse(Buffer.from(bundle.verificationMaterial.content.x509CertificateChain.certificates[0].rawBytes))
+          };
+        case "certificate":
+          return {
+            $case: "certificate",
+            certificate: core_1.X509Certificate.parse(Buffer.from(bundle.verificationMaterial.content.certificate.rawBytes))
+          };
+      }
+    }
+  }
+});
+
+// node_modules/.pnpm/@sigstore+verify@4.1.3/node_modules/@sigstore/verify/dist/error.js
+var require_error6 = __commonJS({
+  "node_modules/.pnpm/@sigstore+verify@4.1.3/node_modules/@sigstore/verify/dist/error.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.PolicyError = exports2.VerificationError = void 0;
+    var BaseError = class extends Error {
+      code;
+      cause;
+      /* eslint-disable-line @typescript-eslint/no-explicit-any */
+      constructor({ code, message, cause }) {
+        super(message);
+        this.code = code;
+        this.cause = cause;
+        this.name = this.constructor.name;
+      }
+    };
+    var VerificationError = class extends BaseError {
+    };
+    exports2.VerificationError = VerificationError;
+    var PolicyError = class extends BaseError {
+    };
+    exports2.PolicyError = PolicyError;
+  }
+});
+
+// node_modules/.pnpm/@sigstore+verify@4.1.3/node_modules/@sigstore/verify/dist/trust/filter.js
+var require_filter = __commonJS({
+  "node_modules/.pnpm/@sigstore+verify@4.1.3/node_modules/@sigstore/verify/dist/trust/filter.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.filterCertAuthorities = filterCertAuthorities;
+    exports2.filterTLogAuthorities = filterTLogAuthorities;
+    function filterCertAuthorities(certAuthorities, timestamp) {
+      return certAuthorities.filter((ca) => {
+        return ca.validFor.start <= timestamp && ca.validFor.end >= timestamp;
+      });
+    }
+    function filterTLogAuthorities(tlogAuthorities, criteria) {
+      return tlogAuthorities.filter((tlog) => {
+        if (criteria.logID && !tlog.logID.equals(criteria.logID)) {
+          return false;
+        }
+        return tlog.validFor.start <= criteria.targetDate && criteria.targetDate <= tlog.validFor.end;
+      });
+    }
+  }
+});
+
+// node_modules/.pnpm/@sigstore+verify@4.1.3/node_modules/@sigstore/verify/dist/trust/index.js
+var require_trust = __commonJS({
+  "node_modules/.pnpm/@sigstore+verify@4.1.3/node_modules/@sigstore/verify/dist/trust/index.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.filterTLogAuthorities = exports2.filterCertAuthorities = void 0;
+    exports2.toTrustMaterial = toTrustMaterial2;
+    var core_1 = require_dist6();
+    var protobuf_specs_1 = require_dist2();
+    var error_1 = require_error6();
+    var BEGINNING_OF_TIME = /* @__PURE__ */ new Date(0);
+    var END_OF_TIME = /* @__PURE__ */ new Date(864e13);
+    var filter_1 = require_filter();
+    Object.defineProperty(exports2, "filterCertAuthorities", { enumerable: true, get: function() {
+      return filter_1.filterCertAuthorities;
+    } });
+    Object.defineProperty(exports2, "filterTLogAuthorities", { enumerable: true, get: function() {
+      return filter_1.filterTLogAuthorities;
+    } });
+    function toTrustMaterial2(root, keys) {
+      const keyFinder = typeof keys === "function" ? keys : keyLocator(keys);
+      return {
+        certificateAuthorities: root.certificateAuthorities.map(createCertAuthority),
+        timestampAuthorities: root.timestampAuthorities.map(createCertAuthority),
+        tlogs: root.tlogs.map(createTLogAuthority),
+        ctlogs: root.ctlogs.map(createTLogAuthority),
+        publicKey: keyFinder
+      };
+    }
+    function createTLogAuthority(tlogInstance) {
+      const keyDetails = tlogInstance.publicKey.keyDetails;
+      const keyType = keyDetails === protobuf_specs_1.PublicKeyDetails.PKCS1_RSA_PKCS1V5 || keyDetails === protobuf_specs_1.PublicKeyDetails.PKIX_RSA_PKCS1V5 || keyDetails === protobuf_specs_1.PublicKeyDetails.PKIX_RSA_PKCS1V15_2048_SHA256 || keyDetails === protobuf_specs_1.PublicKeyDetails.PKIX_RSA_PKCS1V15_3072_SHA256 || keyDetails === protobuf_specs_1.PublicKeyDetails.PKIX_RSA_PKCS1V15_4096_SHA256 ? "pkcs1" : "spki";
+      return {
+        baseURL: tlogInstance.baseUrl,
+        logID: tlogInstance.checkpointKeyId ? tlogInstance.checkpointKeyId.keyId : tlogInstance.logId.keyId,
+        publicKey: core_1.crypto.createPublicKey(tlogInstance.publicKey.rawBytes, keyType),
+        validFor: {
+          start: tlogInstance.publicKey.validFor?.start || BEGINNING_OF_TIME,
+          end: tlogInstance.publicKey.validFor?.end || END_OF_TIME
+        }
+      };
+    }
+    function createCertAuthority(ca) {
+      return {
+        certChain: ca.certChain.certificates.map((cert) => {
+          return core_1.X509Certificate.parse(Buffer.from(cert.rawBytes));
+        }),
+        validFor: {
+          start: ca.validFor?.start || BEGINNING_OF_TIME,
+          end: ca.validFor?.end || END_OF_TIME
+        }
+      };
+    }
+    function keyLocator(keys) {
+      return (hint) => {
+        const key = (keys || {})[hint];
+        if (!key) {
+          throw new error_1.VerificationError({
+            code: "PUBLIC_KEY_ERROR",
+            message: `key not found: ${hint}`
+          });
+        }
+        return {
+          publicKey: core_1.crypto.createPublicKey(key.rawBytes),
+          validFor: (date5) => {
+            return (key.validFor?.start || BEGINNING_OF_TIME) <= date5 && (key.validFor?.end || END_OF_TIME) >= date5;
+          }
+        };
+      };
+    }
+  }
+});
+
+// node_modules/.pnpm/@sigstore+verify@4.1.3/node_modules/@sigstore/verify/dist/key/certificate.js
+var require_certificate = __commonJS({
+  "node_modules/.pnpm/@sigstore+verify@4.1.3/node_modules/@sigstore/verify/dist/key/certificate.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.CertificateChainVerifier = void 0;
+    exports2.verifyCertificateChain = verifyCertificateChain;
+    var error_1 = require_error6();
+    var trust_1 = require_trust();
+    function verifyCertificateChain(timestamp, leaf, certificateAuthorities) {
+      const cas = (0, trust_1.filterCertAuthorities)(certificateAuthorities, timestamp);
+      let error62;
+      for (const ca of cas) {
+        try {
+          const verifier = new CertificateChainVerifier({
+            trustedCerts: ca.certChain,
+            untrustedCert: leaf,
+            timestamp
+          });
+          return verifier.verify();
+        } catch (err) {
+          error62 = err;
+        }
+      }
+      throw new error_1.VerificationError({
+        code: "CERTIFICATE_ERROR",
+        message: "Failed to verify certificate chain",
+        cause: error62
+      });
+    }
+    var CertificateChainVerifier = class {
+      untrustedCert;
+      trustedCerts;
+      localCerts;
+      timestamp;
+      constructor(opts) {
+        this.untrustedCert = opts.untrustedCert;
+        this.trustedCerts = opts.trustedCerts;
+        this.localCerts = dedupeCertificates([
+          ...opts.trustedCerts,
+          opts.untrustedCert
+        ]);
+        this.timestamp = opts.timestamp;
+      }
+      verify() {
+        const certificatePath = this.sort();
+        this.checkPath(certificatePath);
+        const validForDate = certificatePath.every((cert) => cert.validForDate(this.timestamp));
+        if (!validForDate) {
+          throw new error_1.VerificationError({
+            code: "CERTIFICATE_ERROR",
+            message: "certificate is not valid or expired at the specified date"
+          });
+        }
+        return certificatePath;
+      }
+      sort() {
+        const leafCert = this.untrustedCert;
+        let paths = this.buildPaths(leafCert);
+        paths = paths.filter((path2) => path2.some((cert) => this.trustedCerts.includes(cert)));
+        if (paths.length === 0) {
+          throw new error_1.VerificationError({
+            code: "CERTIFICATE_ERROR",
+            message: "no trusted certificate path found"
+          });
+        }
+        const path = paths.reduce((prev, curr) => prev.length < curr.length ? prev : curr);
+        return [leafCert, ...path].slice(0, -1);
+      }
+      // Recursively build all possible paths from the leaf to the root
+      buildPaths(certificate) {
+        const paths = [];
+        const issuers = this.findIssuer(certificate);
+        if (issuers.length === 0) {
+          throw new error_1.VerificationError({
+            code: "CERTIFICATE_ERROR",
+            message: "no valid certificate path found"
+          });
+        }
+        for (let i = 0; i < issuers.length; i++) {
+          const issuer = issuers[i];
+          if (issuer.equals(certificate)) {
+            paths.push([certificate]);
+            continue;
+          }
+          const subPaths = this.buildPaths(issuer);
+          for (let j = 0; j < subPaths.length; j++) {
+            paths.push([issuer, ...subPaths[j]]);
+          }
+        }
+        return paths;
+      }
+      // Return all possible issuers for the given certificate
+      findIssuer(certificate) {
+        let issuers = [];
+        let keyIdentifier;
+        if (certificate.subject.equals(certificate.issuer)) {
+          if (certificate.verify()) {
+            return [certificate];
+          }
+        }
+        if (certificate.extAuthorityKeyID) {
+          keyIdentifier = certificate.extAuthorityKeyID.keyIdentifier;
+        }
+        this.localCerts.forEach((possibleIssuer) => {
+          if (keyIdentifier) {
+            if (possibleIssuer.extSubjectKeyID) {
+              if (possibleIssuer.extSubjectKeyID.keyIdentifier.equals(keyIdentifier)) {
+                issuers.push(possibleIssuer);
+              }
+              return;
+            }
+          }
+          if (possibleIssuer.subject.equals(certificate.issuer)) {
+            issuers.push(possibleIssuer);
+          }
+        });
+        issuers = issuers.filter((issuer) => {
+          try {
+            return certificate.verify(issuer);
+          } catch (ex) {
+            return false;
+          }
+        });
+        return issuers;
+      }
+      checkPath(path) {
+        if (path.length < 1) {
+          throw new error_1.VerificationError({
+            code: "CERTIFICATE_ERROR",
+            message: "certificate chain must contain at least one certificate"
+          });
+        }
+        const validCAs = path.slice(1).every((cert) => cert.isCA);
+        if (!validCAs) {
+          throw new error_1.VerificationError({
+            code: "CERTIFICATE_ERROR",
+            message: "intermediate certificate is not a CA"
+          });
+        }
+        for (let i = path.length - 2; i >= 0; i--) {
+          if (!path[i].issuer.equals(path[i + 1].subject)) {
+            throw new error_1.VerificationError({
+              code: "CERTIFICATE_ERROR",
+              message: "incorrect certificate name chaining"
+            });
+          }
+        }
+        for (let i = 0; i < path.length; i++) {
+          const cert = path[i];
+          if (cert.extBasicConstraints?.isCA) {
+            const pathLength = cert.extBasicConstraints.pathLenConstraint;
+            if (pathLength !== void 0 && pathLength < i - 1) {
+              throw new error_1.VerificationError({
+                code: "CERTIFICATE_ERROR",
+                message: "path length constraint exceeded"
+              });
+            }
+          }
+        }
+      }
+    };
+    exports2.CertificateChainVerifier = CertificateChainVerifier;
+    function dedupeCertificates(certs) {
+      for (let i = 0; i < certs.length; i++) {
+        for (let j = i + 1; j < certs.length; j++) {
+          if (certs[i].equals(certs[j])) {
+            certs.splice(j, 1);
+            j--;
+          }
+        }
+      }
+      return certs;
+    }
+  }
+});
+
+// node_modules/.pnpm/@sigstore+verify@4.1.3/node_modules/@sigstore/verify/dist/key/sct.js
+var require_sct2 = __commonJS({
+  "node_modules/.pnpm/@sigstore+verify@4.1.3/node_modules/@sigstore/verify/dist/key/sct.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.verifySCTs = verifySCTs;
+    var core_1 = require_dist6();
+    var error_1 = require_error6();
+    var trust_1 = require_trust();
+    function verifySCTs(cert, issuer, ctlogs) {
+      let extSCT;
+      const clone2 = cert.clone();
+      for (let i = 0; i < clone2.extensions.length; i++) {
+        const ext = clone2.extensions[i];
+        if (ext.subs[0].toOID() === core_1.EXTENSION_OID_SCT) {
+          extSCT = new core_1.X509SCTExtension(ext);
+          clone2.extensions.splice(i, 1);
+          break;
+        }
+      }
+      if (!extSCT) {
+        return [];
+      }
+      if (extSCT.signedCertificateTimestamps.length === 0) {
+        return [];
+      }
+      const preCert = new core_1.ByteStream();
+      const issuerId = core_1.crypto.digest("sha256", issuer.publicKey);
+      preCert.appendView(issuerId);
+      const tbs = clone2.tbsCertificate.toDER();
+      preCert.appendUint24(tbs.length);
+      preCert.appendView(tbs);
+      return extSCT.signedCertificateTimestamps.map((sct) => {
+        const validCTLogs = (0, trust_1.filterTLogAuthorities)(ctlogs, {
+          logID: sct.logID,
+          targetDate: sct.datetime
+        });
+        const verified = validCTLogs.some((log) => sct.verify(preCert.buffer, log.publicKey));
+        if (!verified) {
+          throw new error_1.VerificationError({
+            code: "CERTIFICATE_ERROR",
+            message: "SCT verification failed"
+          });
+        }
+        return sct.logID;
+      });
+    }
+  }
+});
+
+// node_modules/.pnpm/@sigstore+verify@4.1.3/node_modules/@sigstore/verify/dist/key/index.js
+var require_key3 = __commonJS({
+  "node_modules/.pnpm/@sigstore+verify@4.1.3/node_modules/@sigstore/verify/dist/key/index.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.verifyPublicKey = verifyPublicKey;
+    exports2.verifyCertificate = verifyCertificate;
+    var core_1 = require_dist6();
+    var error_1 = require_error6();
+    var certificate_1 = require_certificate();
+    var sct_1 = require_sct2();
+    var OID_FULCIO_ISSUER_V1 = "1.3.6.1.4.1.57264.1.1";
+    var OID_FULCIO_ISSUER_V2 = "1.3.6.1.4.1.57264.1.8";
+    function verifyPublicKey(hint, timestamps, trustMaterial) {
+      const key = trustMaterial.publicKey(hint);
+      timestamps.forEach((timestamp) => {
+        if (!key.validFor(timestamp)) {
+          throw new error_1.VerificationError({
+            code: "PUBLIC_KEY_ERROR",
+            message: `Public key is not valid for timestamp: ${timestamp.toISOString()}`
+          });
+        }
+      });
+      return { key: key.publicKey };
+    }
+    function verifyCertificate(leaf, timestamps, trustMaterial) {
+      let path = [];
+      timestamps.forEach((timestamp) => {
+        path = (0, certificate_1.verifyCertificateChain)(timestamp, leaf, trustMaterial.certificateAuthorities);
+      });
+      return {
+        scts: (0, sct_1.verifySCTs)(path[0], path[1], trustMaterial.ctlogs),
+        signer: getSigner(path[0])
+      };
+    }
+    function getSigner(cert) {
+      let issuer;
+      const issuerExtension = cert.extension(OID_FULCIO_ISSUER_V2);
+      if (issuerExtension) {
+        issuer = issuerExtension.valueObj.subs?.[0]?.value.toString("ascii");
+      } else {
+        issuer = cert.extension(OID_FULCIO_ISSUER_V1)?.value.toString("ascii");
+      }
+      const oids = cert.extensions.map((ext) => {
+        const oid = ext.subs[0].toOID();
+        return {
+          oid: { id: oid.split(".").map(Number) },
+          value: ext.subs[ext.subs.length - 1].value
+        };
+      });
+      const identity = {
+        extensions: { issuer },
+        subjectAlternativeName: cert.subjectAltName,
+        oids
+      };
+      return {
+        key: core_1.crypto.createPublicKey(cert.publicKey),
+        identity
+      };
+    }
+  }
+});
+
+// node_modules/.pnpm/@sigstore+verify@4.1.3/node_modules/@sigstore/verify/dist/policy.js
+var require_policy = __commonJS({
+  "node_modules/.pnpm/@sigstore+verify@4.1.3/node_modules/@sigstore/verify/dist/policy.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.verifySubjectAlternativeName = verifySubjectAlternativeName;
+    exports2.verifyExtensions = verifyExtensions;
+    exports2.verifyOIDs = verifyOIDs;
+    var error_1 = require_error6();
+    function verifySubjectAlternativeName(policyIdentity, signerIdentity) {
+      if (signerIdentity === void 0 || !signerIdentity.match(policyIdentity)) {
+        throw new error_1.PolicyError({
+          code: "UNTRUSTED_SIGNER_ERROR",
+          message: `certificate identity error - expected ${policyIdentity}, got ${signerIdentity}`
+        });
+      }
+    }
+    function verifyExtensions(policyExtensions, signerExtensions = {}) {
+      let key;
+      for (key in policyExtensions) {
+        if (signerExtensions[key] !== policyExtensions[key]) {
+          throw new error_1.PolicyError({
+            code: "UNTRUSTED_SIGNER_ERROR",
+            message: `invalid certificate extension - expected ${key}=${policyExtensions[key]}, got ${key}=${signerExtensions[key]}`
+          });
+        }
+      }
+    }
+    function verifyOIDs(policyOIDs, signerOIDs = []) {
+      for (const policyOID of policyOIDs) {
+        const match = signerOIDs.find((signerOID) => oidEquals(policyOID.oid?.id, signerOID.oid?.id) && policyOID.value.equals(signerOID.value));
+        if (!match) {
+          const oid = policyOID.oid?.id.join(".") ?? "<unknown>";
+          throw new error_1.PolicyError({
+            code: "UNTRUSTED_SIGNER_ERROR",
+            message: `invalid certificate extension - missing OID ${oid}`
+          });
+        }
+      }
+    }
+    function oidEquals(a, b) {
+      if (a === void 0 || b === void 0) {
+        return false;
+      }
+      return a.length === b.length && a.every((v, i) => v === b[i]);
+    }
+  }
+});
+
+// node_modules/.pnpm/@sigstore+verify@4.1.3/node_modules/@sigstore/verify/dist/timestamp/tsa.js
+var require_tsa = __commonJS({
+  "node_modules/.pnpm/@sigstore+verify@4.1.3/node_modules/@sigstore/verify/dist/timestamp/tsa.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.verifyRFC3161Timestamp = verifyRFC3161Timestamp;
+    var core_1 = require_dist6();
+    var error_1 = require_error6();
+    var certificate_1 = require_certificate();
+    var trust_1 = require_trust();
+    function verifyRFC3161Timestamp(timestamp, data, timestampAuthorities) {
+      const signingTime = timestamp.signingTime;
+      timestampAuthorities = (0, trust_1.filterCertAuthorities)(timestampAuthorities, signingTime);
+      timestampAuthorities = filterCAsBySerialAndIssuer(timestampAuthorities, {
+        serialNumber: timestamp.signerSerialNumber,
+        issuer: timestamp.signerIssuer
+      });
+      const verified = timestampAuthorities.some((ca) => {
+        try {
+          verifyTimestampForCA(timestamp, data, ca);
+          return true;
+        } catch (e) {
+          return false;
+        }
+      });
+      if (!verified) {
+        throw new error_1.VerificationError({
+          code: "TIMESTAMP_ERROR",
+          message: "timestamp could not be verified"
+        });
+      }
+    }
+    function verifyTimestampForCA(timestamp, data, ca) {
+      const [leaf, ...cas] = ca.certChain;
+      const signingKey = core_1.crypto.createPublicKey(leaf.publicKey);
+      const signingTime = timestamp.signingTime;
+      try {
+        new certificate_1.CertificateChainVerifier({
+          untrustedCert: leaf,
+          trustedCerts: cas,
+          timestamp: signingTime
+        }).verify();
+      } catch (e) {
+        throw new error_1.VerificationError({
+          code: "TIMESTAMP_ERROR",
+          message: "invalid certificate chain"
+        });
+      }
+      timestamp.verify(data, signingKey);
+    }
+    function filterCAsBySerialAndIssuer(timestampAuthorities, criteria) {
+      return timestampAuthorities.filter((ca) => ca.certChain.length > 0 && core_1.crypto.bufferEqual(ca.certChain[0].serialNumber, criteria.serialNumber) && core_1.crypto.bufferEqual(ca.certChain[0].issuer, criteria.issuer));
+    }
+  }
+});
+
+// node_modules/.pnpm/@sigstore+verify@4.1.3/node_modules/@sigstore/verify/dist/timestamp/index.js
+var require_timestamp6 = __commonJS({
+  "node_modules/.pnpm/@sigstore+verify@4.1.3/node_modules/@sigstore/verify/dist/timestamp/index.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.getTSATimestamp = getTSATimestamp;
+    exports2.getTLogTimestamp = getTLogTimestamp;
+    var tsa_1 = require_tsa();
+    function getTSATimestamp(timestamp, data, timestampAuthorities) {
+      (0, tsa_1.verifyRFC3161Timestamp)(timestamp, data, timestampAuthorities);
+      return {
+        type: "timestamp-authority",
+        logID: timestamp.signerSerialNumber,
+        timestamp: timestamp.signingTime
+      };
+    }
+    function getTLogTimestamp(entry) {
+      if (!entry.inclusionPromise) {
+        return void 0;
+      }
+      return {
+        type: "transparency-log",
+        logID: entry.logId.keyId,
+        timestamp: new Date(Number(entry.integratedTime) * 1e3)
+      };
+    }
+  }
+});
+
+// node_modules/.pnpm/@sigstore+protobuf-specs@0.5.2/node_modules/@sigstore/protobuf-specs/dist/__generated__/rekor/v2/verifier.js
+var require_verifier = __commonJS({
+  "node_modules/.pnpm/@sigstore+protobuf-specs@0.5.2/node_modules/@sigstore/protobuf-specs/dist/__generated__/rekor/v2/verifier.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.Signature = exports2.Verifier = exports2.PublicKey = void 0;
+    var sigstore_common_1 = require_sigstore_common();
+    exports2.PublicKey = {
+      fromJSON(object2) {
+        return { rawBytes: isSet(object2.rawBytes) ? Buffer.from(bytesFromBase64(object2.rawBytes)) : Buffer.alloc(0) };
+      },
+      toJSON(message) {
+        const obj = {};
+        if (message.rawBytes.length !== 0) {
+          obj.rawBytes = base64FromBytes(message.rawBytes);
+        }
+        return obj;
+      }
+    };
+    exports2.Verifier = {
+      fromJSON(object2) {
+        return {
+          verifier: isSet(object2.publicKey) ? { $case: "publicKey", publicKey: exports2.PublicKey.fromJSON(object2.publicKey) } : isSet(object2.x509Certificate) ? { $case: "x509Certificate", x509Certificate: sigstore_common_1.X509Certificate.fromJSON(object2.x509Certificate) } : void 0,
+          keyDetails: isSet(object2.keyDetails) ? (0, sigstore_common_1.publicKeyDetailsFromJSON)(object2.keyDetails) : 0
+        };
+      },
+      toJSON(message) {
+        const obj = {};
+        if (message.verifier?.$case === "publicKey") {
+          obj.publicKey = exports2.PublicKey.toJSON(message.verifier.publicKey);
+        } else if (message.verifier?.$case === "x509Certificate") {
+          obj.x509Certificate = sigstore_common_1.X509Certificate.toJSON(message.verifier.x509Certificate);
+        }
+        if (message.keyDetails !== 0) {
+          obj.keyDetails = (0, sigstore_common_1.publicKeyDetailsToJSON)(message.keyDetails);
+        }
+        return obj;
+      }
+    };
+    exports2.Signature = {
+      fromJSON(object2) {
+        return {
+          content: isSet(object2.content) ? Buffer.from(bytesFromBase64(object2.content)) : Buffer.alloc(0),
+          verifier: isSet(object2.verifier) ? exports2.Verifier.fromJSON(object2.verifier) : void 0
+        };
+      },
+      toJSON(message) {
+        const obj = {};
+        if (message.content.length !== 0) {
+          obj.content = base64FromBytes(message.content);
+        }
+        if (message.verifier !== void 0) {
+          obj.verifier = exports2.Verifier.toJSON(message.verifier);
+        }
+        return obj;
+      }
+    };
+    function bytesFromBase64(b64) {
+      return Uint8Array.from(globalThis.Buffer.from(b64, "base64"));
+    }
+    function base64FromBytes(arr) {
+      return globalThis.Buffer.from(arr).toString("base64");
+    }
+    function isSet(value) {
+      return value !== null && value !== void 0;
+    }
+  }
+});
+
+// node_modules/.pnpm/@sigstore+protobuf-specs@0.5.2/node_modules/@sigstore/protobuf-specs/dist/__generated__/rekor/v2/dsse.js
+var require_dsse3 = __commonJS({
+  "node_modules/.pnpm/@sigstore+protobuf-specs@0.5.2/node_modules/@sigstore/protobuf-specs/dist/__generated__/rekor/v2/dsse.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.DSSELogEntryV002 = exports2.DSSERequestV002 = void 0;
+    var envelope_1 = require_envelope();
+    var sigstore_common_1 = require_sigstore_common();
+    var verifier_1 = require_verifier();
+    exports2.DSSERequestV002 = {
+      fromJSON(object2) {
+        return {
+          envelope: isSet(object2.envelope) ? envelope_1.Envelope.fromJSON(object2.envelope) : void 0,
+          verifiers: globalThis.Array.isArray(object2?.verifiers) ? object2.verifiers.map((e) => verifier_1.Verifier.fromJSON(e)) : []
+        };
+      },
+      toJSON(message) {
+        const obj = {};
+        if (message.envelope !== void 0) {
+          obj.envelope = envelope_1.Envelope.toJSON(message.envelope);
+        }
+        if (message.verifiers?.length) {
+          obj.verifiers = message.verifiers.map((e) => verifier_1.Verifier.toJSON(e));
+        }
+        return obj;
+      }
+    };
+    exports2.DSSELogEntryV002 = {
+      fromJSON(object2) {
+        return {
+          payloadHash: isSet(object2.payloadHash) ? sigstore_common_1.HashOutput.fromJSON(object2.payloadHash) : void 0,
+          signatures: globalThis.Array.isArray(object2?.signatures) ? object2.signatures.map((e) => verifier_1.Signature.fromJSON(e)) : []
+        };
+      },
+      toJSON(message) {
+        const obj = {};
+        if (message.payloadHash !== void 0) {
+          obj.payloadHash = sigstore_common_1.HashOutput.toJSON(message.payloadHash);
+        }
+        if (message.signatures?.length) {
+          obj.signatures = message.signatures.map((e) => verifier_1.Signature.toJSON(e));
+        }
+        return obj;
+      }
+    };
+    function isSet(value) {
+      return value !== null && value !== void 0;
+    }
+  }
+});
+
+// node_modules/.pnpm/@sigstore+protobuf-specs@0.5.2/node_modules/@sigstore/protobuf-specs/dist/__generated__/rekor/v2/hashedrekord.js
+var require_hashedrekord = __commonJS({
+  "node_modules/.pnpm/@sigstore+protobuf-specs@0.5.2/node_modules/@sigstore/protobuf-specs/dist/__generated__/rekor/v2/hashedrekord.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.HashedRekordLogEntryV002 = exports2.HashedRekordRequestV002 = void 0;
+    var sigstore_common_1 = require_sigstore_common();
+    var verifier_1 = require_verifier();
+    exports2.HashedRekordRequestV002 = {
+      fromJSON(object2) {
+        return {
+          digest: isSet(object2.digest) ? Buffer.from(bytesFromBase64(object2.digest)) : Buffer.alloc(0),
+          signature: isSet(object2.signature) ? verifier_1.Signature.fromJSON(object2.signature) : void 0
+        };
+      },
+      toJSON(message) {
+        const obj = {};
+        if (message.digest.length !== 0) {
+          obj.digest = base64FromBytes(message.digest);
+        }
+        if (message.signature !== void 0) {
+          obj.signature = verifier_1.Signature.toJSON(message.signature);
+        }
+        return obj;
+      }
+    };
+    exports2.HashedRekordLogEntryV002 = {
+      fromJSON(object2) {
+        return {
+          data: isSet(object2.data) ? sigstore_common_1.HashOutput.fromJSON(object2.data) : void 0,
+          signature: isSet(object2.signature) ? verifier_1.Signature.fromJSON(object2.signature) : void 0
+        };
+      },
+      toJSON(message) {
+        const obj = {};
+        if (message.data !== void 0) {
+          obj.data = sigstore_common_1.HashOutput.toJSON(message.data);
+        }
+        if (message.signature !== void 0) {
+          obj.signature = verifier_1.Signature.toJSON(message.signature);
+        }
+        return obj;
+      }
+    };
+    function bytesFromBase64(b64) {
+      return Uint8Array.from(globalThis.Buffer.from(b64, "base64"));
+    }
+    function base64FromBytes(arr) {
+      return globalThis.Buffer.from(arr).toString("base64");
+    }
+    function isSet(value) {
+      return value !== null && value !== void 0;
+    }
+  }
+});
+
+// node_modules/.pnpm/@sigstore+protobuf-specs@0.5.2/node_modules/@sigstore/protobuf-specs/dist/__generated__/rekor/v2/entry.js
+var require_entry = __commonJS({
+  "node_modules/.pnpm/@sigstore+protobuf-specs@0.5.2/node_modules/@sigstore/protobuf-specs/dist/__generated__/rekor/v2/entry.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.CreateEntryRequest = exports2.Spec = exports2.Entry = void 0;
+    var dsse_1 = require_dsse3();
+    var hashedrekord_1 = require_hashedrekord();
+    exports2.Entry = {
+      fromJSON(object2) {
+        return {
+          kind: isSet(object2.kind) ? globalThis.String(object2.kind) : "",
+          apiVersion: isSet(object2.apiVersion) ? globalThis.String(object2.apiVersion) : "",
+          spec: isSet(object2.spec) ? exports2.Spec.fromJSON(object2.spec) : void 0
+        };
+      },
+      toJSON(message) {
+        const obj = {};
+        if (message.kind !== "") {
+          obj.kind = message.kind;
+        }
+        if (message.apiVersion !== "") {
+          obj.apiVersion = message.apiVersion;
+        }
+        if (message.spec !== void 0) {
+          obj.spec = exports2.Spec.toJSON(message.spec);
+        }
+        return obj;
+      }
+    };
+    exports2.Spec = {
+      fromJSON(object2) {
+        return {
+          spec: isSet(object2.hashedRekordV002) ? { $case: "hashedRekordV002", hashedRekordV002: hashedrekord_1.HashedRekordLogEntryV002.fromJSON(object2.hashedRekordV002) } : isSet(object2.dsseV002) ? { $case: "dsseV002", dsseV002: dsse_1.DSSELogEntryV002.fromJSON(object2.dsseV002) } : void 0
+        };
+      },
+      toJSON(message) {
+        const obj = {};
+        if (message.spec?.$case === "hashedRekordV002") {
+          obj.hashedRekordV002 = hashedrekord_1.HashedRekordLogEntryV002.toJSON(message.spec.hashedRekordV002);
+        } else if (message.spec?.$case === "dsseV002") {
+          obj.dsseV002 = dsse_1.DSSELogEntryV002.toJSON(message.spec.dsseV002);
+        }
+        return obj;
+      }
+    };
+    exports2.CreateEntryRequest = {
+      fromJSON(object2) {
+        return {
+          spec: isSet(object2.hashedRekordRequestV002) ? {
+            $case: "hashedRekordRequestV002",
+            hashedRekordRequestV002: hashedrekord_1.HashedRekordRequestV002.fromJSON(object2.hashedRekordRequestV002)
+          } : isSet(object2.dsseRequestV002) ? { $case: "dsseRequestV002", dsseRequestV002: dsse_1.DSSERequestV002.fromJSON(object2.dsseRequestV002) } : void 0
+        };
+      },
+      toJSON(message) {
+        const obj = {};
+        if (message.spec?.$case === "hashedRekordRequestV002") {
+          obj.hashedRekordRequestV002 = hashedrekord_1.HashedRekordRequestV002.toJSON(message.spec.hashedRekordRequestV002);
+        } else if (message.spec?.$case === "dsseRequestV002") {
+          obj.dsseRequestV002 = dsse_1.DSSERequestV002.toJSON(message.spec.dsseRequestV002);
+        }
+        return obj;
+      }
+    };
+    function isSet(value) {
+      return value !== null && value !== void 0;
+    }
+  }
+});
+
+// node_modules/.pnpm/@sigstore+protobuf-specs@0.5.2/node_modules/@sigstore/protobuf-specs/dist/rekor/v2/index.js
+var require_v2 = __commonJS({
+  "node_modules/.pnpm/@sigstore+protobuf-specs@0.5.2/node_modules/@sigstore/protobuf-specs/dist/rekor/v2/index.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o, m, k, k2) {
+      if (k2 === void 0) k2 = k;
+      var desc = Object.getOwnPropertyDescriptor(m, k);
+      if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m[k];
+        } };
+      }
+      Object.defineProperty(o, k2, desc);
+    }) : (function(o, m, k, k2) {
+      if (k2 === void 0) k2 = k;
+      o[k2] = m[k];
+    }));
+    var __exportStar = exports2 && exports2.__exportStar || function(m, exports3) {
+      for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports3, p)) __createBinding(exports3, m, p);
+    };
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    __exportStar(require_dsse3(), exports2);
+    __exportStar(require_entry(), exports2);
+    __exportStar(require_hashedrekord(), exports2);
+    __exportStar(require_verifier(), exports2);
+  }
+});
+
+// node_modules/.pnpm/@sigstore+verify@4.1.3/node_modules/@sigstore/verify/dist/tlog/dsse.js
+var require_dsse4 = __commonJS({
+  "node_modules/.pnpm/@sigstore+verify@4.1.3/node_modules/@sigstore/verify/dist/tlog/dsse.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.DSSE_API_VERSION_V1 = void 0;
+    exports2.verifyDSSETLogBody = verifyDSSETLogBody;
+    exports2.verifyDSSETLogBodyV2 = verifyDSSETLogBodyV2;
+    var error_1 = require_error6();
+    exports2.DSSE_API_VERSION_V1 = "0.0.1";
+    function verifyDSSETLogBody(tlogEntry, content) {
+      switch (tlogEntry.apiVersion) {
+        case exports2.DSSE_API_VERSION_V1:
+          return verifyDSSE001TLogBody(tlogEntry, content);
+        default:
+          throw new error_1.VerificationError({
+            code: "TLOG_BODY_ERROR",
+            message: `unsupported dsse version: ${tlogEntry.apiVersion}`
+          });
+      }
+    }
+    function verifyDSSETLogBodyV2(tlogEntry, content) {
+      const spec = tlogEntry.spec?.spec;
+      if (!spec) {
+        throw new error_1.VerificationError({
+          code: "TLOG_BODY_ERROR",
+          message: `missing dsse spec`
+        });
+      }
+      switch (spec.$case) {
+        case "dsseV002":
+          return verifyDSSE002TLogBody(spec.dsseV002, content);
+        default:
+          throw new error_1.VerificationError({
+            code: "TLOG_BODY_ERROR",
+            message: `unsupported version: ${spec.$case}`
+          });
+      }
+    }
+    function verifyDSSE001TLogBody(tlogEntry, content) {
+      if (tlogEntry.spec.signatures?.length !== 1) {
+        throw new error_1.VerificationError({
+          code: "TLOG_BODY_ERROR",
+          message: "signature count mismatch"
+        });
+      }
+      const tlogSig = tlogEntry.spec.signatures[0].signature;
+      if (!content.compareSignature(Buffer.from(tlogSig, "base64")))
+        throw new error_1.VerificationError({
+          code: "TLOG_BODY_ERROR",
+          message: "tlog entry signature mismatch"
+        });
+      const tlogHash = tlogEntry.spec.payloadHash?.value || "";
+      if (!content.compareDigest(Buffer.from(tlogHash, "hex"))) {
+        throw new error_1.VerificationError({
+          code: "TLOG_BODY_ERROR",
+          message: "DSSE payload hash mismatch"
+        });
+      }
+    }
+    function verifyDSSE002TLogBody(spec, content) {
+      if (spec.signatures?.length !== 1) {
+        throw new error_1.VerificationError({
+          code: "TLOG_BODY_ERROR",
+          message: "signature count mismatch"
+        });
+      }
+      const tlogSig = spec.signatures[0].content;
+      if (!content.compareSignature(tlogSig))
+        throw new error_1.VerificationError({
+          code: "TLOG_BODY_ERROR",
+          message: "tlog entry signature mismatch"
+        });
+      const tlogHash = spec.payloadHash?.digest || Buffer.from("");
+      if (!content.compareDigest(tlogHash)) {
+        throw new error_1.VerificationError({
+          code: "TLOG_BODY_ERROR",
+          message: "DSSE payload hash mismatch"
+        });
+      }
+    }
+  }
+});
+
+// node_modules/.pnpm/@sigstore+verify@4.1.3/node_modules/@sigstore/verify/dist/tlog/hashedrekord.js
+var require_hashedrekord2 = __commonJS({
+  "node_modules/.pnpm/@sigstore+verify@4.1.3/node_modules/@sigstore/verify/dist/tlog/hashedrekord.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.HASHEDREKORD_API_VERSION_V1 = void 0;
+    exports2.verifyHashedRekordTLogBody = verifyHashedRekordTLogBody;
+    exports2.verifyHashedRekordTLogBodyV2 = verifyHashedRekordTLogBodyV2;
+    var error_1 = require_error6();
+    exports2.HASHEDREKORD_API_VERSION_V1 = "0.0.1";
+    function verifyHashedRekordTLogBody(tlogEntry, content) {
+      switch (tlogEntry.apiVersion) {
+        case exports2.HASHEDREKORD_API_VERSION_V1:
+          return verifyHashedrekord001TLogBody(tlogEntry, content);
+        default:
+          throw new error_1.VerificationError({
+            code: "TLOG_BODY_ERROR",
+            message: `unsupported hashedrekord version: ${tlogEntry.apiVersion}`
+          });
+      }
+    }
+    function verifyHashedRekordTLogBodyV2(tlogEntry, content) {
+      const spec = tlogEntry.spec?.spec;
+      if (!spec) {
+        throw new error_1.VerificationError({
+          code: "TLOG_BODY_ERROR",
+          message: `missing dsse spec`
+        });
+      }
+      switch (spec.$case) {
+        case "hashedRekordV002":
+          return verifyHashedrekord002TLogBody(spec.hashedRekordV002, content);
+        default:
+          throw new error_1.VerificationError({
+            code: "TLOG_BODY_ERROR",
+            message: `unsupported version: ${spec.$case}`
+          });
+      }
+    }
+    function verifyHashedrekord001TLogBody(tlogEntry, content) {
+      const tlogSig = tlogEntry.spec.signature.content || "";
+      if (!content.compareSignature(Buffer.from(tlogSig, "base64"))) {
+        throw new error_1.VerificationError({
+          code: "TLOG_BODY_ERROR",
+          message: "signature mismatch"
+        });
+      }
+      const tlogDigest = tlogEntry.spec.data.hash?.value || "";
+      if (!content.compareSignedDigest(Buffer.from(tlogDigest, "hex"))) {
+        throw new error_1.VerificationError({
+          code: "TLOG_BODY_ERROR",
+          message: "digest mismatch"
+        });
+      }
+    }
+    function verifyHashedrekord002TLogBody(spec, content) {
+      const tlogSig = spec.signature?.content || Buffer.from("");
+      if (!content.compareSignature(tlogSig)) {
+        throw new error_1.VerificationError({
+          code: "TLOG_BODY_ERROR",
+          message: "signature mismatch"
+        });
+      }
+      const tlogHash = spec.data?.digest || Buffer.from("");
+      if (!content.compareSignedDigest(tlogHash)) {
+        throw new error_1.VerificationError({
+          code: "TLOG_BODY_ERROR",
+          message: "digest mismatch"
+        });
+      }
+    }
+  }
+});
+
+// node_modules/.pnpm/@sigstore+verify@4.1.3/node_modules/@sigstore/verify/dist/tlog/intoto.js
+var require_intoto = __commonJS({
+  "node_modules/.pnpm/@sigstore+verify@4.1.3/node_modules/@sigstore/verify/dist/tlog/intoto.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.verifyIntotoTLogBody = verifyIntotoTLogBody;
+    var error_1 = require_error6();
+    function verifyIntotoTLogBody(tlogEntry, content) {
+      switch (tlogEntry.apiVersion) {
+        case "0.0.2":
+          return verifyIntoto002TLogBody(tlogEntry, content);
+        default:
+          throw new error_1.VerificationError({
+            code: "TLOG_BODY_ERROR",
+            message: `unsupported intoto version: ${tlogEntry.apiVersion}`
+          });
+      }
+    }
+    function verifyIntoto002TLogBody(tlogEntry, content) {
+      if (tlogEntry.spec.content.envelope.signatures?.length !== 1) {
+        throw new error_1.VerificationError({
+          code: "TLOG_BODY_ERROR",
+          message: "signature count mismatch"
+        });
+      }
+      const tlogSig = base64Decode(tlogEntry.spec.content.envelope.signatures[0].sig);
+      if (!content.compareSignature(Buffer.from(tlogSig, "base64"))) {
+        throw new error_1.VerificationError({
+          code: "TLOG_BODY_ERROR",
+          message: "tlog entry signature mismatch"
+        });
+      }
+      const tlogHash = tlogEntry.spec.content.payloadHash?.value || "";
+      if (!content.compareDigest(Buffer.from(tlogHash, "hex"))) {
+        throw new error_1.VerificationError({
+          code: "TLOG_BODY_ERROR",
+          message: "DSSE payload hash mismatch"
+        });
+      }
+    }
+    function base64Decode(str2) {
+      return Buffer.from(str2, "base64").toString("utf-8");
+    }
+  }
+});
+
+// node_modules/.pnpm/@sigstore+verify@4.1.3/node_modules/@sigstore/verify/dist/tlog/checkpoint.js
+var require_checkpoint = __commonJS({
+  "node_modules/.pnpm/@sigstore+verify@4.1.3/node_modules/@sigstore/verify/dist/tlog/checkpoint.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.LogCheckpoint = void 0;
+    exports2.verifyCheckpoint = verifyCheckpoint;
+    var core_1 = require_dist6();
+    var error_1 = require_error6();
+    var CHECKPOINT_SEPARATOR = "\n\n";
+    var SIGNATURE_REGEX = /\u2014 (\S+) (\S+)\n/g;
+    function verifyCheckpoint(entry, tlogs) {
+      const inclusionProof = entry.inclusionProof;
+      const signedNote = SignedNote.fromString(inclusionProof.checkpoint.envelope);
+      const checkpoint = LogCheckpoint.fromString(signedNote.note);
+      if (!verifySignedNote(signedNote, tlogs)) {
+        throw new error_1.VerificationError({
+          code: "TLOG_INCLUSION_PROOF_ERROR",
+          message: "invalid checkpoint signature"
+        });
+      }
+      return checkpoint;
+    }
+    function verifySignedNote(signedNote, tlogs) {
+      const data = Buffer.from(signedNote.note, "utf-8");
+      return signedNote.signatures.some((signature) => {
+        const tlog = tlogs.find((tlog2) => core_1.crypto.bufferEqual(tlog2.logID.subarray(0, 4), signature.keyHint) && // Match the signature name to the base URL of the tlog. The name is
+        // attacker-controlled, so it MUST be compared as a literal substring
+        // and never coerced into a RegExp (as String.prototype.match would).
+        tlog2.baseURL.includes(signature.name));
+        if (!tlog) {
+          return false;
+        }
+        return core_1.crypto.verify(data, tlog.publicKey, signature.signature);
+      });
+    }
+    var SignedNote = class _SignedNote {
+      note;
+      signatures;
+      constructor(note, signatures) {
+        this.note = note;
+        this.signatures = signatures;
+      }
+      // Deserialize a SignedNote from a string
+      static fromString(envelope) {
+        if (!envelope.includes(CHECKPOINT_SEPARATOR)) {
+          throw new error_1.VerificationError({
+            code: "TLOG_INCLUSION_PROOF_ERROR",
+            message: "missing checkpoint separator"
+          });
+        }
+        const split = envelope.indexOf(CHECKPOINT_SEPARATOR);
+        const header = envelope.slice(0, split + 1);
+        const data = envelope.slice(split + CHECKPOINT_SEPARATOR.length);
+        const matches = data.matchAll(SIGNATURE_REGEX);
+        const signatures = Array.from(matches, (match) => {
+          const [, name, signature] = match;
+          const sigBytes = Buffer.from(signature, "base64");
+          if (sigBytes.length < 5) {
+            throw new error_1.VerificationError({
+              code: "TLOG_INCLUSION_PROOF_ERROR",
+              message: "malformed checkpoint signature"
+            });
+          }
+          return {
+            name,
+            keyHint: sigBytes.subarray(0, 4),
+            signature: sigBytes.subarray(4)
+          };
+        });
+        if (signatures.length === 0) {
+          throw new error_1.VerificationError({
+            code: "TLOG_INCLUSION_PROOF_ERROR",
+            message: "no signatures found in checkpoint"
+          });
+        }
+        return new _SignedNote(header, signatures);
+      }
+    };
+    var LogCheckpoint = class _LogCheckpoint {
+      origin;
+      logSize;
+      logHash;
+      rest;
+      constructor(origin, logSize, logHash, rest) {
+        this.origin = origin;
+        this.logSize = logSize;
+        this.logHash = logHash;
+        this.rest = rest;
+      }
+      static fromString(note) {
+        const lines = note.trimEnd().split("\n");
+        if (lines.length < 3) {
+          throw new error_1.VerificationError({
+            code: "TLOG_INCLUSION_PROOF_ERROR",
+            message: "too few lines in checkpoint header"
+          });
+        }
+        const origin = lines[0];
+        let logSize;
+        try {
+          logSize = BigInt(lines[1]);
+        } catch {
+          throw new error_1.VerificationError({
+            code: "TLOG_INCLUSION_PROOF_ERROR",
+            message: "invalid checkpoint log size"
+          });
+        }
+        const rootHash = Buffer.from(lines[2], "base64");
+        const rest = lines.slice(3);
+        return new _LogCheckpoint(origin, logSize, rootHash, rest);
+      }
+    };
+    exports2.LogCheckpoint = LogCheckpoint;
+  }
+});
+
+// node_modules/.pnpm/@sigstore+verify@4.1.3/node_modules/@sigstore/verify/dist/tlog/merkle.js
+var require_merkle = __commonJS({
+  "node_modules/.pnpm/@sigstore+verify@4.1.3/node_modules/@sigstore/verify/dist/tlog/merkle.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.verifyMerkleInclusion = verifyMerkleInclusion;
+    var core_1 = require_dist6();
+    var error_1 = require_error6();
+    var RFC6962_LEAF_HASH_PREFIX = Buffer.from([0]);
+    var RFC6962_NODE_HASH_PREFIX = Buffer.from([1]);
+    function verifyMerkleInclusion(entry, checkpoint) {
+      const inclusionProof = entry.inclusionProof;
+      let logIndex;
+      try {
+        logIndex = BigInt(inclusionProof.logIndex);
+      } catch {
+        throw new error_1.VerificationError({
+          code: "TLOG_INCLUSION_PROOF_ERROR",
+          message: "invalid inclusion proof log index"
+        });
+      }
+      const treeSize = BigInt(checkpoint.logSize);
+      if (logIndex < 0n || logIndex >= treeSize) {
+        throw new error_1.VerificationError({
+          code: "TLOG_INCLUSION_PROOF_ERROR",
+          message: `invalid index: ${logIndex}`
+        });
+      }
+      const { inner, border } = decompInclProof(logIndex, treeSize);
+      if (inclusionProof.hashes.length !== inner + border) {
+        throw new error_1.VerificationError({
+          code: "TLOG_INCLUSION_PROOF_ERROR",
+          message: "invalid hash count"
+        });
+      }
+      const innerHashes = inclusionProof.hashes.slice(0, inner);
+      const borderHashes = inclusionProof.hashes.slice(inner);
+      const leafHash = hashLeaf(entry.canonicalizedBody);
+      const calculatedHash = chainBorderRight(chainInner(leafHash, innerHashes, logIndex), borderHashes);
+      if (!core_1.crypto.bufferEqual(calculatedHash, checkpoint.logHash)) {
+        throw new error_1.VerificationError({
+          code: "TLOG_INCLUSION_PROOF_ERROR",
+          message: "calculated root hash does not match inclusion proof"
+        });
+      }
+    }
+    function decompInclProof(index, size) {
+      const inner = innerProofSize(index, size);
+      const border = onesCount(index >> BigInt(inner));
+      return { inner, border };
+    }
+    function chainInner(seed, hashes, index) {
+      return hashes.reduce((acc, h, i) => {
+        if (index >> BigInt(i) & BigInt(1)) {
+          return hashChildren(h, acc);
+        } else {
+          return hashChildren(acc, h);
+        }
+      }, seed);
+    }
+    function chainBorderRight(seed, hashes) {
+      return hashes.reduce((acc, h) => hashChildren(h, acc), seed);
+    }
+    function innerProofSize(index, size) {
+      return bitLength(index ^ size - BigInt(1));
+    }
+    function onesCount(num) {
+      return num.toString(2).split("1").length - 1;
+    }
+    function bitLength(n) {
+      if (n === 0n) {
+        return 0;
+      }
+      return n.toString(2).length;
+    }
+    function hashChildren(left, right) {
+      return core_1.crypto.digest("sha256", RFC6962_NODE_HASH_PREFIX, left, right);
+    }
+    function hashLeaf(leaf) {
+      return core_1.crypto.digest("sha256", RFC6962_LEAF_HASH_PREFIX, leaf);
+    }
+  }
+});
+
+// node_modules/.pnpm/@sigstore+verify@4.1.3/node_modules/@sigstore/verify/dist/tlog/set.js
+var require_set3 = __commonJS({
+  "node_modules/.pnpm/@sigstore+verify@4.1.3/node_modules/@sigstore/verify/dist/tlog/set.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.verifyTLogSET = verifyTLogSET;
+    var core_1 = require_dist6();
+    var error_1 = require_error6();
+    var trust_1 = require_trust();
+    function verifyTLogSET(entry, tlogs) {
+      const validTLogs = (0, trust_1.filterTLogAuthorities)(tlogs, {
+        logID: entry.logId.keyId,
+        targetDate: new Date(Number(entry.integratedTime) * 1e3)
+      });
+      const verified = validTLogs.some((tlog) => {
+        const payload = toVerificationPayload(entry);
+        const data = Buffer.from(core_1.json.canonicalize(payload), "utf8");
+        const signature = entry.inclusionPromise.signedEntryTimestamp;
+        return core_1.crypto.verify(data, tlog.publicKey, signature);
+      });
+      if (!verified) {
+        throw new error_1.VerificationError({
+          code: "TLOG_INCLUSION_PROMISE_ERROR",
+          message: "inclusion promise could not be verified"
+        });
+      }
+    }
+    function toVerificationPayload(entry) {
+      const { integratedTime, logIndex, logId, canonicalizedBody } = entry;
+      return {
+        body: canonicalizedBody.toString("base64"),
+        integratedTime: Number(integratedTime),
+        logIndex: Number(logIndex),
+        logID: logId.keyId.toString("hex")
+      };
+    }
+  }
+});
+
+// node_modules/.pnpm/@sigstore+verify@4.1.3/node_modules/@sigstore/verify/dist/tlog/index.js
+var require_tlog = __commonJS({
+  "node_modules/.pnpm/@sigstore+verify@4.1.3/node_modules/@sigstore/verify/dist/tlog/index.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.verifyTLogBody = verifyTLogBody;
+    exports2.verifyTLogInclusion = verifyTLogInclusion;
+    var v2_1 = require_v2();
+    var error_1 = require_error6();
+    var dsse_1 = require_dsse4();
+    var hashedrekord_1 = require_hashedrekord2();
+    var intoto_1 = require_intoto();
+    var checkpoint_1 = require_checkpoint();
+    var merkle_1 = require_merkle();
+    var set_1 = require_set3();
+    function verifyTLogBody(entry, sigContent) {
+      const { kind, version: version2 } = entry.kindVersion;
+      let body;
+      try {
+        body = JSON.parse(entry.canonicalizedBody.toString("utf8"));
+      } catch {
+        throw new error_1.VerificationError({
+          code: "TLOG_BODY_ERROR",
+          message: "invalid canonicalized body"
+        });
+      }
+      if (kind !== body.kind || version2 !== body.apiVersion) {
+        throw new error_1.VerificationError({
+          code: "TLOG_BODY_ERROR",
+          message: `kind/version mismatch - expected: ${kind}/${version2}, received: ${body.kind}/${body.apiVersion}`
+        });
+      }
+      switch (kind) {
+        case "dsse":
+          if (version2 == dsse_1.DSSE_API_VERSION_V1) {
+            return (0, dsse_1.verifyDSSETLogBody)(body, sigContent);
+          } else {
+            const entryRekorV2 = v2_1.Entry.fromJSON(body);
+            return (0, dsse_1.verifyDSSETLogBodyV2)(entryRekorV2, sigContent);
+          }
+        case "intoto":
+          return (0, intoto_1.verifyIntotoTLogBody)(body, sigContent);
+        case "hashedrekord":
+          if (version2 == hashedrekord_1.HASHEDREKORD_API_VERSION_V1) {
+            return (0, hashedrekord_1.verifyHashedRekordTLogBody)(body, sigContent);
+          } else {
+            const entryRekorV2 = v2_1.Entry.fromJSON(body);
+            return (0, hashedrekord_1.verifyHashedRekordTLogBodyV2)(entryRekorV2, sigContent);
+          }
+        /* istanbul ignore next */
+        default:
+          throw new error_1.VerificationError({
+            code: "TLOG_BODY_ERROR",
+            message: `unsupported kind: ${kind}`
+          });
+      }
+    }
+    function verifyTLogInclusion(entry, tlogAuthorities) {
+      let inclusionVerified = false;
+      if (isTLogEntryWithInclusionPromise(entry)) {
+        (0, set_1.verifyTLogSET)(entry, tlogAuthorities);
+        inclusionVerified = true;
+      }
+      if (isTLogEntryWithInclusionProof(entry)) {
+        const matchingAuthorities = tlogAuthorities.filter((tlog) => tlog.logID.equals(entry.logId.keyId));
+        const checkpoint = (0, checkpoint_1.verifyCheckpoint)(entry, matchingAuthorities);
+        (0, merkle_1.verifyMerkleInclusion)(entry, checkpoint);
+        inclusionVerified = true;
+      }
+      if (!inclusionVerified) {
+        throw new error_1.VerificationError({
+          code: "TLOG_MISSING_INCLUSION_ERROR",
+          message: "inclusion could not be verified"
+        });
+      }
+      return;
+    }
+    function isTLogEntryWithInclusionPromise(entry) {
+      return entry.inclusionPromise !== void 0;
+    }
+    function isTLogEntryWithInclusionProof(entry) {
+      return entry.inclusionProof !== void 0;
+    }
+  }
+});
+
+// node_modules/.pnpm/@sigstore+verify@4.1.3/node_modules/@sigstore/verify/dist/verifier.js
+var require_verifier2 = __commonJS({
+  "node_modules/.pnpm/@sigstore+verify@4.1.3/node_modules/@sigstore/verify/dist/verifier.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.Verifier = void 0;
+    var util_1 = require("util");
+    var error_1 = require_error6();
+    var key_1 = require_key3();
+    var policy_1 = require_policy();
+    var timestamp_1 = require_timestamp6();
+    var tlog_1 = require_tlog();
+    var Verifier2 = class {
+      trustMaterial;
+      options;
+      constructor(trustMaterial, options2 = {}) {
+        this.trustMaterial = trustMaterial;
+        this.options = {
+          ctlogThreshold: options2.ctlogThreshold ?? 1,
+          tlogThreshold: options2.tlogThreshold ?? 1,
+          timestampThreshold: options2.timestampThreshold ?? options2.tsaThreshold ?? 1,
+          tsaThreshold: 0
+        };
+      }
+      verify(entity, policy) {
+        const timestamps = this.verifyTimestamps(entity);
+        const signer = this.verifySigningKey(entity, timestamps);
+        this.verifyTLogs(entity);
+        this.verifySignature(entity, signer);
+        if (policy) {
+          this.verifyPolicy(policy, signer.identity || {});
+        }
+        return signer;
+      }
+      // Checks that all of the timestamps in the entity are valid and returns them
+      verifyTimestamps(entity) {
+        const timestamps = [];
+        for (const timestamp of entity.timestamps) {
+          switch (timestamp.$case) {
+            case "timestamp-authority":
+              timestamps.push((0, timestamp_1.getTSATimestamp)(timestamp.timestamp, entity.signature.signature, this.trustMaterial.timestampAuthorities));
+              break;
+            case "transparency-log": {
+              const result = (0, timestamp_1.getTLogTimestamp)(timestamp.tlogEntry);
+              if (result) {
+                timestamps.push(result);
+              }
+              break;
+            }
+          }
+        }
+        if (containsDupes(timestamps)) {
+          throw new error_1.VerificationError({
+            code: "TIMESTAMP_ERROR",
+            message: "duplicate timestamp"
+          });
+        }
+        if (timestamps.length < this.options.timestampThreshold) {
+          throw new error_1.VerificationError({
+            code: "TIMESTAMP_ERROR",
+            message: `expected ${this.options.timestampThreshold} timestamps, got ${timestamps.length}`
+          });
+        }
+        return timestamps.map((t) => t.timestamp);
+      }
+      // Checks that the signing key is valid for all of the the supplied timestamps
+      // and returns the signer.
+      verifySigningKey({ key }, timestamps) {
+        switch (key.$case) {
+          case "public-key": {
+            return (0, key_1.verifyPublicKey)(key.hint, timestamps, this.trustMaterial);
+          }
+          case "certificate": {
+            const result = (0, key_1.verifyCertificate)(key.certificate, timestamps, this.trustMaterial);
+            if (containsDupes(result.scts)) {
+              throw new error_1.VerificationError({
+                code: "CERTIFICATE_ERROR",
+                message: "duplicate SCT"
+              });
+            }
+            if (result.scts.length < this.options.ctlogThreshold) {
+              throw new error_1.VerificationError({
+                code: "CERTIFICATE_ERROR",
+                message: `expected ${this.options.ctlogThreshold} SCTs, got ${result.scts.length}`
+              });
+            }
+            return result.signer;
+          }
+        }
+      }
+      // Checks that the tlog entries are valid for the supplied content
+      verifyTLogs({ signature: content, tlogEntries }) {
+        const entryIDs = [];
+        tlogEntries.forEach((entry) => {
+          (0, tlog_1.verifyTLogInclusion)(entry, this.trustMaterial.tlogs);
+          (0, tlog_1.verifyTLogBody)(entry, content);
+          entryIDs.push({
+            logID: entry.logId.keyId,
+            body: entry.canonicalizedBody
+          });
+        });
+        if (containsDupes(entryIDs)) {
+          throw new error_1.VerificationError({
+            code: "TLOG_ERROR",
+            message: "duplicate tlog entry"
+          });
+        }
+        if (entryIDs.length < this.options.tlogThreshold) {
+          throw new error_1.VerificationError({
+            code: "TLOG_ERROR",
+            message: `expected ${this.options.tlogThreshold} tlog entries, got ${entryIDs.length}`
+          });
+        }
+      }
+      // Checks that the signature is valid for the supplied content
+      verifySignature(entity, signer) {
+        if (!entity.signature.verifySignature(signer.key)) {
+          throw new error_1.VerificationError({
+            code: "SIGNATURE_ERROR",
+            message: "signature verification failed"
+          });
+        }
+      }
+      verifyPolicy(policy, identity) {
+        if (policy.subjectAlternativeName) {
+          (0, policy_1.verifySubjectAlternativeName)(policy.subjectAlternativeName, identity.subjectAlternativeName);
+        }
+        if (policy.extensions) {
+          (0, policy_1.verifyExtensions)(policy.extensions, identity.extensions);
+        }
+        if (policy.oids) {
+          (0, policy_1.verifyOIDs)(policy.oids, identity.oids);
+        }
+      }
+    };
+    exports2.Verifier = Verifier2;
+    function containsDupes(arr) {
+      for (let i = 0; i < arr.length; i++) {
+        for (let j = i + 1; j < arr.length; j++) {
+          if ((0, util_1.isDeepStrictEqual)(arr[i], arr[j])) {
+            return true;
+          }
+        }
+      }
+      return false;
+    }
+  }
+});
+
+// node_modules/.pnpm/@sigstore+verify@4.1.3/node_modules/@sigstore/verify/dist/index.js
+var require_dist7 = __commonJS({
+  "node_modules/.pnpm/@sigstore+verify@4.1.3/node_modules/@sigstore/verify/dist/index.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.Verifier = exports2.toTrustMaterial = exports2.VerificationError = exports2.PolicyError = exports2.toSignedEntity = void 0;
+    var bundle_1 = require_bundle();
+    Object.defineProperty(exports2, "toSignedEntity", { enumerable: true, get: function() {
+      return bundle_1.toSignedEntity;
+    } });
+    var error_1 = require_error6();
+    Object.defineProperty(exports2, "PolicyError", { enumerable: true, get: function() {
+      return error_1.PolicyError;
+    } });
+    Object.defineProperty(exports2, "VerificationError", { enumerable: true, get: function() {
+      return error_1.VerificationError;
+    } });
+    var trust_1 = require_trust();
+    Object.defineProperty(exports2, "toTrustMaterial", { enumerable: true, get: function() {
+      return trust_1.toTrustMaterial;
+    } });
+    var verifier_1 = require_verifier2();
+    Object.defineProperty(exports2, "Verifier", { enumerable: true, get: function() {
+      return verifier_1.Verifier;
+    } });
+  }
+});
+
+// node_modules/.pnpm/@sigstore+bundle@5.0.1/node_modules/@sigstore/bundle/dist/bundle.js
+var require_bundle2 = __commonJS({
+  "node_modules/.pnpm/@sigstore+bundle@5.0.1/node_modules/@sigstore/bundle/dist/bundle.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.BUNDLE_V03_MEDIA_TYPE = exports2.BUNDLE_V03_LEGACY_MEDIA_TYPE = exports2.BUNDLE_V02_MEDIA_TYPE = exports2.BUNDLE_V01_MEDIA_TYPE = void 0;
+    exports2.isBundleWithCertificateChain = isBundleWithCertificateChain;
+    exports2.isBundleWithPublicKey = isBundleWithPublicKey;
+    exports2.isBundleWithMessageSignature = isBundleWithMessageSignature;
+    exports2.isBundleWithDsseEnvelope = isBundleWithDsseEnvelope2;
+    exports2.BUNDLE_V01_MEDIA_TYPE = "application/vnd.dev.sigstore.bundle+json;version=0.1";
+    exports2.BUNDLE_V02_MEDIA_TYPE = "application/vnd.dev.sigstore.bundle+json;version=0.2";
+    exports2.BUNDLE_V03_LEGACY_MEDIA_TYPE = "application/vnd.dev.sigstore.bundle+json;version=0.3";
+    exports2.BUNDLE_V03_MEDIA_TYPE = "application/vnd.dev.sigstore.bundle.v0.3+json";
+    function isBundleWithCertificateChain(b) {
+      return b.verificationMaterial.content.$case === "x509CertificateChain";
+    }
+    function isBundleWithPublicKey(b) {
+      return b.verificationMaterial.content.$case === "publicKey";
+    }
+    function isBundleWithMessageSignature(b) {
+      return b.content.$case === "messageSignature";
+    }
+    function isBundleWithDsseEnvelope2(b) {
+      return b.content.$case === "dsseEnvelope";
+    }
+  }
+});
+
+// node_modules/.pnpm/@sigstore+bundle@5.0.1/node_modules/@sigstore/bundle/dist/build.js
+var require_build = __commonJS({
+  "node_modules/.pnpm/@sigstore+bundle@5.0.1/node_modules/@sigstore/bundle/dist/build.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.toMessageSignatureBundle = toMessageSignatureBundle;
+    exports2.toDSSEBundle = toDSSEBundle;
+    var protobuf_specs_1 = require_dist2();
+    var bundle_1 = require_bundle2();
+    function toMessageSignatureBundle(options2) {
+      return {
+        mediaType: options2.certificateChain ? bundle_1.BUNDLE_V02_MEDIA_TYPE : bundle_1.BUNDLE_V03_MEDIA_TYPE,
+        content: {
+          $case: "messageSignature",
+          messageSignature: {
+            messageDigest: {
+              algorithm: protobuf_specs_1.HashAlgorithm.SHA2_256,
+              digest: options2.digest
+            },
+            signature: options2.signature
+          }
+        },
+        verificationMaterial: toVerificationMaterial(options2)
+      };
+    }
+    function toDSSEBundle(options2) {
+      return {
+        mediaType: options2.certificateChain ? bundle_1.BUNDLE_V02_MEDIA_TYPE : bundle_1.BUNDLE_V03_MEDIA_TYPE,
+        content: {
+          $case: "dsseEnvelope",
+          dsseEnvelope: toEnvelope(options2)
+        },
+        verificationMaterial: toVerificationMaterial(options2)
+      };
+    }
+    function toEnvelope(options2) {
+      return {
+        payloadType: options2.artifactType,
+        payload: options2.artifact,
+        signatures: [toSignature(options2)]
+      };
+    }
+    function toSignature(options2) {
+      return {
+        keyid: options2.keyHint || "",
+        sig: options2.signature
+      };
+    }
+    function toVerificationMaterial(options2) {
+      return {
+        content: toKeyContent(options2),
+        tlogEntries: [],
+        timestampVerificationData: { rfc3161Timestamps: [] }
+      };
+    }
+    function toKeyContent(options2) {
+      if (options2.certificate) {
+        if (options2.certificateChain) {
+          return {
+            $case: "x509CertificateChain",
+            x509CertificateChain: {
+              certificates: [{ rawBytes: options2.certificate }]
+            }
+          };
+        } else {
+          return {
+            $case: "certificate",
+            certificate: { rawBytes: options2.certificate }
+          };
+        }
+      } else {
+        return {
+          $case: "publicKey",
+          publicKey: {
+            hint: options2.keyHint || ""
+          }
+        };
+      }
+    }
+  }
+});
+
+// node_modules/.pnpm/@sigstore+bundle@5.0.1/node_modules/@sigstore/bundle/dist/error.js
+var require_error7 = __commonJS({
+  "node_modules/.pnpm/@sigstore+bundle@5.0.1/node_modules/@sigstore/bundle/dist/error.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.ValidationError = void 0;
+    var ValidationError = class extends Error {
+      fields;
+      constructor(message, fields) {
+        super(message);
+        this.fields = fields;
+      }
+    };
+    exports2.ValidationError = ValidationError;
+  }
+});
+
+// node_modules/.pnpm/@sigstore+bundle@5.0.1/node_modules/@sigstore/bundle/dist/validate.js
+var require_validate = __commonJS({
+  "node_modules/.pnpm/@sigstore+bundle@5.0.1/node_modules/@sigstore/bundle/dist/validate.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.assertBundle = assertBundle;
+    exports2.assertBundleV01 = assertBundleV01;
+    exports2.isBundleV01 = isBundleV01;
+    exports2.assertBundleV02 = assertBundleV02;
+    exports2.assertBundleLatest = assertBundleLatest;
+    var error_1 = require_error7();
+    function assertBundle(b) {
+      const invalidValues = validateBundleBase(b);
+      if (invalidValues.length > 0) {
+        throw new error_1.ValidationError("invalid bundle", invalidValues);
+      }
+    }
+    function assertBundleV01(b) {
+      const invalidValues = [];
+      invalidValues.push(...validateBundleBase(b));
+      invalidValues.push(...validateInclusionPromise(b));
+      if (invalidValues.length > 0) {
+        throw new error_1.ValidationError("invalid v0.1 bundle", invalidValues);
+      }
+    }
+    function isBundleV01(b) {
+      try {
+        assertBundleV01(b);
+        return true;
+      } catch (e) {
+        return false;
+      }
+    }
+    function assertBundleV02(b) {
+      const invalidValues = [];
+      invalidValues.push(...validateBundleBase(b));
+      invalidValues.push(...validateInclusionProof(b));
+      if (invalidValues.length > 0) {
+        throw new error_1.ValidationError("invalid v0.2 bundle", invalidValues);
+      }
+    }
+    function assertBundleLatest(b) {
+      const invalidValues = [];
+      invalidValues.push(...validateBundleBase(b));
+      invalidValues.push(...validateInclusionProof(b));
+      invalidValues.push(...validateNoCertificateChain(b));
+      if (invalidValues.length > 0) {
+        throw new error_1.ValidationError("invalid bundle", invalidValues);
+      }
+    }
+    function validateBundleBase(b) {
+      const invalidValues = [];
+      if (b.mediaType === void 0 || !b.mediaType.match(/^application\/vnd\.dev\.sigstore\.bundle\+json;version=\d\.\d/) && !b.mediaType.match(/^application\/vnd\.dev\.sigstore\.bundle\.v\d\.\d\+json/)) {
+        invalidValues.push("mediaType");
+      }
+      if (b.content === void 0) {
+        invalidValues.push("content");
+      } else {
+        switch (b.content.$case) {
+          case "messageSignature":
+            if (b.content.messageSignature.messageDigest === void 0) {
+              invalidValues.push("content.messageSignature.messageDigest");
+            } else {
+              if (b.content.messageSignature.messageDigest.digest.length === 0) {
+                invalidValues.push("content.messageSignature.messageDigest.digest");
+              }
+            }
+            if (b.content.messageSignature.signature.length === 0) {
+              invalidValues.push("content.messageSignature.signature");
+            }
+            break;
+          case "dsseEnvelope":
+            if (b.content.dsseEnvelope.payload.length === 0) {
+              invalidValues.push("content.dsseEnvelope.payload");
+            }
+            if (b.content.dsseEnvelope.signatures.length !== 1) {
+              invalidValues.push("content.dsseEnvelope.signatures");
+            } else {
+              if (b.content.dsseEnvelope.signatures[0].sig.length === 0) {
+                invalidValues.push("content.dsseEnvelope.signatures[0].sig");
+              }
+            }
+            break;
+        }
+      }
+      if (b.verificationMaterial === void 0) {
+        invalidValues.push("verificationMaterial");
+      } else {
+        if (b.verificationMaterial.content === void 0) {
+          invalidValues.push("verificationMaterial.content");
+        } else {
+          switch (b.verificationMaterial.content.$case) {
+            case "x509CertificateChain":
+              if (b.verificationMaterial.content.x509CertificateChain.certificates.length === 0) {
+                invalidValues.push("verificationMaterial.content.x509CertificateChain.certificates");
+              }
+              b.verificationMaterial.content.x509CertificateChain.certificates.forEach((cert, i) => {
+                if (cert.rawBytes.length === 0) {
+                  invalidValues.push(`verificationMaterial.content.x509CertificateChain.certificates[${i}].rawBytes`);
+                }
+              });
+              break;
+            case "certificate":
+              if (b.verificationMaterial.content.certificate.rawBytes.length === 0) {
+                invalidValues.push("verificationMaterial.content.certificate.rawBytes");
+              }
+              break;
+          }
+        }
+        if (b.verificationMaterial.tlogEntries === void 0) {
+          invalidValues.push("verificationMaterial.tlogEntries");
+        } else {
+          if (b.verificationMaterial.tlogEntries.length > 0) {
+            b.verificationMaterial.tlogEntries.forEach((entry, i) => {
+              if (entry.logId === void 0) {
+                invalidValues.push(`verificationMaterial.tlogEntries[${i}].logId`);
+              }
+              if (entry.kindVersion === void 0) {
+                invalidValues.push(`verificationMaterial.tlogEntries[${i}].kindVersion`);
+              }
+            });
+          }
+        }
+      }
+      return invalidValues;
+    }
+    function validateInclusionPromise(b) {
+      const invalidValues = [];
+      if (b.verificationMaterial && b.verificationMaterial.tlogEntries?.length > 0) {
+        b.verificationMaterial.tlogEntries.forEach((entry, i) => {
+          if (entry.inclusionPromise === void 0) {
+            invalidValues.push(`verificationMaterial.tlogEntries[${i}].inclusionPromise`);
+          }
+        });
+      }
+      return invalidValues;
+    }
+    function validateInclusionProof(b) {
+      const invalidValues = [];
+      if (b.verificationMaterial && b.verificationMaterial.tlogEntries?.length > 0) {
+        b.verificationMaterial.tlogEntries.forEach((entry, i) => {
+          if (entry.inclusionProof === void 0) {
+            invalidValues.push(`verificationMaterial.tlogEntries[${i}].inclusionProof`);
+          } else {
+            if (entry.inclusionProof.checkpoint === void 0) {
+              invalidValues.push(`verificationMaterial.tlogEntries[${i}].inclusionProof.checkpoint`);
+            }
+          }
+        });
+      }
+      return invalidValues;
+    }
+    function validateNoCertificateChain(b) {
+      const invalidValues = [];
+      if (b.verificationMaterial?.content?.$case === "x509CertificateChain") {
+        invalidValues.push("verificationMaterial.content.$case");
+      }
+      return invalidValues;
+    }
+  }
+});
+
+// node_modules/.pnpm/@sigstore+bundle@5.0.1/node_modules/@sigstore/bundle/dist/serialized.js
+var require_serialized = __commonJS({
+  "node_modules/.pnpm/@sigstore+bundle@5.0.1/node_modules/@sigstore/bundle/dist/serialized.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.envelopeToJSON = exports2.envelopeFromJSON = exports2.bundleToJSON = exports2.bundleFromJSON = void 0;
+    var protobuf_specs_1 = require_dist2();
+    var bundle_1 = require_bundle2();
+    var validate_1 = require_validate();
+    var bundleFromJSON2 = (obj) => {
+      const bundle = protobuf_specs_1.Bundle.fromJSON(obj);
+      switch (bundle.mediaType) {
+        case bundle_1.BUNDLE_V01_MEDIA_TYPE:
+          (0, validate_1.assertBundleV01)(bundle);
+          break;
+        case bundle_1.BUNDLE_V02_MEDIA_TYPE:
+          (0, validate_1.assertBundleV02)(bundle);
+          break;
+        default:
+          (0, validate_1.assertBundleLatest)(bundle);
+          break;
+      }
+      return bundle;
+    };
+    exports2.bundleFromJSON = bundleFromJSON2;
+    var bundleToJSON = (bundle) => {
+      return protobuf_specs_1.Bundle.toJSON(bundle);
+    };
+    exports2.bundleToJSON = bundleToJSON;
+    var envelopeFromJSON = (obj) => {
+      return protobuf_specs_1.Envelope.fromJSON(obj);
+    };
+    exports2.envelopeFromJSON = envelopeFromJSON;
+    var envelopeToJSON = (envelope) => {
+      return protobuf_specs_1.Envelope.toJSON(envelope);
+    };
+    exports2.envelopeToJSON = envelopeToJSON;
+  }
+});
+
+// node_modules/.pnpm/@sigstore+bundle@5.0.1/node_modules/@sigstore/bundle/dist/index.js
+var require_dist8 = __commonJS({
+  "node_modules/.pnpm/@sigstore+bundle@5.0.1/node_modules/@sigstore/bundle/dist/index.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.isBundleV01 = exports2.assertBundleV02 = exports2.assertBundleV01 = exports2.assertBundleLatest = exports2.assertBundle = exports2.envelopeToJSON = exports2.envelopeFromJSON = exports2.bundleToJSON = exports2.bundleFromJSON = exports2.ValidationError = exports2.isBundleWithPublicKey = exports2.isBundleWithMessageSignature = exports2.isBundleWithDsseEnvelope = exports2.isBundleWithCertificateChain = exports2.BUNDLE_V03_MEDIA_TYPE = exports2.BUNDLE_V03_LEGACY_MEDIA_TYPE = exports2.BUNDLE_V02_MEDIA_TYPE = exports2.BUNDLE_V01_MEDIA_TYPE = exports2.toMessageSignatureBundle = exports2.toDSSEBundle = void 0;
+    var build_1 = require_build();
+    Object.defineProperty(exports2, "toDSSEBundle", { enumerable: true, get: function() {
+      return build_1.toDSSEBundle;
+    } });
+    Object.defineProperty(exports2, "toMessageSignatureBundle", { enumerable: true, get: function() {
+      return build_1.toMessageSignatureBundle;
+    } });
+    var bundle_1 = require_bundle2();
+    Object.defineProperty(exports2, "BUNDLE_V01_MEDIA_TYPE", { enumerable: true, get: function() {
+      return bundle_1.BUNDLE_V01_MEDIA_TYPE;
+    } });
+    Object.defineProperty(exports2, "BUNDLE_V02_MEDIA_TYPE", { enumerable: true, get: function() {
+      return bundle_1.BUNDLE_V02_MEDIA_TYPE;
+    } });
+    Object.defineProperty(exports2, "BUNDLE_V03_LEGACY_MEDIA_TYPE", { enumerable: true, get: function() {
+      return bundle_1.BUNDLE_V03_LEGACY_MEDIA_TYPE;
+    } });
+    Object.defineProperty(exports2, "BUNDLE_V03_MEDIA_TYPE", { enumerable: true, get: function() {
+      return bundle_1.BUNDLE_V03_MEDIA_TYPE;
+    } });
+    Object.defineProperty(exports2, "isBundleWithCertificateChain", { enumerable: true, get: function() {
+      return bundle_1.isBundleWithCertificateChain;
+    } });
+    Object.defineProperty(exports2, "isBundleWithDsseEnvelope", { enumerable: true, get: function() {
+      return bundle_1.isBundleWithDsseEnvelope;
+    } });
+    Object.defineProperty(exports2, "isBundleWithMessageSignature", { enumerable: true, get: function() {
+      return bundle_1.isBundleWithMessageSignature;
+    } });
+    Object.defineProperty(exports2, "isBundleWithPublicKey", { enumerable: true, get: function() {
+      return bundle_1.isBundleWithPublicKey;
+    } });
+    var error_1 = require_error7();
+    Object.defineProperty(exports2, "ValidationError", { enumerable: true, get: function() {
+      return error_1.ValidationError;
+    } });
+    var serialized_1 = require_serialized();
+    Object.defineProperty(exports2, "bundleFromJSON", { enumerable: true, get: function() {
+      return serialized_1.bundleFromJSON;
+    } });
+    Object.defineProperty(exports2, "bundleToJSON", { enumerable: true, get: function() {
+      return serialized_1.bundleToJSON;
+    } });
+    Object.defineProperty(exports2, "envelopeFromJSON", { enumerable: true, get: function() {
+      return serialized_1.envelopeFromJSON;
+    } });
+    Object.defineProperty(exports2, "envelopeToJSON", { enumerable: true, get: function() {
+      return serialized_1.envelopeToJSON;
+    } });
+    var validate_1 = require_validate();
+    Object.defineProperty(exports2, "assertBundle", { enumerable: true, get: function() {
+      return validate_1.assertBundle;
+    } });
+    Object.defineProperty(exports2, "assertBundleLatest", { enumerable: true, get: function() {
+      return validate_1.assertBundleLatest;
+    } });
+    Object.defineProperty(exports2, "assertBundleV01", { enumerable: true, get: function() {
+      return validate_1.assertBundleV01;
+    } });
+    Object.defineProperty(exports2, "assertBundleV02", { enumerable: true, get: function() {
+      return validate_1.assertBundleV02;
+    } });
+    Object.defineProperty(exports2, "isBundleV01", { enumerable: true, get: function() {
+      return validate_1.isBundleV01;
+    } });
+  }
+});
+
 // src/run.ts
-var import_node_crypto = require("node:crypto");
-var import_node_fs = require("node:fs");
+var import_node_crypto2 = require("node:crypto");
+var import_node_fs2 = require("node:fs");
 var core = __toESM(require_core());
 
 // node_modules/.pnpm/@intentsolutions+rollout-gate@2.2.0/node_modules/@intentsolutions/rollout-gate/dist/chunk-OJDCIZJO.js
@@ -36674,8 +47310,8 @@ function rewriteKeyNames(ctx) {
       bySchema.set(entry.schema, entry);
   }
   const rewrites = /* @__PURE__ */ new Map();
-  for (const record2 of pendingRecords.get(ctx) ?? []) {
-    const seen = ctx.seen.get(record2);
+  for (const record3 of pendingRecords.get(ctx) ?? []) {
+    const seen = ctx.seen.get(record3);
     const names = (seen?.def ?? seen?.schema)?.propertyNames;
     if (!names || names === true || rewrites.has(names))
       continue;
@@ -39524,7 +50160,7 @@ function visit(schema, fnOrHandlers) {
     return h ? h(node2, rewritten) : node2;
   };
   const cache = /* @__PURE__ */ new Map();
-  function run2(s) {
+  function run(s) {
     const cached2 = cache.get(s);
     if (cached2 === RESOLVING) {
       return new $ZodLazy({
@@ -39550,21 +50186,21 @@ function visit(schema, fnOrHandlers) {
         let changed = false;
         const newShape = {};
         for (const k of keys) {
-          const mapped = run2(oldShape[k]);
+          const mapped = run(oldShape[k]);
           if (mapped !== oldShape[k])
             changed = true;
           newShape[k] = mapped;
         }
         let newCatchall = def.catchall;
         if (def.catchall) {
-          newCatchall = run2(def.catchall);
+          newCatchall = run(def.catchall);
           if (newCatchall !== def.catchall)
             changed = true;
         }
         return changed ? clone(s, { ...def, shape: newShape, catchall: newCatchall }) : s;
       }
       case "array": {
-        const mapped = run2(def.element);
+        const mapped = run(def.element);
         return mapped === def.element ? s : clone(s, { ...def, element: mapped });
       }
       case "tuple": {
@@ -39572,14 +50208,14 @@ function visit(schema, fnOrHandlers) {
         let changed = false;
         const newItems = [];
         for (const item of oldItems) {
-          const mapped = run2(item);
+          const mapped = run(item);
           if (mapped !== item)
             changed = true;
           newItems.push(mapped);
         }
         let newRest = def.rest;
         if (def.rest) {
-          newRest = run2(def.rest);
+          newRest = run(def.rest);
           if (newRest !== def.rest)
             changed = true;
         }
@@ -39587,12 +50223,12 @@ function visit(schema, fnOrHandlers) {
       }
       case "record":
       case "map": {
-        const newKey = run2(def.keyType);
-        const newVal = run2(def.valueType);
+        const newKey = run(def.keyType);
+        const newVal = run(def.valueType);
         return newKey === def.keyType && newVal === def.valueType ? s : clone(s, { ...def, keyType: newKey, valueType: newVal });
       }
       case "set": {
-        const newVal = run2(def.valueType);
+        const newVal = run(def.valueType);
         return newVal === def.valueType ? s : clone(s, { ...def, valueType: newVal });
       }
       case "union": {
@@ -39600,7 +50236,7 @@ function visit(schema, fnOrHandlers) {
         let changed = false;
         const newOptions = [];
         for (const opt of oldOptions) {
-          const mapped = run2(opt);
+          const mapped = run(opt);
           if (mapped !== opt)
             changed = true;
           newOptions.push(mapped);
@@ -39608,8 +50244,8 @@ function visit(schema, fnOrHandlers) {
         return changed ? clone(s, { ...def, options: newOptions }) : s;
       }
       case "intersection": {
-        const newLeft = run2(def.left);
-        const newRight = run2(def.right);
+        const newLeft = run(def.left);
+        const newRight = run(def.right);
         return newLeft === def.left && newRight === def.right ? s : clone(s, { ...def, left: newLeft, right: newRight });
       }
       case "optional":
@@ -39621,23 +50257,23 @@ function visit(schema, fnOrHandlers) {
       case "nonoptional":
       case "promise":
       case "success": {
-        const newInner = run2(def.innerType);
+        const newInner = run(def.innerType);
         return newInner === def.innerType ? s : clone(s, { ...def, innerType: newInner });
       }
       case "pipe": {
-        const newIn = run2(def.in);
-        const newOut = run2(def.out);
+        const newIn = run(def.in);
+        const newOut = run(def.out);
         return newIn === def.in && newOut === def.out ? s : clone(s, { ...def, in: newIn, out: newOut });
       }
       case "function": {
-        const newInput = run2(def.input);
-        const newOutput = run2(def.output);
+        const newInput = run(def.input);
+        const newOutput = run(def.output);
         return newInput === def.input && newOutput === def.output ? s : clone(s, { ...def, input: newInput, output: newOutput });
       }
       case "lazy": {
         const original = def.getter;
         const { _cachedInner, ...rest } = def;
-        return clone(s, { ...rest, getter: () => run2(original()) });
+        return clone(s, { ...rest, getter: () => run(original()) });
       }
       // A leaf by choice: `parts` are regex fragments, not data positions.
       case "template_literal":
@@ -39668,7 +50304,7 @@ function visit(schema, fnOrHandlers) {
       }
     }
   }
-  return run2(schema);
+  return run(schema);
 }
 
 // node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/classic/deep-partial.js
@@ -54096,8 +64732,8 @@ function matchesPattern(pattern, value) {
 }
 function rowsFromBundle(bundle) {
   if (Array.isArray(bundle)) return bundle;
-  const record2 = asRecord(bundle);
-  return record2 !== null && Array.isArray(record2.rows) ? record2.rows : null;
+  const record3 = asRecord(bundle);
+  return record3 !== null && Array.isArray(record3.rows) ? record3.rows : null;
 }
 function failure2(index, reason) {
   return [`skill promotion row at index ${index}: ${reason}`];
@@ -54241,6 +64877,269 @@ function validateSkillPromotionBinding(bundle, policy) {
   return reasons;
 }
 
+// src/verification/trusted-loader.ts
+var import_node_crypto = require("node:crypto");
+var import_tuf = __toESM(require_dist5());
+var import_verify = __toESM(require_dist7());
+var exactText = external_exports.string().min(1).refine((value) => value === value.trim());
+var privatePolicy = external_exports.object({
+  kind: external_exports.literal("key"),
+  keyHint: exactText,
+  publicKeyPem: external_exports.string().startsWith("-----BEGIN PUBLIC KEY-----"),
+  status: external_exports.enum(["active", "revoked", "disabled"]),
+  notBefore: external_exports.iso.datetime(),
+  notAfter: external_exports.iso.datetime(),
+  requireInclusion: external_exports.boolean()
+}).strict();
+var keylessPolicy = external_exports.object({
+  kind: external_exports.literal("oidc"),
+  issuer: external_exports.url(),
+  identity: external_exports.url()
+}).strict();
+var policySchema = external_exports.discriminatedUnion("kind", [
+  privatePolicy,
+  keylessPolicy
+]);
+async function loadTrustedPolicy(configuration) {
+  const config2 = policySchema.parse(configuration);
+  if (config2.kind === "oidc") {
+    const root = await (0, import_tuf.getTrustedRoot)({
+      retry: 0,
+      timeout: 5e3,
+      forceCache: false
+    });
+    return { material: (0, import_verify.toTrustMaterial)(root), signer: config2 };
+  }
+  const start = Date.parse(config2.notBefore);
+  const end = Date.parse(config2.notAfter);
+  const activeAt = (date5) => Number.isFinite(date5.getTime()) && start <= date5.getTime() && date5.getTime() <= end;
+  if (config2.status !== "active" || start >= end || !activeAt(/* @__PURE__ */ new Date()))
+    throw new Error("private key is not currently authorized");
+  const publicKey = (0, import_node_crypto.createPublicKey)(config2.publicKeyPem);
+  const publicKeySpkiSha256 = (0, import_node_crypto.createHash)("sha256").update(publicKey.export({ type: "spki", format: "der" })).digest("hex");
+  const publicKeyLookup = (hint) => {
+    if (hint !== config2.keyHint || !activeAt(/* @__PURE__ */ new Date()))
+      throw new Error("private key is not currently authorized");
+    return { publicKey, validFor: activeAt };
+  };
+  const material = config2.requireInclusion ? (0, import_verify.toTrustMaterial)(
+    await (0, import_tuf.getTrustedRoot)({ retry: 0, timeout: 5e3, forceCache: false }),
+    publicKeyLookup
+  ) : {
+    certificateAuthorities: [],
+    timestampAuthorities: [],
+    ctlogs: [],
+    tlogs: [],
+    publicKey: publicKeyLookup
+  };
+  return {
+    material,
+    signer: {
+      kind: "key",
+      keyHint: config2.keyHint,
+      requireInclusion: config2.requireInclusion,
+      publicKeySpkiSha256
+    }
+  };
+}
+
+// src/verification/read-artifacts.ts
+var import_node_fs = require("node:fs");
+
+// src/verification/verify-row.ts
+var import_bundle = __toESM(require_dist8());
+var import_verify2 = __toESM(require_dist7());
+var PAYLOAD_TYPE = "application/vnd.in-toto+json";
+var PREDICATE_TYPE = GATE_RESULT_V1_URI2;
+var STATEMENT_TYPE = "https://in-toto.io/Statement/v1";
+var MAX_ROW_BYTES = 4 * 1024 * 1024;
+function record2(value) {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+function requireStatement(payload) {
+  const statement = JSON.parse(
+    new TextDecoder("utf-8", { fatal: true }).decode(payload)
+  );
+  if (!record2(statement) || statement._type !== STATEMENT_TYPE || statement.predicateType !== PREDICATE_TYPE && statement.predicateType !== SKILL_REFINER_PASS_V1_URI) {
+    throw new Error("unsupported evidence statement");
+  }
+  if (statement.predicateType === SKILL_REFINER_PASS_V1_URI) {
+    const advisory = SkillRefinerPassV1Schema.safeParse(statement.predicate);
+    if (!advisory.success) return statement;
+    const digest = advisory.data.result_snapshot_hash.slice(7);
+    if (!Array.isArray(statement.subject) || !statement.subject.some(
+      (subject2) => record2(subject2) && typeof subject2.name === "string" && subject2.name.length > 0 && record2(subject2.digest) && subject2.digest.sha256 === digest
+    ))
+      throw new Error("refiner subject does not bind result snapshot");
+    return statement;
+  }
+  const predicate = GateResultV1Schema2.parse(statement.predicate);
+  const hash2 = predicate.input_hash;
+  if (!/^sha256:[a-f0-9]{64}$/.test(hash2))
+    throw new Error("invalid input digest");
+  const matchingSubjects = Array.isArray(statement.subject) ? statement.subject.filter(
+    (subject2) => record2(subject2) && subject2.name === predicate.gate_id
+  ) : [];
+  if (matchingSubjects.length !== 1)
+    throw new Error("ambiguous or missing gate subject");
+  const subject = matchingSubjects[0];
+  if (!record2(subject) || !record2(subject.digest) || subject.digest.sha256 !== hash2.slice(7)) {
+    throw new Error("subject identity or digest mismatch");
+  }
+  return statement;
+}
+function identityPolicy(trust) {
+  if (trust.signer.kind === "key") {
+    if (!trust.signer.keyHint) throw new Error("trusted key hint is required");
+    return void 0;
+  }
+  if (!trust.signer.issuer || !trust.signer.identity)
+    throw new Error("trusted certificate identity is required");
+  return {
+    extensions: { issuer: trust.signer.issuer },
+    // The pinned library interprets strings as regex patterns, not literals.
+    // A negative-any-character end assertion also rejects a trailing newline.
+    subjectAlternativeName: `^${trust.signer.identity.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?![\\s\\S])`
+  };
+}
+function requireEncoding(value) {
+  if (typeof value !== "string" || value.length === 0 || Buffer.from(value, "base64").toString("base64") !== value) {
+    throw new Error("noncanonical or empty base64 encoding");
+  }
+}
+function claimsAnchoring(statement) {
+  const predicate = statement.predicate;
+  const metadata = record2(predicate) && record2(predicate.metadata) ? predicate.metadata : {};
+  let anchored = false;
+  for (const claims of [statement, metadata]) {
+    if (claims.signing_mode !== void 0) {
+      if (claims.signing_mode !== "rekor_production" && claims.signing_mode !== "sigstore_staging") {
+        throw new Error("unsupported signed signing_mode claim");
+      }
+      anchored = true;
+    }
+    if (["rekor_log_index", "rekor_log_indices", "rekor_url"].some(
+      (key) => Object.hasOwn(claims, key) && claims[key] !== null
+    ))
+      anchored = true;
+  }
+  return anchored;
+}
+function requireCheckpointConsistency(proof) {
+  const lines = proof.checkpoint.envelope.split("\n");
+  const size = lines[1];
+  const root = lines[2];
+  const decimal = /^(0|[1-9][0-9]*)$/;
+  if (size === void 0 || !decimal.test(size) || !decimal.test(proof.treeSize))
+    throw new Error("noncanonical checkpoint or proof tree size");
+  requireEncoding(root);
+  if (BigInt(size) !== BigInt(proof.treeSize) || !Buffer.from(root, "base64").equals(proof.rootHash)) {
+    throw new Error("proof metadata does not match authenticated checkpoint");
+  }
+}
+function requireEntryProofs(entity) {
+  if (entity.tlogEntries.length === 0)
+    throw new Error("missing transparency inclusion proof");
+  const seen = /* @__PURE__ */ new Set();
+  for (const entry of entity.tlogEntries) {
+    if (!entry.inclusionProof?.checkpoint?.envelope)
+      throw new Error("proof and signed checkpoint required");
+    requireCheckpointConsistency(entry.inclusionProof);
+    const identity = `${entry.logId.keyId.toString("hex")}:${entry.canonicalizedBody.toString("base64")}`;
+    if (seen.has(identity)) throw new Error("duplicate transparency entry");
+    seen.add(identity);
+  }
+}
+function verifyRow(bundleJson, trust) {
+  if (Buffer.byteLength(bundleJson) > MAX_ROW_BYTES)
+    throw new Error("evidence row exceeds size limit");
+  const serialized = JSON.parse(bundleJson);
+  if (!record2(serialized))
+    throw new Error("evidence must be a Sigstore bundle");
+  if (!record2(serialized.dsseEnvelope))
+    throw new Error("missing DSSE envelope");
+  requireEncoding(serialized.dsseEnvelope.payload);
+  const signatures = serialized.dsseEnvelope.signatures;
+  if (!Array.isArray(signatures) || signatures.length !== 1)
+    throw new Error("exactly one DSSE signature required");
+  for (const signature of signatures) {
+    if (!record2(signature)) throw new Error("invalid DSSE signature");
+    requireEncoding(signature.sig);
+  }
+  const bundle = (0, import_bundle.bundleFromJSON)(serialized);
+  if (!(0, import_bundle.isBundleWithDsseEnvelope)(bundle))
+    throw new Error("expected a signed DSSE statement");
+  const envelope = bundle.content.dsseEnvelope;
+  if (envelope.payloadType !== PAYLOAD_TYPE || envelope.signatures.length !== 1 || envelope.payload.length === 0) {
+    throw new Error("unsupported DSSE payload or signature count");
+  }
+  const entity = (0, import_verify2.toSignedEntity)(bundle);
+  const policy = identityPolicy(trust);
+  if (trust.signer.kind === "key") {
+    if (entity.key.$case !== "public-key" || entity.key.hint !== trust.signer.keyHint)
+      throw new Error("unexpected signing key");
+  } else if (entity.key.$case !== "certificate") {
+    throw new Error("certificate identity required");
+  }
+  const signatureVerifier = new import_verify2.Verifier(trust.material, {
+    tlogThreshold: 0,
+    timestampThreshold: trust.signer.kind === "oidc" ? 1 : 0,
+    ctlogThreshold: 1
+  });
+  signatureVerifier.verify(entity, policy);
+  const payloadBytes = Buffer.from(envelope.payload);
+  const statement = requireStatement(payloadBytes);
+  const requireInclusion = claimsAnchoring(statement) || trust.signer.kind === "oidc" || trust.signer.requireInclusion || entity.tlogEntries.length > 0;
+  if (requireInclusion) {
+    requireEntryProofs(entity);
+  }
+  return {
+    payloadBytes,
+    statement,
+    transparency: requireInclusion ? "verified-inclusion" : "private-unanchored"
+  };
+}
+
+// src/verification/verify-artifacts.ts
+var MAX_ARTIFACT_BYTES = 16 * 1024 * 1024;
+var containerSchema = external_exports.object({
+  format: external_exports.literal("sigstore-dsse-rows/v1"),
+  rows: external_exports.array(external_exports.unknown()).min(1).max(256)
+}).strict();
+function verifyArtifactSet(bytes, trust) {
+  if (bytes.byteLength > MAX_ARTIFACT_BYTES)
+    throw new Error("signed artifact set exceeds size limit");
+  const input2 = JSON.parse(
+    new TextDecoder("utf-8", { fatal: true }).decode(bytes)
+  );
+  const container = containerSchema.parse(input2);
+  return container.rows.map((row) => verifyRow(JSON.stringify(row), trust));
+}
+
+// src/verification/read-artifacts.ts
+function readSignedArtifacts(path) {
+  const fd = (0, import_node_fs.openSync)(path, import_node_fs.constants.O_RDONLY | import_node_fs.constants.O_NONBLOCK);
+  try {
+    const stat = (0, import_node_fs.fstatSync)(fd);
+    if (!stat.isFile())
+      throw new Error("signed artifact input must be a regular file");
+    if (stat.size > MAX_ARTIFACT_BYTES)
+      throw new Error("signed artifact set exceeds size limit");
+    const buffer = Buffer.alloc(MAX_ARTIFACT_BYTES + 1);
+    let length = 0;
+    while (length < buffer.length) {
+      const count = (0, import_node_fs.readSync)(fd, buffer, length, buffer.length - length, null);
+      if (count === 0) break;
+      length += count;
+    }
+    if (length > MAX_ARTIFACT_BYTES)
+      throw new Error("signed artifact set exceeds size limit");
+    return buffer.subarray(0, length);
+  } finally {
+    (0, import_node_fs.closeSync)(fd);
+  }
+}
+
 // src/run.ts
 var SUPPORTED_PREDICATE_URI = GATE_RESULT_V1_URI2;
 var ADVISORY_REFINER_PASS_URI = SKILL_REFINER_PASS_V1_URI;
@@ -54304,7 +65203,7 @@ function validateReportBinding(bundle, reportPath, auditManifestPath = "") {
   let reportBytes;
   let report;
   try {
-    reportBytes = (0, import_node_fs.readFileSync)(reportPath);
+    reportBytes = (0, import_node_fs2.readFileSync)(reportPath);
     report = JSON.parse(reportBytes.toString("utf8"));
   } catch {
     return ["report-path must be a readable, valid JSON report"];
@@ -54345,14 +65244,14 @@ function validateReportBinding(bundle, reportPath, auditManifestPath = "") {
   if (auditManifestPath !== "") {
     let manifestBytes;
     try {
-      manifestBytes = (0, import_node_fs.readFileSync)(auditManifestPath);
+      manifestBytes = (0, import_node_fs2.readFileSync)(auditManifestPath);
       JSON.parse(manifestBytes.toString("utf8"));
     } catch {
       return ["audit-manifest-path must be a readable JSON audit manifest"];
     }
     inputBytes = Buffer.concat([reportBytes, Buffer.from("\0"), manifestBytes]);
   }
-  const expectedInputHash = `sha256:${(0, import_node_crypto.createHash)("sha256").update(inputBytes).digest("hex")}`;
+  const expectedInputHash = `sha256:${(0, import_node_crypto2.createHash)("sha256").update(inputBytes).digest("hex")}`;
   const rows = bundleRows(bundle);
   if (rows === null) {
     return ["report-path requires a valid Evidence Bundle"];
@@ -54485,8 +65384,11 @@ function stripRefinerPassRows(bundle) {
   }
   return bundle;
 }
-async function conclude(decision, reasons, result, failOnBlock, refinerRows = []) {
-  const summary2 = renderSummary(decision, reasons, result, refinerRows);
+async function concludeResult(decision, reasons, result, failOnBlock, refinerRows = [], transparency) {
+  const summary2 = renderSummary(decision, reasons, result, refinerRows) + (transparency ? `
+
+Evidence transparency: **${transparency}**.
+` : "");
   core.setOutput("decision", decision);
   core.setOutput("reasons", JSON.stringify(reasons));
   core.setOutput("summary", summary2);
@@ -54506,7 +65408,28 @@ async function conclude(decision, reasons, result, failOnBlock, refinerRows = []
     core.info(`Rollout decision: ${decision}`);
   }
 }
-async function run() {
+async function runEnforcingAction() {
+  return execute(void 0, true, async () => {
+    const input2 = core.getInput("verification-policy-json", { required: true });
+    if (Buffer.byteLength(input2) > 64 * 1024)
+      throw new Error("verification policy exceeds size limit");
+    return loadTrustedPolicy(JSON.parse(input2));
+  });
+}
+async function execute(trust, verificationRequired = false, prepareTrust) {
+  let transparency = verificationRequired ? "not-verified" : void 0;
+  const conclude = (decision, reasons, result, failOnBlock2, refinerRows = []) => concludeResult(
+    decision,
+    reasons,
+    result,
+    failOnBlock2,
+    refinerRows,
+    transparency
+  );
+  if (verificationRequired) {
+    core.setOutput("verification-status", "not-verified");
+    core.setOutput("verification-transparency", "not-verified");
+  }
   const failOnBlock = core.getInput("fail-on-block").trim().toLowerCase() !== "false" && core.getInput("dry-run").trim().toLowerCase() !== "true";
   try {
     const bundlePath = core.getInput("bundle-path", { required: true });
@@ -54551,12 +65474,26 @@ async function run() {
     }
     let bundle;
     try {
-      bundle = JSON.parse((0, import_node_fs.readFileSync)(bundlePath, "utf8"));
+      if (verificationRequired) {
+        trust ??= await prepareTrust?.();
+        if (!trust) throw new Error("trusted verification policy is required");
+        const bytes = readSignedArtifacts(bundlePath);
+        const rows = verifyArtifactSet(bytes, trust);
+        transparency = rows.every(
+          (row) => row.transparency === "verified-inclusion"
+        ) ? "all-inclusion" : "contains-private-unanchored";
+        core.setOutput("verification-transparency", transparency);
+        bundle = rows.map((row) => row.statement);
+        core.setOutput("verification-status", "verified");
+      } else {
+        bundle = JSON.parse((0, import_node_fs2.readFileSync)(bundlePath, "utf8"));
+      }
     } catch (err) {
+      if (verificationRequired) core.setOutput("verification-status", "failed");
       await conclude(
         "block",
         [
-          `unreadable or invalid-JSON Evidence Bundle at '${bundlePath}': ${errMessage(err)}`
+          verificationRequired ? "Evidence authentication or signed artifact format failed" : `unreadable or invalid-JSON Evidence Bundle at '${bundlePath}': ${errMessage(err)}`
         ],
         null,
         failOnBlock
@@ -54565,7 +65502,7 @@ async function run() {
     }
     let policy;
     try {
-      const rawPolicy = hasJson ? JSON.parse(policyJson) : JSON.parse((0, import_node_fs.readFileSync)(policyPath, "utf8"));
+      const rawPolicy = hasJson ? JSON.parse(policyJson) : JSON.parse((0, import_node_fs2.readFileSync)(policyPath, "utf8"));
       policy = parsePolicy(rawPolicy);
     } catch (err) {
       await conclude(
@@ -54625,7 +65562,7 @@ async function run() {
 }
 
 // src/main.ts
-void run();
+void runEnforcingAction();
 /*! Bundled license information:
 
 undici/lib/fetch/body.js:

@@ -56,11 +56,11 @@ by policy remains under the published package's existing unknown-row behavior.
 ```bash
 pnpm install --frozen-lockfile
 pnpm run check        # prettier --check + tsc --noEmit typecheck + vitest unit tests
-pnpm run build        # esbuild bundle src/main.ts → dist/index.js (node20 target)
+pnpm run build        # esbuild bundle src/main.ts → dist/index.js (node22.22 target; unreleased enforcing source)
 pnpm run dist:check   # rebuild + git diff --exit-code dist/
 ```
 
-`dist/index.js` is **committed** (GitHub Actions convention). Any change to `src/` or the dependency lockfile requires re-running `pnpm run build` and committing the updated `dist/` in the same commit — the CI dist-sync job fails stale bundles. `action.yml` declares `runs.using: node24`; the esbuild transpile target stays node20-compatible per the DR-002 "Node 20+" lock. CI additionally runs `pnpm exec audit-harness verify` (hash-pinned harness integrity) before the format/typecheck/test steps — edits under harness scope must be followed by `pnpm exec audit-harness init` and a committed `.harness-hash`.
+`dist/index.js` is **committed** (GitHub Actions convention). Any change to `src/` or the dependency lockfile requires re-running `pnpm run build` and committing the updated `dist/` in the same commit — the CI dist-sync job fails stale bundles. `action.yml` declares `runs.using: node24`; the unreleased enforcing source requires Node22.22.2+,24.15+ or26+ because the pinned verifier no longer supports Node20. Existing published Node20-compatible artifacts remain unchanged; this explicit runtime break must accompany the new enforcing release. CI additionally runs `pnpm exec audit-harness verify` (hash-pinned harness integrity) before the format/typecheck/test steps — edits under harness scope must be followed by `pnpm exec audit-harness init` and a committed `.harness-hash`.
 
 ## CISO + compliance bindings (carried from ISEDC DR-004)
 

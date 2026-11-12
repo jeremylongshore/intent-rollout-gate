@@ -79,12 +79,19 @@ jobs:
           cat .dogfood/no-ship.bundle.json
           echo "::endgroup::"
 
+      - name: Sign real Statements locally without publishing or storing the private key
+        id: sign-evidence
+        run: |
+          node scripts/sign-local-evidence.mjs --out-dir .dogfood/signed \
+            .dogfood/ship.bundle.json .dogfood/no-ship.bundle.json
+
       # ---- SHIP: all-pass real bundle → allow, job succeeds ----
       - name: SHIP — run the published Action against the all-pass real bundle
         id: ship
         uses: ./
         with:
-          bundle-path: .dogfood/ship.bundle.json
+          bundle-path: .dogfood/signed/ship.bundle.signed.json
+          verification-policy-json: ${{ steps.sign-evidence.outputs.verification-policy }}
           policy-path: tests/fixtures/dogfood-policy.json
 
       # ---- NO-SHIP (observe): same real subject, one fail row, fail-on-block=false ----
@@ -92,12 +99,15 @@ jobs:
         id: noship_observe
         uses: ./
         with:
-          bundle-path: .dogfood/no-ship.bundle.json
+          bundle-path: .dogfood/signed/no-ship.bundle.signed.json
+          verification-policy-json: ${{ steps.sign-evidence.outputs.verification-policy }}
           policy-path: tests/fixtures/dogfood-policy.json
           fail-on-block: "false"
 
       - name: Assert ship + no-ship decisions and the decision-row emit
         env:
+          SHIP_VERIFICATION: ${{ steps.ship.outputs.verification-status }}
+          NOSHIP_VERIFICATION: ${{ steps.noship_observe.outputs.verification-status }}
           SHIP_DECISION: ${{ steps.ship.outputs.decision }}
           SHIP_REASONS: ${{ steps.ship.outputs.reasons }}
           SHIP_SUMMARY: ${{ steps.ship.outputs.summary }}
@@ -111,6 +121,10 @@ jobs:
           # the shell does NOT expand their contents (the JSON is read from
           # stdin, not interpolated); SC2016 is disabled per-line on each.
 
+          if [ "$SHIP_VERIFICATION" != "verified" ] || [ "$NOSHIP_VERIFICATION" != "verified" ]; then
+            echo "::error::evidence was not authenticated"
+            exit 1
+          fi
           # --- SHIP assertions ---
           [ "$SHIP_DECISION" = "allow" ] || { echo "::error::SHIP expected allow, got '$SHIP_DECISION'"; exit 1; }
           [ "$SHIP_REASONS" = "[]" ] || { echo "::error::SHIP expected empty reasons, got '$SHIP_REASONS'"; exit 1; }
@@ -186,21 +200,30 @@ jobs:
             --out-dir .dogfood \
             --policy tests/fixtures/dogfood-policy.json
 
+      - name: Sign real Statements locally without publishing or storing the private key
+        id: sign-evidence
+        run: |
+          node scripts/sign-local-evidence.mjs --out-dir .dogfood/signed \
+            .dogfood/ship.bundle.json .dogfood/no-ship.bundle.json
+
       - name: NO-SHIP (enforce) — expect the Action to FAIL the job
         id: noship_enforce
         continue-on-error: true
         uses: ./
         with:
-          bundle-path: .dogfood/no-ship.bundle.json
+          bundle-path: .dogfood/signed/no-ship.bundle.signed.json
+          verification-policy-json: ${{ steps.sign-evidence.outputs.verification-policy }}
           policy-path: tests/fixtures/dogfood-policy.json
           # fail-on-block defaults to true → a block decision must fail this step.
 
       - name: Assert the gate step actually failed (fail-closed enforcement)
         env:
+          VERIFICATION: ${{ steps.noship_enforce.outputs.verification-status }}
           OUTCOME: ${{ steps.noship_enforce.outcome }}
           DECISION: ${{ steps.noship_enforce.outputs.decision }}
         run: |
           set -euo pipefail
+          [ "$VERIFICATION" = "verified" ] || { echo "::error::expected authenticated no-ship evidence"; exit 1; }
           [ "$OUTCOME" = "failure" ] || { echo "::error::expected the gate step to FAIL on block (fail-on-block default), but outcome was '$OUTCOME'"; exit 1; }
           [ "$DECISION" = "block" ] || { echo "::error::expected decision=block, got '$DECISION'"; exit 1; }
           echo "Enforcement OK: a real no-ship bundle failed the job under default fail-on-block."

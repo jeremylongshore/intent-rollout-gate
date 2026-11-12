@@ -1,0 +1,122 @@
+{
+  "status": "bounded read-only default-branch direct-use scan; not complete transitive consumer coverage",
+  "snapshot_repositories": 229,
+  "refreshed_repo_metadata": 164,
+  "private_repositories": 33,
+  "archived_repositories": 27,
+  "fork_repositories": 28,
+  "workflow_directories_read": 160,
+  "yaml_blobs_read": 784,
+  "yaml_blobs_parsed": 780,
+  "api_calls": 1065,
+  "elapsed_seconds": 109.28768920898438,
+  "workflow_directory_404_count": 4,
+  "yaml_parse_gap_count": 4,
+  "local_uses_unresolved": 188,
+  "dynamic_uses_observed": 0,
+  "snapshot_no_workflow_repositories_not_refreshed": 65,
+  "direct_consumers": [
+    {
+      "repository": "jeremylongshore/intent-audit-harness",
+      "default_branch": "main",
+      "workflow_path": ".github/workflows/rollout-gate-dogfood.yml",
+      "workflow_blob_sha": "1c7b7159477824566ea999aa1bf0684f3137dc3d",
+      "uses_line": 71,
+      "uses": "jeremylongshore/intent-rollout-gate@1c2e13029bf7088870df16037a9969fe1c4d9296",
+      "ref": "1c2e13029bf7088870df16037a9969fe1c4d9296",
+      "ref_kind": "immutable_commit",
+      "archived": false,
+      "private": false,
+      "migration_required": "new signed row artifacts + admitted external trust + intentional consumer pin update"
+    },
+    {
+      "repository": "jeremylongshore/intent-rollout-gate",
+      "default_branch": "main",
+      "workflow_path": ".github/workflows/release-gate.yml",
+      "workflow_blob_sha": "239148a3bed2a3106e90ae5925186a80136f038d",
+      "uses_line": 194,
+      "uses": "jeremylongshore/intent-rollout-gate@a6e44951b2e950d250a65e5f5f3dbaf5deb6aab4",
+      "ref": "a6e44951b2e950d250a65e5f5f3dbaf5deb6aab4",
+      "ref_kind": "immutable_commit",
+      "archived": false,
+      "private": false,
+      "migration_required": "new signed row artifacts + admitted external trust + intentional consumer pin update"
+    }
+  ],
+  "full_inventory_sha256": "fecb0d09168ee09b42a56da97541a522a421329ab4384549e3ea551751c49551",
+  "local_full_inventory": "/tmp/intent-ci-audit-github/rollout-consumers/inventory.json",
+  "limitations": [
+    "65 snapshot-no-workflow repos not refreshed",
+    "Only current default branches; nondefault workflow refs and pinned historical versions not scanned",
+    "Third-party action internals and external reusable dependency graphs not expanded",
+    "No observed direct @main use is not proof of no transitive or inaccessible @main use",
+    "All188localrefs statically inspected at pinned commits;125local-action runtime checkout bindings not exhaustively proven",
+    "Four YAML parse failures remain despite lexical inspection;four directory404s resolved as verified directory absence"
+  ],
+  "v0_3_2_tag_commit": "1c2e13029bf7088870df16037a9969fe1c4d9296",
+  "publication_note": "Private consumer identity, workflow paths, blobs and pins omitted. Only public self-consumer details and aggregates included. Exact private mapping remains local.",
+  "private_direct_consumers": {
+    "workflow_count": 2,
+    "repository_count": 1,
+    "ref_kinds": ["immutable_commit"]
+  },
+  "local_reference_followup": {
+    "repositories": 14,
+    "reference_occurrences": 188,
+    "original_workflow_blobs_matched_at_pinned_commit": 188,
+    "distinct_static_definitions_read": 54,
+    "reusable_workflow_occurrences": 63,
+    "local_action_occurrences": 125,
+    "runtime_workspace_limit": "Local action definitions read from repository commits; runtime checkout provenance not exhaustively proven. Rollout self-consumer checkout is inspected separately.",
+    "additional_direct_rollout_pins": "Only already observed immutable pins through reusable workflows",
+    "directory_404_followup": "All4 verified absent workflow/.github directories at accessible pinned commits; deletion history and permission denial not inferred",
+    "malformed_yaml_followup": "Lexical inspection found no additional rollout uses;4files still invalid/unresolved"
+  },
+  "rollout_self_consumers": [
+    {
+      "workflow": ".github/workflows/ci.yml",
+      "blob": "bc0466954f1284e44938b3d2f950b4caf6d8ea48",
+      "job": "smoke-action",
+      "checkout": [
+        {
+          "uses": "actions/checkout@v6",
+          "repository": "default caller repository",
+          "ref": "checkout action default for triggering event"
+        }
+      ],
+      "local_action_calls": 3
+    },
+    {
+      "workflow": ".github/workflows/dogfood.yml",
+      "blob": "ce2c7ec2c8c9abf803ea4ecf12864c0f2b514011",
+      "job": "dogfood",
+      "checkout": [
+        {
+          "uses": "actions/checkout@v6",
+          "repository": "default caller repository",
+          "ref": "checkout action default for triggering event"
+        }
+      ],
+      "local_action_calls": 2
+    },
+    {
+      "workflow": ".github/workflows/dogfood.yml",
+      "blob": "ce2c7ec2c8c9abf803ea4ecf12864c0f2b514011",
+      "job": "dogfood-enforce",
+      "checkout": [
+        {
+          "uses": "actions/checkout@v6",
+          "repository": "default caller repository",
+          "ref": "checkout action default for triggering event"
+        }
+      ],
+      "local_action_calls": 1
+    }
+  ],
+  "followup_receipt_sha256": {
+    "local-reference-followup.json": "c8ef877ca06d0d3e0b2f27782f836eb31088428cdbbefbc582f337c5f89ea924",
+    "directory-gap-followup.json": "b25855ad91263ac47d4df7a64e6c8313ad33cab53a248550af747ccb2eb83c1b",
+    "parse-gap-followup.json": "789656a8b93fb9dae7d03c6de2952ed4fc9bf38f695d0c22d4233a6f96709130",
+    "rollout-self-consumers.json": "ee4ae1c8271969d747f8e8fd1504b2ef129c8df627c673a7bf3bddb7aa1325dd"
+  }
+}

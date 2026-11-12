@@ -1,8 +1,8 @@
 # tests/TESTING.md — intent-rollout-gate testing policy
 
 The canonical testing-policy spec for this repo. Per the Intent Solutions
-Testing SOP, enforcement travels with the code: every gate below is wired in
-`.github/workflows/ci.yml` and references the in-repo
+Testing SOP, implemented gates travel with the code through
+`.github/workflows/ci.yml` and reference the in-repo
 `@intentsolutions/audit-harness` (never a `~/.claude/` path). The 7-layer
 taxonomy mapping and the gap-analysis that produced this policy live in
 `TEST_AUDIT.md` at the repo root.
@@ -16,7 +16,8 @@ taxonomy mapping and the gap-analysis that produced this policy live in
   schema come from `@intentsolutions/core` (the SSoT kernel). This repo owns
   wiring (input validation, file I/O, output + step-summary rendering,
   optional report-byte/lineage and j-rig skill-promotion provenance preflights,
-  and fail-closed exit plumbing) and nothing else. The preflights verify
+  incoming signature, externally trusted identity and transparency-proof authentication,
+  and fail-closed exit plumbing). The preflights verify
   producer evidence but never replace delegated rollout algebra.
 - **Consequence for testing:** the suite is **fixture-dominant**. We assert the
   EXACT emitted decision for a given Evidence Bundle + policy; we do NOT
@@ -103,3 +104,19 @@ pnpm exec audit-harness init   # re-pin after a reviewed policy edit
 
 An AI-proposed threshold edit without a paired `init` fails `audit-harness verify`
 in CI by design.
+
+
+## Incoming signed evidence boundary
+
+The enforcing Action authenticates every row before advisory or delegated decision work.
+Focused tests use real ephemeral P256 signatures, synthetic CA/CT/log keys, signed checkpoints,
+and Merkle proofs through the pinned Sigstore verifier. TUF acquisition alone is substituted
+with synthetic trusted material in offline tests; the crypto verifier is not mocked.
+Private key status/current validity, OIDC identity, mixed valid/invalid log entries, exact
+subject binding, bounded reads and descriptor cleanup have negative controls. Authenticated
+malformed refiner advisory bodies keep their established nondisplay semantics.
+
+Self-consumer fixtures use the vetted DSSE producer with an ephemeral key in memory and no
+witnesses/network access. Their generated public policy is test admission, not independent
+production trust enrollment. Invalid evidence must never reach decide(), including with
+fail-on-block=false or dry-run=true. Global coverage and other policy floors above are unchanged.
