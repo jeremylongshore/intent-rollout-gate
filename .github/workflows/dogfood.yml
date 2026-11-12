@@ -37,7 +37,7 @@ jobs:
     name: Run the published Action against a real kernel-valid bundle
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - uses: pnpm/action-setup@v6
         with:
@@ -159,7 +159,7 @@ jobs:
     name: NO-SHIP enforcement — default fail-on-block fails the job on block
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - uses: pnpm/action-setup@v6
         with:
